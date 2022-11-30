@@ -1,28 +1,27 @@
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import {environment} from "../environments/environment";
 
 const Movies = () => {
     const [movies, setMovies] = useState([]);
 
     useEffect(() => {
-        let movies = [
-            {
-                id: 1,
-                title: "test 1",
-                release_date: "1986-03-07",
-                runtime: 111,
-                mpaa_rating: "R",
-                description: "test desc 1",
-            },
-            {
-                id: 2,
-                title: "test 2",
-                release_date: "1981-03-07",
-                runtime: 112,
-                mpaa_rating: "PG-13",
-                description: "test desc 2",
-            },
-        ];
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+
+        const requestOptions = {
+            method: "GET",
+            headers: headers,
+        }
+
+        fetch(`${environment.apiBaseUrl}/movies`, requestOptions)
+            .then((response) => response.json())
+            .then((data) => {
+                setMovies(data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
 
         setMovies(movies);
     }, []);
