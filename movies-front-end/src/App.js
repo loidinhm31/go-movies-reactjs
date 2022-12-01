@@ -13,8 +13,8 @@ function App() {
 
     const logOut = () => {
         const requestOptions = {
-            method: 'GET',
-            credentials: 'include',
+            method: "GET",
+            credentials: "include",
         }
 
         fetch(`/logout`, requestOptions)
@@ -35,8 +35,8 @@ function App() {
             let i = setInterval(() => {
 
                 const requestOptions = {
-                    method: 'GET',
-                    credentials: 'include',
+                    method: "GET",
+                    credentials: "include",
                 }
 
                 fetch(`/refresh`, requestOptions)
@@ -63,7 +63,7 @@ function App() {
     useEffect(() => {
         if (jwtToken === "") {
             const requestOptions = {
-                method: 'GET', credentials: 'include',
+                method: "GET", credentials: "include",
             }
 
             fetch(`/refresh`, requestOptions)

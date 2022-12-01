@@ -1,7 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "bootstrap/dist/css/bootstrap.min.css";
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import ErrorPage from "./app/core/components/ErrorPage";
 import Home from "./app/core/components/Home";
@@ -11,6 +11,8 @@ import EditMovie from "./app/core/components/EditMovie";
 import GraphQL from "./app/core/components/GraphQL";
 import Login from "./app/core/components/Login";
 import Movie from "./app/core/components/Movie";
+import ManageCatalogue from "./app/core/components/ManageCatalogue";
+import OneGenre from "./app/core/components/OneGenre";
 
 const router = createBrowserRouter([
     {
@@ -32,12 +34,20 @@ const router = createBrowserRouter([
                 element: <Genres/>,
             },
             {
+                path: "/genres/:id",
+                element: <OneGenre/>,
+            },
+            {
                 path: "/admin/movie/0",
                 element: <EditMovie/>,
             },
             {
+                path: "/admin/movie/:id",
+                element: <EditMovie/>,
+            },
+            {
                 path: "/manage-catalogue",
-                element: <Movies/>,
+                element: <ManageCatalogue/>,
             },
             {
                 path: "/graphql",
@@ -51,7 +61,7 @@ const router = createBrowserRouter([
     }
 ])
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
         <RouterProvider router={router}/>

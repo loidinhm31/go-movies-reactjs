@@ -1,4 +1,4 @@
-import Ticket from '../../../assets/images/movie_tickets.jpg';
+import Ticket from "../../../assets/images/movie_tickets.jpg";
 import {Link} from "react-router-dom";
 
 const Home = () => {

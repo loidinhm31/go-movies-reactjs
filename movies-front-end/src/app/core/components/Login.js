@@ -23,11 +23,11 @@ const Login = () => {
         }
 
         const requestOptions = {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             },
-            credentials: 'include',
+            credentials: "include",
             body: JSON.stringify(payload),
         }
 

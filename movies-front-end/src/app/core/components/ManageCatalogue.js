@@ -1,20 +1,27 @@
-import {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import {environment} from "../../../environments/environment";
 
-const Movies = () => {
+const ManageCatalogue = () => {
     const [movies, setMovies] = useState([]);
+    const { jwtToken } = useOutletContext();
+    const navigate = useNavigate();
 
-    useEffect(() => {
+    useEffect( () => {
+        if (jwtToken === "") {
+            navigate("/login");
+            return
+        }
         const headers = new Headers();
         headers.append("Content-Type", "application/json");
+        headers.append("Authorization", "Bearer " + jwtToken);
 
         const requestOptions = {
             method: "GET",
             headers: headers,
         }
 
-        fetch(`${environment.apiBaseUrl}/movies`, requestOptions)
+        fetch(`${environment.apiBaseUrl}/admin/movies`, requestOptions)
             .then((response) => response.json())
             .then((data) => {
                 setMovies(data);
@@ -23,13 +30,12 @@ const Movies = () => {
                 console.log(err);
             })
 
-        setMovies(movies);
-    }, [movies]);
+    }, [jwtToken, navigate]);
 
-    return (
+    return(
         <div>
-            <h2>Movies</h2>
-            <hr/>
+            <h2>Manage Catalogue</h2>
+            <hr />
             <table className="table table-striped table-hover">
                 <thead>
                 <tr>
@@ -42,7 +48,7 @@ const Movies = () => {
                 {movies.map((m) => (
                     <tr key={m.id}>
                         <td>
-                            <Link to={`/movies/${m.id}`}>
+                            <Link to={`/admin/movie/${m.id}`}>
                                 {m.title}
                             </Link>
                         </td>
@@ -56,4 +62,4 @@ const Movies = () => {
     )
 }
 
-export default Movies;
+export default ManageCatalogue;
