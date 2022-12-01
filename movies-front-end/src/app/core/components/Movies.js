@@ -22,9 +22,7 @@ const Movies = () => {
             .catch(err => {
                 console.log(err);
             })
-
-        setMovies(movies);
-    }, [movies]);
+    }, []);
 
     return (
         <div>
