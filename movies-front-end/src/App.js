@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {Link, Outlet, useNavigate} from "react-router-dom";
 import Alert from "./app/core/components/Alert";
+import {environment} from "./environments/environment";
 
 function App() {
     const [jwtToken, setJwtToken] = useState("");
@@ -17,7 +18,7 @@ function App() {
             credentials: "include",
         }
 
-        fetch(`/logout`, requestOptions)
+        fetch(`${environment.apiBaseUrl}/logout`, requestOptions)
             .catch(error => {
                 console.log("error logging out", error);
             })
@@ -30,6 +31,8 @@ function App() {
     }
 
     const toggleRefresh = useCallback((status) => {
+        console.log("clicking");
+
         if (status) {
             console.log("turning on ticking");
             let i = setInterval(() => {
@@ -39,7 +42,7 @@ function App() {
                     credentials: "include",
                 }
 
-                fetch(`/refresh`, requestOptions)
+                fetch(`${environment.apiBaseUrl}/refresh`, requestOptions)
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.access_token) {
@@ -47,7 +50,7 @@ function App() {
                         }
                     })
                     .catch(error => {
-                        console.log("user is not logged in");
+                        console.log("user is not logged in", error);
                     })
             }, 600000);
             setTickInterval(i);
@@ -66,7 +69,7 @@ function App() {
                 method: "GET", credentials: "include",
             }
 
-            fetch(`/refresh`, requestOptions)
+            fetch(`${environment.apiBaseUrl}/refresh`, requestOptions)
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.access_token) {

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {useNavigate, useOutletContext} from "react-router-dom";
 import Input from "../../shared/form/Input";
+import {environment} from "../../../environments/environment";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -31,7 +32,7 @@ const Login = () => {
             body: JSON.stringify(payload),
         }
 
-        fetch(`/authenticate`, requestOptions)
+        fetch(`${environment.apiBaseUrl}/authenticate`, requestOptions)
             .then((response) => response.json())
             .then((data) => {
                 if (data.error) {
