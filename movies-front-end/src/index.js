@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
-import ErrorPage from "./components/ErrorPage";
-import Home from "./components/Home";
-import Movies from "./components/Movies";
-import Genres from "./components/Genres";
-import EditMovie from "./components/EditMovie";
-import GraphQL from "./components/GraphQL";
-import Login from "./components/Login";
-import Movie from "./components/Movie";
+import ErrorPage from "./app/core/components/ErrorPage";
+import Home from "./app/core/components/Home";
+import Movies from "./app/core/components/Movies";
+import Genres from "./app/core/components/Genres";
+import EditMovie from "./app/core/components/EditMovie";
+import GraphQL from "./app/core/components/GraphQL";
+import Login from "./app/core/components/Login";
+import Movie from "./app/core/components/Movie";
 
 const router = createBrowserRouter([
     {

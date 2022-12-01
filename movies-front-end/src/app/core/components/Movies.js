@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
-import {environment} from "../environments/environment";
+import {environment} from "../../../environments/environment";
 
 const Movies = () => {
     const [movies, setMovies] = useState([]);
