@@ -20,7 +20,7 @@ const Movies = () => {
             {!isLoading &&
                 <Box component="span"
                      sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
-                    <EnhancedTable rows={movies}/>
+                    {movies && <EnhancedTable rows={movies}/>}
                 </Box>
             }
         </Stack>
