@@ -1,67 +1,39 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"log"
-	"movies/backend/internal/repository"
-	"movies/backend/internal/repository/dbrepo"
-	"net/http"
-	"time"
+	"movies-service/config"
+	"movies-service/internal/server"
+	database "movies-service/pkg/database/postgres"
+	"movies-service/pkg/utils"
+	"os"
 )
 
-const port = 9090
-
-type Application struct {
-	DSN          string
-	Domain       string
-	DB           repository.DatabaseRepo
-	auth         Auth
-	JWTSecret    string
-	JWTIssuer    string
-	JWTAudience  string
-	CookieDomain string
-	APIKey       string
-}
-
 func main() {
-	// Set Application config
-	var app Application
+	log.Println("Starting API server")
 
-	// Read from command line
-	dbStr := "host=localhost port=5432 user=postgres password =postgrespw dbname=movies sslmode=disable timezone=UTC connect_timeout=5"
-	flag.StringVar(&app.DSN, "dsn", dbStr, "Postgres connection")
-	flag.StringVar(&app.JWTSecret, "jwt-secret", "verysecret", "signing secret")
-	flag.StringVar(&app.JWTIssuer, "jwt-issuer", "example.com", "signing issuer")
-	flag.StringVar(&app.JWTAudience, "jwt-audience", "example.com", "signing audience")
-	flag.StringVar(&app.CookieDomain, "cookie-domain", "127.0.0.1", "cookie domain")
-	flag.StringVar(&app.Domain, "domain", "example.com", "domain")
-	flag.Parse()
+	envProfile := os.Getenv("profile")
+	configPath := utils.GetConfigPath(envProfile)
+	cfgFile, err := config.LoadConfig(configPath, envProfile)
 
-	// Connect to the database
-	conn, err := app.connectToDB()
 	if err != nil {
-		log.Fatal(err)
-	}
-	app.DB = &dbrepo.PostgresDBRepo{DB: conn}
-	defer app.DB.Connection().Close()
-
-	app.auth = Auth{
-		Secret:        app.JWTSecret,
-		Issuer:        app.JWTIssuer,
-		Audience:      app.JWTAudience,
-		TokenExpiry:   time.Minute * 15,
-		RefreshExpiry: time.Hour * 24,
-		CookiePath:    "/",
-		CookieName:    "__Host-refresh_token",
-		CookieDomain:  app.CookieDomain,
+		log.Fatalf("LoadConfig: %v", err)
 	}
 
-	log.Println("Starting Application on port", port)
-
-	// Start a web server
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
+	cfg, err := config.ParseConfig(cfgFile)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("ParseConfig: %v", err)
 	}
+
+	psqlDB, err := database.NewPsqlDB(cfg, false)
+	if err != nil {
+		log.Fatalf("Postgresql init: %s", err)
+	} else {
+		log.Println("Postgres connected")
+	}
+
+	s := server.NewServer(cfg, psqlDB)
+	s.Run()
+
+	log.Println("Starting Application on port", cfg.Server.Port)
 }

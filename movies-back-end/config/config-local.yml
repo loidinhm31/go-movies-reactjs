@@ -1,0 +1,24 @@
+server:
+  AppVersion: 1.0.0
+  Port: :9090
+  Mode: Development
+  ClientId: API_SECRET
+  ClientSecret: ofBYMfWcT48VYenq8kh0jzdYegxxSPAZ
+  SigningKey: LD_SECRET
+  TokenTTL: 86400
+  CookieName: jwt-token
+  ReadTimeout: 5
+  WriteTimeout: 5
+  SSL: true
+  CtxDefaultTimeout: 12
+  CSRF: true
+  Debug: false
+
+postgres:
+  PostgresqlHost: localhost
+  PostgresqlPort: 5432
+  PostgresqlUser: postgres
+  PostgresqlPassword: postgrespw
+  PostgresqlDbname: movies
+  PostgresqlSslmode: false
+  PgDriver: pgx
