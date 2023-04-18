@@ -1,4 +1,4 @@
-import {getDefaultLayout} from "../components/Layout";
+import {getDefaultLayout} from "../components/layout/Layout";
 import Home from "./home";
 
 

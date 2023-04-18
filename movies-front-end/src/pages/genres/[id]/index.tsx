@@ -1,12 +1,10 @@
-import {useEffect, useState} from "react";
-import Link from "next/link";
 import {useRouter} from "next/router";
 import useSWR from "swr";
 import {get} from "../../../libs/api";
 import EnhancedTable from "../../../components/movies/table/MoviesTable";
 
 
-const OneGenre = () => {
+function OneGenre() {
     const router = useRouter();
 
     // Get the id from the url
@@ -16,7 +14,7 @@ const OneGenre = () => {
     const {genreName} = router.query;
 
     // Get list of movies
-    const { data: movies } = useSWR(`../api/genres/${id}`, get);
+    const { data: movies } = useSWR(`../api/movies/genres/${id}`, get);
 
     return (
         <>

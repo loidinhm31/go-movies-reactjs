@@ -1,41 +1,53 @@
 import Link from "next/link";
 import useSWR from "swr";
 import {get} from "../../libs/api";
-import {Box, List, ListItem, Stack} from "@mui/material";
-import Divider from '@mui/material/Divider';
+import {Box, Chip, List, ListItem, Paper, Stack, Typography} from "@mui/material";
+import Divider from "@mui/material/Divider";
 import {GenreType} from "../../types/movies";
 
-const Genres = () => {
+function Genres() {
     const {data: genres} = useSWR<GenreType[]>(`../api/genres`, get);
 
     return (
-        <Stack>
-            <Box sx={{display: "flex", p: 1, m: 1}}>
-                <h2>Genres</h2>
+        <Stack spacing={2}>
+            <Box sx={{p: 1, m: 1}}>
+                <Typography variant="h4">Genres</Typography>
             </Box>
-            <hr/>
+            <Divider/>
             <Box component="span"
-                 sx={{p: 1, m: 1}}>
-                <List>
+                 sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
+                <Paper
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexWrap: "wrap",
+                        listStyle: "none",
+                        p: 0.5,
+                        m: 0,
+                    }}
+                    component="ul"
+                >
                     {genres && genres.map((g) => (
-                        <>
-                            <ListItem alignItems="flex-start" key={g.id}>
-                                <Link
-                                    key={g.id}
-                                    className="list-group-item list-group-item-action"
-                                    href={`/genres/${g.id}?genreName=${g.genre}`}
-                                >{g.genre}</Link>
-
+                        <Link
+                            key={g.id}
+                            href={`/genres/${g.id}?genreName=${g.genre}`}
+                            style={{textDecoration: "none"}}
+                        >
+                            <ListItem>
+                                <Chip
+                                    color="info"
+                                    variant="filled"
+                                    clickable
+                                    label={g.genre}/>
                             </ListItem>
-                            <Divider variant="middle" component="li" />
-                        </>
+
+                        </Link>
                     ))}
-                </List>
+                </Paper>
 
             </Box>
         </Stack>
     );
-
-};
+}
 
 export default Genres;

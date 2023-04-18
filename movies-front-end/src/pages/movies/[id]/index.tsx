@@ -1,11 +1,10 @@
-import {useState} from "react";
 import {useRouter} from "next/router";
 import {MovieType} from "../../../types/movies";
 import useSWR from "swr";
 import {get} from "../../../libs/api";
-import {Box, Stack} from "@mui/material";
+import {Box, Chip, Divider, Stack} from "@mui/material";
 
-const Movie = () => {
+function Movie() {
     const router = useRouter();
     let {id} = router.query;
 
@@ -23,12 +22,14 @@ const Movie = () => {
                         <small><em>{movie.runtime} minutes, </em></small>
                         <small><em>Rated {movie.mpaa_rating}</em></small>
                     </Box>
-                    <Box>
+                    <Stack direction="row">
                         {movie.genres && movie.genres.map((g) => (
-                            <span key={g.genre} className="badge bg-secondary me-2">{g.genre}</span>
+                            <Box sx={{p: 1}}>
+                                <Chip key={g.id} label={g.genre}/>
+                            </Box>
                         ))}
-                    </Box>
-                    <hr/>
+                    </Stack>
+                    <Divider/>
                     <Box component="span"
                          sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
                         {movie.image !== "" &&
