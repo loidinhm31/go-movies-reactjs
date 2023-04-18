@@ -1,10 +1,7 @@
-import {ChangeEvent, useCallback, useState} from "react";
+import {useCallback, useState} from "react";
 import {
     Box,
-    FormControlLabel,
-    IconButton,
     Paper,
-    Switch,
     Table,
     TableBody,
     TableCell,
@@ -12,10 +9,7 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TableSortLabel,
-    Toolbar,
-    Tooltip,
-    Typography
+    TableSortLabel
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
 import {MovieType} from "../../../types/movies";
@@ -57,10 +51,6 @@ const headCells: readonly HeadCell[] = [
     },
 ];
 
-const DEFAULT_ORDER = 'asc';
-const DEFAULT_ORDER_BY = 'release_date';
-const DEFAULT_ROWS_PER_PAGE = 5;
-
 interface EnhancedTableHeadProps {
     onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
     order: Order;
@@ -68,8 +58,7 @@ interface EnhancedTableHeadProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableHeadProps) {
-    const {order, orderBy, onRequestSort} =
-        props;
+    const {order, orderBy, onRequestSort} = props;
     const createSortHandler =
         (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
             onRequestSort(event, newOrderBy);
@@ -110,12 +99,10 @@ interface EnhancedTableProps {
 }
 
 export default function EnhancedTable(props: EnhancedTableProps) {
-    const [order, setOrder] = useState<Order>(DEFAULT_ORDER);
-    const [orderBy, setOrderBy] = useState<keyof Data>(DEFAULT_ORDER_BY);
+    const [order, setOrder] = useState<Order>("asc");
+    const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
     const [page, setPage] = useState(0);
-    const [dense, setDense] = useState(false);
-    const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
-    const [paddingHeight, setPaddingHeight] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
@@ -131,16 +118,12 @@ export default function EnhancedTable(props: EnhancedTableProps) {
     const handleChangePage = useCallback(
         (event: unknown, newPage: number) => {
             setPage(newPage);
-
-
             // Avoid a layout jump when reaching the last page with empty rows.
             const numEmptyRows =
                 newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - props.rows.length) : 0;
 
-            const newPaddingHeight = (dense ? 33 : 53) * numEmptyRows;
-            setPaddingHeight(newPaddingHeight);
         },
-        [order, orderBy, dense, rowsPerPage],
+        [order, orderBy, rowsPerPage],
     );
 
     const handleChangeRowsPerPage = useCallback(
@@ -149,18 +132,9 @@ export default function EnhancedTable(props: EnhancedTableProps) {
             setRowsPerPage(updatedRowsPerPage);
 
             setPage(0);
-
-
-            // There is no layout jump to handle on the first page.
-            setPaddingHeight(0);
         },
         [order, orderBy],
     );
-
-    const handleChangeDense = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setDense(event.target.checked);
-    };
-
 
     return (
         <Box sx={{width: '100%'}}>
@@ -169,7 +143,6 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                     <Table component="div"
                         sx={{minWidth: 750}}
                         aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
                     >
                         <EnhancedTableHead
                             order={order}
@@ -218,15 +191,6 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                                     );
                                 })
                                 : null}
-                            {paddingHeight > 0 && (
-                                <TableRow
-                                    style={{
-                                        height: paddingHeight,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}/>
-                                </TableRow>
-                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -240,10 +204,6 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            <FormControlLabel
-                control={<Switch checked={dense} onChange={handleChangeDense}/>}
-                label="Dense padding"
-            />
         </Box>
     );
 }
