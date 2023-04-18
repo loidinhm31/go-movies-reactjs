@@ -1,3 +1,5 @@
+import {MovieType} from "../../../../types/movies";
+
 const handler =  async (req, res) => {
     let {id} = req.query;
 
