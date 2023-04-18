@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import Swal from "sweetalert2";
 import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
 import useSWR from "swr";
@@ -111,15 +110,15 @@ const EditMovie = () => {
             }
         });
 
-        if (movie.genres_array.length === 0) {
-            Swal.fire({
-                title: "Error!",
-                text: "You must choose at least one genre!",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            errors.push("genres");
-        }
+        // if (movie.genres_array.length === 0) {
+        //     Swal.fire({
+        //         title: "Error!",
+        //         text: "You must choose at least one genre!",
+        //         icon: "error",
+        //         confirmButtonText: "OK",
+        //     });
+        //     errors.push("genres");
+        // }
 
         if (errors.length > 0) {
             return false;
@@ -162,30 +161,30 @@ const EditMovie = () => {
     };
 
     const confirmDelete = () => {
-        Swal.fire({
-            title: "Delete movies?",
-            text: "You cannot undo this action!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes"
-        }).then((result) => {
-            if (result.isConfirmed) {
-
-                deleteMovie()
-                    .then((data) => {
-                        if (data.error) {
-                            console.log(data.error);
-                        } else {
-                            router.push("/manage-catalogue");
-                        }
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    });
-            }
-        })
+        // Swal.fire({
+        //     title: "Delete movies?",
+        //     text: "You cannot undo this action!",
+        //     icon: "warning",
+        //     showCancelButton: true,
+        //     confirmButtonColor: "#3085d6",
+        //     cancelButtonColor: "#d33",
+        //     confirmButtonText: "Yes"
+        // }).then((result) => {
+        //     if (result.isConfirmed) {
+        //
+        //         deleteMovie()
+        //             .then((data) => {
+        //                 if (data.error) {
+        //                     console.log(data.error);
+        //                 } else {
+        //                     router.push("/manage-catalogue");
+        //                 }
+        //             })
+        //             .catch(err => {
+        //                 console.log(err)
+        //             });
+        //     }
+        // })
     }
 
     return (
