@@ -18,7 +18,6 @@ type Movie struct {
 type Genre struct {
 	ID        int `gorm:"primary_key"`
 	Genre     string
-	Checked   bool
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	Movie     []*Movie `gorm:"many2many:movies_genres;"`

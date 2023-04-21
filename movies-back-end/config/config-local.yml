@@ -19,6 +19,6 @@ postgres:
   PostgresqlPort: 5432
   PostgresqlUser: postgres
   PostgresqlPassword: postgrespw
-  PostgresqlDbname: movies
+  PostgresqlDbname: mdb
   PostgresqlSslmode: false
   PgDriver: pgx

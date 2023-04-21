@@ -3,7 +3,7 @@ package dto
 import "time"
 
 type MovieDto struct {
-	ID          int         `json:"id"`
+	ID          int         `json:"id,omitempty"`
 	Title       string      `json:"title"`
 	ReleaseDate time.Time   `json:"release_date"`
 	Runtime     int         `json:"runtime"`
@@ -18,7 +18,6 @@ type MovieDto struct {
 type GenreDto struct {
 	ID        int       `json:"id"`
 	Genre     string    `json:"genre"`
-	Checked   bool      `json:"checked"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`
 }

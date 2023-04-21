@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"movies-service/internal/models"
 	"movies-service/internal/movies"
 )
@@ -25,14 +26,14 @@ func (mr *movieRepository) InsertMovie(ctx context.Context, movie *models.Movie)
 }
 
 func (mr *movieRepository) FindAllMovies(ctx context.Context) ([]*models.Movie, error) {
-	var movies []*models.Movie
-	err := mr.db.WithContext(ctx).Preload("Genres").Find(&movies).Error
+	var m []*models.Movie
+	err := mr.db.WithContext(ctx).Preload("Genres").Find(&m).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return movies, nil
+	return m, nil
 }
 
 func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*models.Movie, error) {
@@ -49,15 +50,15 @@ func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*models.M
 }
 
 func (mr *movieRepository) FindMoviesByGenre(ctx context.Context, genreId int) ([]*models.Movie, error) {
-	var movies []*models.Movie
+	var m []*models.Movie
 
 	err := mr.db.WithContext(ctx).Where("movies.id IN (SELECT movie_id FROM movies_genres WHERE genre_id = ?)", genreId).
-		Find(&movies).Error
+		Find(&m).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return movies, nil
+	return m, nil
 }
 
 func (mr *movieRepository) UpdateMovie(ctx context.Context, movie models.Movie) error {
@@ -90,7 +91,14 @@ func (mr *movieRepository) UpdateMovie(ctx context.Context, movie models.Movie) 
 //}
 
 func (mr *movieRepository) DeleteMovieById(ctx context.Context, id int) error {
-	err := mr.db.WithContext(ctx).Delete(&models.Movie{}, id).Error
+	//err := mr.db.WithContext(ctx).Delete(&models.Movie{}, id).Error
+	//if err != nil {
+	//	return err
+	//}
+
+	err := mr.db.WithContext(ctx).Select(clause.Associations).Delete(&models.Movie{
+		ID: id,
+	}).Error
 	if err != nil {
 		return err
 	}

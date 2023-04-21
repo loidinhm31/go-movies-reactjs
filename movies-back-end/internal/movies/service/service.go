@@ -5,7 +5,9 @@ import (
 	"errors"
 	"log"
 	"movies-service/internal/dto"
+	"movies-service/internal/models"
 	"movies-service/internal/movies"
+	"time"
 )
 
 type movieService struct {
@@ -31,9 +33,8 @@ func (ms *movieService) GetAllMovies(ctx context.Context) ([]*dto.MovieDto, erro
 		if m.Genres != nil {
 			for _, g := range m.Genres {
 				genreDtos = append(genreDtos, &dto.GenreDto{
-					ID:      g.ID,
-					Genre:   g.Genre,
-					Checked: g.Checked,
+					ID:    g.ID,
+					Genre: g.Genre,
 				})
 			}
 		}
@@ -65,9 +66,8 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 	if movie.Genres != nil {
 		for _, g := range movie.Genres {
 			genreDtos = append(genreDtos, &dto.GenreDto{
-				ID:      g.ID,
-				Genre:   g.Genre,
-				Checked: g.Checked,
+				ID:    g.ID,
+				Genre: g.Genre,
 			})
 		}
 	}
@@ -88,21 +88,20 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 }
 
 func (ms *movieService) GetMoviesByGenre(ctx context.Context, genreId int) ([]*dto.MovieDto, error) {
-	movies, err := ms.movieRepository.FindMoviesByGenre(ctx, genreId)
+	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, genreId)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range movies {
+	for _, m := range movieResults {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
 				genreDtos = append(genreDtos, &dto.GenreDto{
-					ID:      g.ID,
-					Genre:   g.Genre,
-					Checked: g.Checked,
+					ID:    g.ID,
+					Genre: g.Genre,
 				})
 			}
 		}
@@ -123,12 +122,53 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, genreId int) ([]*d
 	return movieDtos, nil
 }
 
+func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error {
+	var genreObjects []*models.Genre
+
+	if movie.ID > 0 ||
+		movie.Title == "" ||
+		movie.Runtime == 0 ||
+		movie.Description == "" ||
+		movie.ReleaseDate.IsZero() ||
+		(movie.Genres == nil || len(movie.Genres) == 0) {
+		return errors.New("invalid input")
+	}
+
+	for _, genre := range movie.Genres {
+		genreObjects = append(genreObjects, &models.Genre{
+			ID:    genre.ID,
+			Genre: genre.Genre,
+		})
+	}
+
+	movieObject := &models.Movie{
+		Title:       movie.Title,
+		ReleaseDate: movie.ReleaseDate,
+		Runtime:     movie.Runtime,
+		MpaaRating:  movie.MpaaRating,
+		Description: movie.Description,
+		Image:       movie.Image,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Genres:      genreObjects,
+	}
+
+	err := ms.movieRepository.InsertMovie(ctx, movieObject)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) error {
 	//TODO implement me
 	panic("implement me")
 }
 
 func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
-	//TODO implement me
-	panic("implement me")
+	err := ms.movieRepository.DeleteMovieById(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

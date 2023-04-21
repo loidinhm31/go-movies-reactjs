@@ -30,7 +30,6 @@ func (gs *genreService) GetAllGenres(ctx context.Context) ([]*dto.GenreDto, erro
 		genreDtos = append(genreDtos, &dto.GenreDto{
 			ID:        g.ID,
 			Genre:     g.Genre,
-			Checked:   g.Checked,
 			CreatedAt: g.CreatedAt,
 			UpdatedAt: g.UpdatedAt,
 		})

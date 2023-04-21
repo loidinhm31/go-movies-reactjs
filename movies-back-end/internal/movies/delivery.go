@@ -6,4 +6,6 @@ type MovieHandler interface {
 	FetchMovies() gin.HandlerFunc
 	FetchMovieById() gin.HandlerFunc
 	FetchMovieByGenre() gin.HandlerFunc
+	PutMovie() gin.HandlerFunc
+	DeleteMovie() gin.HandlerFunc
 }
