@@ -21,14 +21,14 @@ func NewMovieService(movieRepository movies.MovieRepository) movies.Service {
 }
 
 func (ms *movieService) GetAllMovies(ctx context.Context) ([]*dto.MovieDto, error) {
-	movies, err := ms.movieRepository.FindAllMovies(ctx)
+	allMovies, err := ms.movieRepository.FindAllMovies(ctx)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range movies {
+	for _, m := range allMovies {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -135,10 +135,12 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 	}
 
 	for _, genre := range movie.Genres {
-		genreObjects = append(genreObjects, &models.Genre{
-			ID:    genre.ID,
-			Genre: genre.Genre,
-		})
+		if genre.Checked {
+			genreObjects = append(genreObjects, &models.Genre{
+				ID:    genre.ID,
+				Genre: genre.Genre,
+			})
+		}
 	}
 
 	movieObject := &models.Movie{
@@ -161,8 +163,49 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 }
 
 func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) error {
-	//TODO implement me
-	panic("implement me")
+	if movie.ID == 0 ||
+		movie.Title == "" ||
+		movie.Runtime == 0 ||
+		movie.Description == "" ||
+		movie.ReleaseDate.IsZero() ||
+		(movie.Genres == nil || len(movie.Genres) == 0) {
+		return errors.New("invalid input")
+	}
+
+	movieObj, err := ms.movieRepository.FindMovieById(ctx, movie.ID)
+	if err != nil {
+		return errors.New("cannot find object")
+	}
+
+	movieObj = &models.Movie{
+		ID:          movie.ID,
+		Title:       movie.Title,
+		ReleaseDate: movie.ReleaseDate,
+		Runtime:     movie.Runtime,
+		MpaaRating:  movie.MpaaRating,
+		Description: movie.Description,
+		Image:       movie.Image,
+		UpdatedAt:   time.Now(),
+	}
+
+	err = ms.movieRepository.UpdateMovie(ctx, movieObj)
+	if err != nil {
+		return err
+	}
+
+	var genreObjects []*models.Genre
+	for _, genre := range movie.Genres {
+		if genre.Checked {
+			genreObjects = append(genreObjects, &models.Genre{
+				ID: genre.ID,
+			})
+		}
+	}
+	err = ms.movieRepository.UpdateMovieGenres(ctx, movieObj, genreObjects)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {

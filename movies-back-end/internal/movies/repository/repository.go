@@ -61,8 +61,8 @@ func (mr *movieRepository) FindMoviesByGenre(ctx context.Context, genreId int) (
 	return m, nil
 }
 
-func (mr *movieRepository) UpdateMovie(ctx context.Context, movie models.Movie) error {
-	err := mr.db.WithContext(ctx).Updates(movie).Error
+func (mr *movieRepository) UpdateMovie(ctx context.Context, movie *models.Movie) error {
+	err := mr.db.WithContext(ctx).Model(&models.Movie{}).Where("id = ?", movie.ID).Updates(movie).Error
 
 	if err != nil {
 		return err
@@ -70,32 +70,15 @@ func (mr *movieRepository) UpdateMovie(ctx context.Context, movie models.Movie) 
 	return nil
 }
 
-//func (mr *movieRepository) UpdateMovieGenres(id int, genreIDs []int) error {
-//
-//
-//	stmt := `DELETE FROM movies_genres WHERE movie_id = $1`
-//
-//	_, err := gr.DB.ExecContext(ctx, stmt, id)
-//	if err != nil {
-//		return err
-//	}
-//
-//	for _, n := range genreIDs {
-//		stmt := `INSERT INTO movies_genres (movie_id, genre_id) VALUES ($1, $2)`
-//		_, err := gr.DB.ExecContext(ctx, stmt, id, n)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//	return nil
-//}
+func (mr *movieRepository) UpdateMovieGenres(ctx context.Context, movie *models.Movie, genres []*models.Genre) error {
+	err := mr.db.WithContext(ctx).Model(&movie).Omit("Genres.*").Association("Genres").Replace(genres)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func (mr *movieRepository) DeleteMovieById(ctx context.Context, id int) error {
-	//err := mr.db.WithContext(ctx).Delete(&models.Movie{}, id).Error
-	//if err != nil {
-	//	return err
-	//}
-
 	err := mr.db.WithContext(ctx).Select(clause.Associations).Delete(&models.Movie{
 		ID: id,
 	}).Error

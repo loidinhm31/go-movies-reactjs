@@ -121,3 +121,27 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
 	}
 }
+
+func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		movie := &dto.MovieDto{}
+
+		if err := utils.ReadRequest(c, movie); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		err := mh.movieService.UpdateMovie(c, movie)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+	}
+}

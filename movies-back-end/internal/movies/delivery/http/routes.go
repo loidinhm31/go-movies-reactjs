@@ -12,4 +12,5 @@ func MapMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
 	movieGroup.GET("/genres/:id", h.FetchMovieByGenre())
 	movieGroup.PUT("/", h.PutMovie())
 	movieGroup.DELETE("/:id", h.DeleteMovie())
+	movieGroup.PATCH("/", h.PatchMovie())
 }

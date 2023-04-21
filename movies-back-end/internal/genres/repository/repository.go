@@ -16,13 +16,12 @@ func NewGenreRepository(db *gorm.DB) genres.GenreRepository {
 }
 
 func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, error) {
-	var genres []*models.Genre
+	var allGenres []*models.Genre
 
-	err := gr.db.WithContext(ctx).Find(&genres).Error
-
+	err := gr.db.WithContext(ctx).Find(&allGenres).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return genres, nil
+	return allGenres, nil
 }

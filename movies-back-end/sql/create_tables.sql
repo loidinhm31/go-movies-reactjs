@@ -1,6 +1,3 @@
-CREATE
-DATABASE mdb;
-
 SET
 search_path TO public;
 
@@ -69,7 +66,8 @@ CREATE TABLE public.movies_genres
 (
     id       SERIAL PRIMARY KEY,
     movie_id INTEGER REFERENCES movies (id),
-    genre_id INTEGER REFERENCES genres (id)
+    genre_id INTEGER REFERENCES genres (id),
+    UNIQUE (movie_id, genre_id)
 );
 
 CREATE TABLE public.mpaa
