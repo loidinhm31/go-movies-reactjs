@@ -6,7 +6,7 @@ import Divider from "@mui/material/Divider";
 import {GenreType} from "../../types/movies";
 
 function Genres() {
-    const {data: genres} = useSWR<GenreType[]>(`../api/genres`, get);
+    const {data: genres} = useSWR<GenreType[]>(`../api/v1/genres`, get);
 
     return (
         <Stack spacing={2}>

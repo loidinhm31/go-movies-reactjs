@@ -1,6 +1,8 @@
-import {useCallback, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {
     Box,
+    Button,
+    Chip,
     Paper,
     Table,
     TableBody,
@@ -13,7 +15,9 @@ import {
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
 import {MovieType} from "../../../types/movies";
-import Link from "next/link";
+import moment from "moment";
+import {boolean} from "boolean";
+import AlertDialog from "../../shared/alert";
 
 export interface Data {
     movie: string;
@@ -21,7 +25,7 @@ export interface Data {
     rating: number;
 }
 
-type Order = 'asc' | 'desc';
+type Order = "asc" | "desc";
 
 interface HeadCell {
     disablePadding: boolean;
@@ -32,22 +36,22 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
     {
-        id: 'movie',
+        id: "movie",
         numeric: false,
         disablePadding: false,
-        label: 'Movie',
+        label: "Movie",
     },
     {
-        id: 'release_date',
+        id: "release_date",
         numeric: false,
         disablePadding: false,
-        label: 'Release Date',
+        label: "Release Date",
     },
     {
-        id: 'rating',
+        id: "rating",
         numeric: false,
         disablePadding: false,
-        label: 'Rating',
+        label: "Rating",
     },
 ];
 
@@ -65,29 +69,32 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
         };
 
     return (
-        <TableHead component="div">
-            <TableRow component="div">
+        <TableHead>
+            <TableRow>
                 {headCells.map((headCell) => (
-                    <TableCell component="div"
+                    <TableCell
                         key={headCell.id}
-                        align={headCell.numeric ? 'right' : 'left'}
-                        padding={headCell.disablePadding ? 'none' : 'normal'}
+                        align={headCell.numeric ? "right" : "left"}
+                        padding={headCell.disablePadding ? "none" : "normal"}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel
                             active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
+                            direction={orderBy === headCell.id ? order : "asc"}
                             onClick={createSortHandler(headCell.id)}
                         >
                             <b>{headCell.label}</b>
                             {orderBy === headCell.id ? (
                                 <Box component="span" sx={visuallyHidden}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
                                 </Box>
                             ) : null}
                         </TableSortLabel>
                     </TableCell>
                 ))}
+                <TableCell
+                    aria-label="last"
+                    style={{width: "var(--Table-lastColumnWidth)"}}/>
             </TableRow>
         </TableHead>
     );
@@ -96,6 +103,9 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
 
 interface EnhancedTableProps {
     rows: MovieType[];
+    setDeleteId: (selectId: number) => void;
+    confirmDelete: boolean;
+    setConfirmDelete: (flag: boolean) => void;
 }
 
 export default function EnhancedTable(props: EnhancedTableProps) {
@@ -104,13 +114,23 @@ export default function EnhancedTable(props: EnhancedTableProps) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
+    const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
+    const [selectedTitle, setSelectedTitle] = useState("");
+    const [selectedId, setSelectedId] = useState<number>();
+
+    useEffect(() => {
+        if (props.confirmDelete) {
+            props.setDeleteId(selectedId);
+            props.setConfirmDelete(true);
+        }
+    }, [props.confirmDelete])
+
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
-            const isAsc = orderBy === newOrderBy && order === 'asc';
-            const toggledOrder = isAsc ? 'desc' : 'asc';
+            const isAsc = orderBy === newOrderBy && order === "asc";
+            const toggledOrder = isAsc ? "desc" : "asc";
             setOrder(toggledOrder);
             setOrderBy(newOrderBy);
-
         },
         [order, orderBy, page, rowsPerPage],
     );
@@ -136,74 +156,99 @@ export default function EnhancedTable(props: EnhancedTableProps) {
         [order, orderBy],
     );
 
+    const handleDeleteRow = (movie: MovieType) => {
+        setIsOpenDeleteDialog(true);
+        setSelectedId(movie.id);
+        setSelectedTitle(movie.title);
+    };
+
     return (
-        <Box sx={{width: '100%'}}>
-            <Paper sx={{width: '100%', mb: 2}}>
-                <TableContainer>
-                    <Table component="div"
-                        sx={{minWidth: 750}}
-                        aria-labelledby="tableTitle"
-                    >
-                        <EnhancedTableHead
-                            order={order}
-                            orderBy={orderBy}
-                            onRequestSort={handleRequestSort}
-                        />
-                        <TableBody component="div">
-                            {props.rows
-                                ? props.rows.map((row, index) => {
-                                    const labelId = `enhanced-table-checkbox-${index}`;
+        <>
+            {isOpenDeleteDialog &&
+                <AlertDialog
+                    open={isOpenDeleteDialog}
+                    setOpen={setIsOpenDeleteDialog}
+                    title={`Delete "${selectedTitle}"`}
+                    description={"You cannot undo this action!"}
+                    confirmText={"Yes"}
+                    showCancelButton={true}
+                    setConfirmDelete={props.setConfirmDelete}/>
+            }
 
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox"
-                                            tabIndex={-1}
-                                            key={row.id}
-                                            sx={{cursor: 'pointer'}}
-                                            component={Link}
-                                            href={`/movies/${row.id}`}
-                                            style={{textDecoration: 'none'}}
-                                        >
-                                            <TableCell
-                                                component="div"
-                                                id={labelId}
-                                                scope="row"
-                                            >
-                                                {row.title}
-                                            </TableCell>
-                                            <TableCell
-                                                component="div"
-                                                id={labelId}
-                                                scope="row"
-                                            >
-                                                {new Date(row.release_date).toDateString()}
-                                            </TableCell>
-                                            <TableCell
-                                                component="div"
-                                                id={labelId}
-                                                scope="row"
-                                            >
-                                                {row.mpaa_rating}
-                                            </TableCell>
+            <Box sx={{width: "100%"}}>
+                <Paper sx={{width: "100%", mb: 2}}>
+                    <TableContainer>
+                        <Table
+                            sx={{minWidth: 750}}
+                            aria-labelledby="tableTitle"
+                        >
+                            <EnhancedTableHead
+                                order={order}
+                                orderBy={orderBy}
+                                onRequestSort={handleRequestSort}
+                            />
+                            <TableBody>
+                                {props.rows
+                                    ? props.rows.map((row, index) => {
+                                        const labelId = `enhanced-table-checkbox-${index}`;
 
-                                        </TableRow>
-                                    );
-                                })
-                                : null}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={props.rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                />
-            </Paper>
-        </Box>
+                                        return (
+                                            <TableRow
+                                                hover
+                                                role="checkbox"
+                                                tabIndex={-1}
+                                                key={row.id}
+                                                sx={{cursor: "pointer"}}
+                                            >
+
+                                                <TableCell
+                                                    id={labelId}
+
+                                                >
+                                                    <Chip label={row.title} color="info" component="a"
+                                                          href={`/movies/${row.id}`} clickable/>
+                                                </TableCell>
+                                                <TableCell
+                                                    id={labelId}
+                                                >
+                                                    {moment(row.release_date).format("yyyy-MM-DD")}
+                                                </TableCell>
+                                                <TableCell
+                                                    id={labelId}
+                                                >
+                                                    {row.mpaa_rating}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Box sx={{display: "flex", gap: 1}}>
+                                                        <Button variant="contained" color="inherit"
+                                                                href={`/admin/movies?id=${row.id}`}>
+                                                            Edit
+                                                        </Button>
+                                                        <Button variant="contained" color="error"
+                                                                onClick={() => handleDeleteRow(row)}>
+                                                            Delete
+                                                        </Button>
+                                                    </Box>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                    : null}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={props.rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                </Paper>
+            </Box>
+        </>
+
     );
 }

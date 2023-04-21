@@ -2,12 +2,11 @@ export type MovieType = {
     id?: number,
     title: string,
     description: string,
-    release_date: Date,
+    release_date: string,
     runtime: number,
     mpaa_rating: string,
     image?: string,
     genres: GenreType[],
-    genres_array?: any[],
 }
 
 export type GenreType = {

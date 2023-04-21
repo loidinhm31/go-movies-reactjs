@@ -38,7 +38,7 @@ export function Header() {
                 <Link href={homeURL} style={{textDecoration: "none", color: "white"}}>
                     <Box sx={{justifyContent: "center", alignItems: "center"}}>
                         <Typography variant="h6" noWrap component="div">
-                            Movies App
+                            SHIFTFLIX
                         </Typography>
                     </Box>
                 </Link>

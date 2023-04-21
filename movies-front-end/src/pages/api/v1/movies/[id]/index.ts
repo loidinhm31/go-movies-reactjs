@@ -1,5 +1,3 @@
-import {MovieType} from "../../../../types/movies";
-
 const handler =  async (req, res) => {
     let {id} = req.query;
 
@@ -14,9 +12,8 @@ const handler =  async (req, res) => {
     const response = await fetch(`${process.env.API_BASE_URL}/movies/${id}`,
         requestOptions
     );
-    const movies = await response.json();
-
-    res.status(200).json(movies);
+    const movie = await response.json();
+    res.status(200).json(movie);
 };
 
 export default handler;

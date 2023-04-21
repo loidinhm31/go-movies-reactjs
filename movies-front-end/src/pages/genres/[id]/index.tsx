@@ -14,7 +14,7 @@ function OneGenre() {
     const {genreName} = router.query;
 
     // Get list of movies
-    const { data: movies } = useSWR(`../api/movies/genres/${id}`, get);
+    const { data: movies } = useSWR(`../api/v1/movies/genres/${id}`, get);
 
     return (
         <>

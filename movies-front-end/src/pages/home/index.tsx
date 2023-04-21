@@ -1,4 +1,4 @@
-import Ticket from "../../assets/images/movie_tickets.jpg";
+import Wallpaper from "../../assets/images/wallpaper.png";
 import Link from "next/link";
 import Image from "next/image";
 import {Box, Stack, Typography} from "@mui/material";
@@ -14,7 +14,7 @@ function Home() {
            <Box component="span"
                 sx={{display: "flex", justifyContent: "center", p: 1, m: 1 }}>
                <Link href="/movies">
-                   <Image src={Ticket} alt="movie tickets"></Image>
+                   <Image src={Wallpaper} alt="movie tickets"></Image>
                </Link>
            </Box>
        </Stack>

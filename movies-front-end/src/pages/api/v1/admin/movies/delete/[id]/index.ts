@@ -1,8 +1,8 @@
-import {withRole} from "../../../../libs/auth";
+import {withRole} from "../../../../../../../libs/auth";
 
 const handler = withRole("admin", async (req, res, token) => {
     let {id} = req.query;
-
+    console.log("hit " + id)
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${token.accessToken}`);
@@ -12,7 +12,7 @@ const handler = withRole("admin", async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/admin/movies/${id}`,
+    await fetch(`${process.env.API_BASE_URL}/movies/${id}`,
         requestOptions
     );
 
