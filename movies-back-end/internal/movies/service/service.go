@@ -7,6 +7,7 @@ import (
 	"movies-service/internal/dto"
 	"movies-service/internal/models"
 	"movies-service/internal/movies"
+	"movies-service/pkg/pagination"
 	"time"
 )
 
@@ -20,15 +21,17 @@ func NewMovieService(movieRepository movies.MovieRepository) movies.Service {
 	}
 }
 
-func (ms *movieService) GetAllMovies(ctx context.Context) ([]*dto.MovieDto, error) {
-	allMovies, err := ms.movieRepository.FindAllMovies(ctx)
+func (ms *movieService) GetAllMovies(ctx context.Context, pageable *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
+	page := &pagination.Page[*models.Movie]{}
+
+	allMovies, err := ms.movieRepository.FindAllMovies(ctx, pageable, page)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range allMovies {
+	for _, m := range allMovies.Data {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -52,7 +55,14 @@ func (ms *movieService) GetAllMovies(ctx context.Context) ([]*dto.MovieDto, erro
 			Genres:      genreDtos,
 		})
 	}
-	return movieDtos, nil
+	return &pagination.Page[*dto.MovieDto]{
+		PageSize:   pageable.PageSize,
+		PageNumber: pageable.PageNumber,
+		Sort:       pageable.Sort,
+		TotalData:  allMovies.TotalData,
+		TotalPages: allMovies.TotalPages,
+		Data:       movieDtos,
+	}, nil
 }
 
 func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto, error) {

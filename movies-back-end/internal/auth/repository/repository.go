@@ -3,17 +3,19 @@ package repository
 import (
 	"context"
 	"gorm.io/gorm"
+	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/models"
 	"strings"
 )
 
 type userRepository struct {
-	db *gorm.DB
+	cfg *config.Config
+	db  *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) auth.UserRepository {
-	return &userRepository{db: db}
+func NewUserRepository(cfg *config.Config, db *gorm.DB) auth.UserRepository {
+	return &userRepository{cfg: cfg, db: db}
 }
 
 func (ur *userRepository) InsertUser(ctx context.Context, user *models.User) error {

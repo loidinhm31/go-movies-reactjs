@@ -33,7 +33,7 @@ func (mh *genreHandler) FetchGenres() gin.HandlerFunc {
 //
 //func (app *Application) getPoster(movie models.Movie) models.Movie {
 //	type TheMovieDB struct {
-//		Page    int `json:"page"`
+//		PageNumber    int `json:"page"`
 //		Results []struct {
 //			PosterPath string `json:"poster_path"`
 //		} `json:"results"`

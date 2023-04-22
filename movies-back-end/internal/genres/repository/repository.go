@@ -3,16 +3,18 @@ package repository
 import (
 	"context"
 	"gorm.io/gorm"
+	"movies-service/config"
 	"movies-service/internal/genres"
 	"movies-service/internal/models"
 )
 
 type genreRepository struct {
-	db *gorm.DB
+	cfg *config.Config
+	db  *gorm.DB
 }
 
-func NewGenreRepository(db *gorm.DB) genres.GenreRepository {
-	return &genreRepository{db: db}
+func NewGenreRepository(cfg *config.Config, db *gorm.DB) genres.GenreRepository {
+	return &genreRepository{cfg: cfg, db: db}
 }
 
 func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, error) {

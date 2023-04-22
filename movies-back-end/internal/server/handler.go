@@ -21,9 +21,9 @@ import (
 
 func (s *Server) MapHandlers(g *gin.Engine) error {
 	// Init repositories
-	uRepo := userRepository.NewUserRepository(s.db)
-	mRepo := movieRepository.NewMovieRepository(s.db)
-	gRepo := genreRepository.NewGenreRepository(s.db)
+	uRepo := userRepository.NewUserRepository(s.cfg, s.db)
+	mRepo := movieRepository.NewMovieRepository(s.cfg, s.db)
+	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 
 	// Init service
 	aService := authService.NewAuthService(uRepo,

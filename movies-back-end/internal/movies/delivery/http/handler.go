@@ -5,6 +5,7 @@ import (
 	"log"
 	"movies-service/internal/dto"
 	"movies-service/internal/movies"
+	"movies-service/pkg/pagination"
 	"movies-service/pkg/utils"
 	"net/http"
 	"strconv"
@@ -22,7 +23,18 @@ func NewMovieHandler(movieService movies.Service) movies.MovieHandler {
 
 func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		allMovies, err := mh.movieService.GetAllMovies(c.Request.Context())
+		pageable, _ := pagination.ReadPageRequest(c)
+
+		if err := utils.ReadRequest(c, pageable); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		allMovies, err := mh.movieService.GetAllMovies(c.Request.Context(), pageable)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
