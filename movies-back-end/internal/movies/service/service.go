@@ -56,12 +56,12 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageable *pagination.P
 		})
 	}
 	return &pagination.Page[*dto.MovieDto]{
-		PageSize:   pageable.PageSize,
-		PageNumber: pageable.PageNumber,
-		Sort:       pageable.Sort,
-		TotalData:  allMovies.TotalData,
-		TotalPages: allMovies.TotalPages,
-		Data:       movieDtos,
+		PageSize:      pageable.PageSize,
+		PageNumber:    pageable.PageNumber,
+		Sort:          pageable.Sort,
+		TotalElements: allMovies.TotalElements,
+		TotalPages:    allMovies.TotalPages,
+		Data:          movieDtos,
 	}, nil
 }
 
