@@ -16,16 +16,14 @@ import {
 import {visuallyHidden} from "@mui/utils";
 import {MovieType} from "../../../types/movies";
 import moment from "moment";
-import {boolean} from "boolean";
 import AlertDialog from "../../shared/alert";
+import {Direction, PageType} from "../../../types/page";
 
 export interface Data {
-    movie: string;
+    title: string;
     release_date: Date;
     rating: number;
 }
-
-type Order = "asc" | "desc";
 
 interface HeadCell {
     disablePadding: boolean;
@@ -36,7 +34,7 @@ interface HeadCell {
 
 const headCells: readonly HeadCell[] = [
     {
-        id: "movie",
+        id: "title",
         numeric: false,
         disablePadding: false,
         label: "Movie",
@@ -57,7 +55,7 @@ const headCells: readonly HeadCell[] = [
 
 interface EnhancedTableHeadProps {
     onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
-    order: Order;
+    order: Direction;
     orderBy: string;
 }
 
@@ -102,18 +100,21 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
 
 
 interface EnhancedTableProps {
-    rows: MovieType[];
+    page: PageType<MovieType>;
     setDeleteId: (selectId: number) => void;
     confirmDelete: boolean;
     setConfirmDelete: (flag: boolean) => void;
+    pageIndex: number;
+    setPageIndex: (value: number) => void;
+    rowsPerPage: number;
+    setRowsPerPage: (value: number) => void;
+    order: Direction;
+    setOrder: (direction: Direction) => void;
+    orderBy: keyof Data;
+    setOrderBy: (by: keyof Data) => void;
 }
 
 export default function EnhancedTable(props: EnhancedTableProps) {
-    const [order, setOrder] = useState<Order>("asc");
-    const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(5);
-
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
     const [selectedTitle, setSelectedTitle] = useState("");
     const [selectedId, setSelectedId] = useState<number>();
@@ -127,33 +128,28 @@ export default function EnhancedTable(props: EnhancedTableProps) {
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
-            const isAsc = orderBy === newOrderBy && order === "asc";
-            const toggledOrder = isAsc ? "desc" : "asc";
-            setOrder(toggledOrder);
-            setOrderBy(newOrderBy);
+            const isAsc = props.orderBy === newOrderBy && props.order === "asc";
+            const toggledOrder = isAsc ? Direction.DESC : Direction.ASC;
+            props.setOrder(toggledOrder);
+            props.setOrderBy(newOrderBy);
         },
-        [order, orderBy, page, rowsPerPage],
+        [props.order, props.orderBy, props.pageIndex, props.rowsPerPage],
     );
 
-    const handleChangePage = useCallback(
-        (event: unknown, newPage: number) => {
-            setPage(newPage);
-            // Avoid a layout jump when reaching the last page with empty rows.
-            const numEmptyRows =
-                newPage > 0 ? Math.max(0, (1 + newPage) * rowsPerPage - props.rows.length) : 0;
-
+    const handleChangePageIndex = useCallback(
+        (event: unknown, newPageIndex: number) => {
+            props.setPageIndex(newPageIndex);
         },
-        [order, orderBy, rowsPerPage],
+        [props.order, props.orderBy, props.rowsPerPage],
     );
 
     const handleChangeRowsPerPage = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             const updatedRowsPerPage = parseInt(event.target.value, 10);
-            setRowsPerPage(updatedRowsPerPage);
-
-            setPage(0);
+            props.setRowsPerPage(updatedRowsPerPage);
+            props.setPageIndex(0);
         },
-        [order, orderBy],
+        [props.order, props.orderBy],
     );
 
     const handleDeleteRow = (movie: MovieType) => {
@@ -183,13 +179,13 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                             aria-labelledby="tableTitle"
                         >
                             <EnhancedTableHead
-                                order={order}
-                                orderBy={orderBy}
+                                order={props.order}
+                                orderBy={props.orderBy}
                                 onRequestSort={handleRequestSort}
                             />
                             <TableBody>
-                                {props.rows
-                                    ? props.rows.map((row, index) => {
+                                {props.page
+                                    ? props.page.data.map((row, index) => {
                                         const labelId = `enhanced-table-checkbox-${index}`;
 
                                         return (
@@ -238,12 +234,12 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                         </Table>
                     </TableContainer>
                     <TablePagination
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
                         component="div"
-                        count={props.rows.length}
-                        rowsPerPage={rowsPerPage}
-                        page={page}
-                        onPageChange={handleChangePage}
+                        count={props.page.total_elements}
+                        rowsPerPage={props.rowsPerPage}
+                        page={props.pageIndex}
+                        onPageChange={handleChangePageIndex}
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                 </Paper>

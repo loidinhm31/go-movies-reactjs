@@ -23,7 +23,7 @@ function OneGenre() {
             <hr/>
 
             {movies ? (
-                <EnhancedTable rows={movies} />
+                <EnhancedTable page={movies} />
 
             ) : (
                 <p>No movies in this genre (yet)!</p>

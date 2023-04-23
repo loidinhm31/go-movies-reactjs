@@ -1,11 +1,26 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import useSWR from "swr";
 import {get} from "../../libs/api";
-import {Box, ButtonBase, Chip, Grid, Paper, Stack, Typography,} from "@mui/material";
+import {
+    Box,
+    ButtonBase,
+    Chip,
+    FormControl,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Pagination,
+    Paper,
+    Select,
+    SelectChangeEvent,
+    Stack,
+    Typography,
+} from "@mui/material";
 import {MovieType} from "../../types/movies";
 import Divider from "@mui/material/Divider";
 import {styled} from "@mui/material/styles";
 import Link from "next/link";
+import {PageType} from "../../types/page";
 
 const Img = styled("img")({
     margin: "auto",
@@ -15,23 +30,38 @@ const Img = styled("img")({
 });
 
 function Movies() {
-    const [page, setPage] = useState(0);
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(9);
 
-    // Get all movies
-    const {data: movies} = useSWR<MovieType[]>(`../api/v1/movies`, get);
+    // Get movies
+    const {data: page} =
+        useSWR<PageType<MovieType>>(`../api/v1/movies?pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
+
+    // Ensure the page index has been reset when the page size changes
+    useEffect(() => {
+        setPageIndex(0);
+    }, [pageSize])
+
+    const handlePageIndexChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPageIndex(value - 1);
+    };
+
+    const handlePageSizeChange = (event: SelectChangeEvent) => {
+        const val = event.target.value
+        setPageSize(parseInt(val));
+    };
 
     return (
-
         <Stack spacing={2}>
             <Box sx={{p: 1, m: 1}}>
                 <Typography variant="h4">Movies</Typography>
             </Box>
             <Divider/>
-            {movies &&
+            {page &&
                 <Box component="span"
                      sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
                     <Grid container spacing={2}>
-                        {movies && movies.map((movie) => (
+                        {page && page.data && page.data.map((movie) => (
                             <Grid key={movie.id} item xs={4}>
                                 <Link href={`/movies/${movie.id}`} style={{textDecoration: "none"}}>
                                     <Paper
@@ -64,9 +94,37 @@ function Movies() {
 
                             </Grid>
                         ))}
+
+                        <Grid item xs={12} sx={{display: "flex", justifyContent: "center"}}>
+                            <Stack spacing={2} direction="row">
+                                <FormControl>
+                                    <InputLabel>Size</InputLabel>
+                                    <Select
+                                        sx={{display: "flex", alignItems: "center"}}
+                                        value={pageSize.toString()}
+                                        label="Size"
+                                        onChange={handlePageSizeChange}
+                                    >
+                                        {process.env.NODE_ENV === "development"
+                                            && <MenuItem value={1}>1</MenuItem>}
+                                        <MenuItem value={9}>9</MenuItem>
+                                        <MenuItem value={18}>18</MenuItem>
+                                        <MenuItem value={27}>27</MenuItem>
+                                    </Select>
+                                </FormControl>
+                                <Pagination
+                                    sx={{display: "flex", alignItems: "center"}}
+                                    page={pageIndex + 1}
+                                    count={page.total_pages}
+                                    onChange={handlePageIndexChange}
+                                />
+                            </Stack>
+                        </Grid>
                     </Grid>
+
                 </Box>
             }
+
         </Stack>
     )
 }

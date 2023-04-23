@@ -9,19 +9,18 @@ import {
     Box,
     Button,
     Checkbox,
-    Divider, FormControl,
+    Divider,
     FormControlLabel,
     FormGroup,
     Grid,
-    InputAdornment, InputLabel,
-    MenuItem, OutlinedInput,
+    InputAdornment,
+    MenuItem,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
 import AlertDialog from "../../../components/shared/alert";
 import moment from "moment";
-import {number} from "prop-types";
 
 const EditMovie = () => {
     const router = useRouter();
