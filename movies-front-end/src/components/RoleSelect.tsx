@@ -2,7 +2,7 @@ import {forwardRef} from "react";
 import {ElementOf} from "../types/utils";
 import {FormControl, InputLabel, MenuItem, Select, SelectProps, TextField} from "@mui/material";
 
-export const roles = ["general", "admin", "banned"] as const;
+export const roles = ["general", "admin", "moderator", "banned"] as const;
 export type Role = ElementOf<typeof roles>;
 
 type RoleSelectProps = Omit<SelectProps<any>, "defaultValue"> & {

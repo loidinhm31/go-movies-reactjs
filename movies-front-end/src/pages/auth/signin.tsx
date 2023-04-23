@@ -8,7 +8,18 @@ import {AuthLayout} from "../../components/layout/AuthLayout";
 import {ClientSafeProvider, getProviders, signIn} from "next-auth/react";
 import {Role, RoleSelect} from "../../components/RoleSelect";
 import {GetServerSideProps} from "next";
-import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/material";
+import {
+    Box,
+    Button,
+    ButtonProps,
+    Chip,
+    Divider, FormHelperText,
+    InputAdornment,
+    OutlinedInput,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import {DrawerHeader} from "../../components/shared/drawer";
@@ -109,10 +120,8 @@ const SigninForm = ({credentials}: { credentials: ClientSafeProvider; }) => {
     }
 
     return (
-        <form
-            onSubmit={handleSubmit(signinWithCredentials)}
-            className="rounded-md p-4 relative"
-        >
+        <Box component="form"
+             onSubmit={handleSubmit(signinWithCredentials)}>
             <Stack spacing={2}>
                 <TextField label="Username" variant="outlined" {...register("username")} />
                 <TextField label="Password" variant="outlined" type="password" {...register("password")} />
@@ -121,7 +130,7 @@ const SigninForm = ({credentials}: { credentials: ClientSafeProvider; }) => {
                     <SigninButton startIcon={<PersonIcon/>}>Continue with User</SigninButton>
                 </Box>
             </Stack>
-        </form>
+        </Box>
     );
 };
 
@@ -146,29 +155,26 @@ const DebugSigninForm = ({credentials}: { credentials: ClientSafeProvider; }) =>
     }
 
     return (
-        <>
-            <form
-                onSubmit={handleSubmit(signinWithDebugCredentials)}
-            >
-                <Box sx={{color: "orange", p: 1}}>
-                    <span>For Debugging Only</span>
+        <Box component="form" sx={{
+            color: "orange", m: 2, p: 2,
+            border: 1, borderRadius: 1, borderWidth: 5
+        }}
+             onSubmit={handleSubmit(signinWithDebugCredentials)}
+        >
+
+            <Stack spacing={2}>
+                <TextField label="Username" variant="outlined" {...register("username")} />
+
+                <RoleSelect {...register("role")}></RoleSelect>
+
+                <Box sx={{display: "flex", justifyContent: "center"}}>
+                    <SigninButton startIcon={<BugReportIcon/>}>Continue with Debug User</SigninButton>
                 </Box>
-
-
-                <Stack spacing={2}>
-                    <TextField label="Username" variant="outlined" {...register("username")} />
-
-                    <RoleSelect {...register("role")}></RoleSelect>
-
-                    <Box sx={{display: "flex", justifyContent: "center"}}>
-                        <SigninButton startIcon={<BugReportIcon/>}>Continue with Debug User</SigninButton>
-                    </Box>
-                </Stack>
-            </form>
+            </Stack>
             <Divider sx={{p: 2}}>
-                <Chip label="FOR DEBUGGING ONLY" />
+                <Chip sx={{color: "white", background: "orange"}} label="FOR DEBUGGING ONLY"/>
             </Divider>
-        </>
+        </Box>
     );
 };
 export const getServerSideProps: GetServerSideProps<SigninProps> = async ({locale}) => {

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import React, {ElementType, useCallback} from "react";
 import {signOut, useSession} from "next-auth/react";
-import {Box, Button, Divider, Menu, MenuItem, MenuList, Typography} from "@mui/material";
+import {Avatar, Box, Button, Divider, IconButton, Menu, MenuItem, MenuList, Tooltip, Typography} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import {useHasAnyRole} from "../../hooks/auth/useHasAnyRole";
+import {useRouter} from "next/router";
+import {MilitaryTech} from "@mui/icons-material";
 
 interface MenuOption {
     name: string;
@@ -16,14 +19,16 @@ interface MenuOption {
 }
 
 export function UserMenu() {
+    const router = useRouter();
+
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const [selectedIndex, setSelectedIndex] = React.useState<number>(1);
     const open = Boolean(anchorEl);
 
     const handleSignOut = useCallback(() => {
         signOut({callbackUrl: "/"});
     }, []);
     const {data: session, status} = useSession();
+    const isAdminOrMod = useHasAnyRole(["admin", "moderator"]);
 
     if (!session || status !== "authenticated") {
         return null;
@@ -49,46 +54,57 @@ export function UserMenu() {
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
-    const createHandleClose = (index: number) => () => {
+    const createHandleClose = () => {
         setAnchorEl(null);
-        if (typeof index === "number") {
-            setSelectedIndex(index);
-        }
     };
+
+    const handeRoute = (href: string) => {
+        router.push(href).then(r => createHandleClose());
+    }
 
     return (
         <Box>
-            <Button
-                onClick={handleClick}
-                startIcon={<PersonIcon/>}
-                sx={{color: "white"}}
-            >
-                {session.user.name || "New User"}
-            </Button>
+            <Tooltip title="Account settings">
+                <IconButton
+                    onClick={handleClick}
+                    size="small"
+                    sx={{ ml: 2 }}
+                    aria-controls={open ? 'account-menu' : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? 'true' : undefined}
+                >
+                    <Avatar sx={{ width: 32, height: 32 }}>{session.user.name.at(0).toUpperCase()}</Avatar>
+                </IconButton>
+            </Tooltip>
             <Menu
                 anchorEl={anchorEl}
                 open={open}
-                onClose={createHandleClose(-1)}>
+                onClose={createHandleClose}
+            >
                 <MenuList>
                     <Box sx={{
                         display: "flex", flexDirection: "column", alignItems: "center",
-                        borderRadius: "md", p: 4
                     }}>
-                        {session.user.name}
+                        <MenuItem>
+                            <Avatar sx={{m: 1}}>{session.user.name.at(0).toUpperCase()}</Avatar> {session.user.name}
+                        </MenuItem>
+                        {isAdminOrMod &&
+                            <MenuItem>
+                                <MilitaryTech />{session.user.role}
+                            </MenuItem>
+                        }
                     </Box>
                     <Divider/>
                     <MenuList>
                         {options.map((item) => (
-                            <Link
+                            <Box
                                 key={item.name}
-                                href={item.href}
-                                style={{textDecoration: "none", color: "black"}}
                             >
-                                <MenuItem>
+                                <MenuItem onClick={() => handeRoute(item.href)}>
                                     <item.icon className="text-blue-500" aria-hidden="true"/>
                                     <Typography sx={{pl: 1}}>{item.name}</Typography>
                                 </MenuItem>
-                            </Link>
+                            </Box>
                         ))}
                     </MenuList>
                     <Divider/>
