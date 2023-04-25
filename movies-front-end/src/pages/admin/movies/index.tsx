@@ -65,7 +65,7 @@ const EditMovie = () => {
         if (!isLoading) {
             if (id === undefined) {
 
-                // Adding a movies
+                // Adding a Tables
                 setMovie({
                     title: "",
                     description: "",
@@ -75,8 +75,8 @@ const EditMovie = () => {
                     genres: [],
                 });
 
-                const checks = [];
-                genres.forEach((g) => {
+                const checks: GenreType[] = [];
+                genres?.forEach((g) => {
                     checks.push({id: g.id, checked: false, genre: g.genre});
                 });
 
@@ -88,21 +88,20 @@ const EditMovie = () => {
             } else {
                 fetchMovie()
                     .then((movie) => {
-                        const checks = [];
+                        const checks: GenreType[] = [];
 
-                        genres.forEach((g) => {
-                            if (movie.genres.some(mg => mg.id === g.id)) {
+                        genres?.forEach((g) => {
+                            if (movie?.genres.some(mg => mg.id === g.id)) {
                                 checks.push({id: g.id, genre: g.genre, checked: true});
                             } else {
                                 checks.push({id: g.id, genre: g.genre, checked: false});
                             }
                         });
 
-                        // Set state
                         setMovie({
                             ...movie,
                             genres: checks,
-                        });
+                        } as MovieType);
                     })
                     .catch((err) => {
                         console.log(err);
@@ -131,7 +130,7 @@ const EditMovie = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
 
-        let errors = [];
+        let errors: any = [];
         let required = [
             {field: movie.title, name: "title"},
             {field: movie.release_date, name: "release_date"},
@@ -140,9 +139,9 @@ const EditMovie = () => {
             {field: movie.mpaa_rating, name: "mpaa_rating"},
         ];
 
-        required.forEach(function (obj) {
-            if (obj.field === "") {
-                errors.push(obj.name);
+        required.forEach(function ({field, name}: any) {
+            if (field === "") {
+                errors.push(name);
             }
         });
 
@@ -238,7 +237,6 @@ const EditMovie = () => {
                             <Grid item xs={4}>
                                 <TextField
                                     fullWidth
-                                    focused
                                     variant="outlined"
                                     label="Release Date"
                                     type="date"
@@ -281,9 +279,11 @@ const EditMovie = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
+                                    type="text"
+                                    name="image"
                                     label="Image Path"
                                     variant="outlined"
-                                    value={movie.image}
+                                    value={movie.image || ""}
                                     onChange={e => handleChange(e, "image")}
                                 />
                             </Grid>
@@ -334,7 +334,7 @@ const EditMovie = () => {
                         <Box sx={{display: "flex", justifyContent: "center", m: 2}}>
                             <Stack direction="row" spacing={2}>
                                 <Button variant="contained" type="submit">Save</Button>
-                                {movie.id > 0 && (
+                                {movie.id! > 0 && (
                                     <Button variant="contained" color="error" href="src/app/core/components#!"
                                             onClick={confirmDelete}>
                                         Delete Movie

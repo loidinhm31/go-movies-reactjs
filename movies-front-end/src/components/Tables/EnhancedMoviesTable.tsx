@@ -14,10 +14,10 @@ import {
     TableSortLabel
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
-import {MovieType} from "../../../types/movies";
+import {MovieType} from "../../types/movies";
 import moment from "moment";
-import AlertDialog from "../../shared/alert";
-import {Direction, PageType} from "../../../types/page";
+import AlertDialog from "../shared/alert";
+import {Direction, PageType} from "../../types/page";
 
 export interface Data {
     title: string;
@@ -101,55 +101,68 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
 
 interface EnhancedTableProps {
     page: PageType<MovieType>;
-    setDeleteId: (selectId: number) => void;
-    confirmDelete: boolean;
-    setConfirmDelete: (flag: boolean) => void;
+    setDeleteId?: (selectId: number | null | undefined) => void;
+    confirmDelete?: boolean;
+    setConfirmDelete?: (flag: boolean) => void;
     pageIndex: number;
     setPageIndex: (value: number) => void;
     rowsPerPage: number;
     setRowsPerPage: (value: number) => void;
-    order: Direction;
-    setOrder: (direction: Direction) => void;
-    orderBy: keyof Data;
-    setOrderBy: (by: keyof Data) => void;
+    order?: Direction;
+    setOrder?: (direction: Direction) => void;
+    orderBy?: keyof Data;
+    setOrderBy?: (by: keyof Data) => void;
 }
 
-export default function EnhancedTable(props: EnhancedTableProps) {
+export default function EnhancedTable({
+                                          confirmDelete,
+                                          order,
+                                          orderBy,
+                                          page,
+                                          pageIndex,
+                                          rowsPerPage,
+                                          setConfirmDelete,
+                                          setDeleteId,
+                                          setOrder,
+                                          setOrderBy,
+                                          setPageIndex,
+                                          setRowsPerPage
+                                      }: EnhancedTableProps) {
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
     const [selectedTitle, setSelectedTitle] = useState("");
-    const [selectedId, setSelectedId] = useState<number>();
+    const [selectedId, setSelectedId] = useState<number | null>();
 
     useEffect(() => {
-        if (props.confirmDelete) {
-            props.setDeleteId(selectedId);
-            props.setConfirmDelete(true);
+        if (confirmDelete) {
+            setDeleteId?.(selectedId);
+            setConfirmDelete?.(true);
         }
-    }, [props.confirmDelete])
+    }, [confirmDelete])
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
-            const isAsc = props.orderBy === newOrderBy && props.order === "asc";
+            const isAsc = orderBy === newOrderBy && order === "asc";
             const toggledOrder = isAsc ? Direction.DESC : Direction.ASC;
-            props.setOrder(toggledOrder);
-            props.setOrderBy(newOrderBy);
+            setOrder?.(toggledOrder);
+            setOrderBy?.(newOrderBy);
         },
-        [props.order, props.orderBy, props.pageIndex, props.rowsPerPage],
+        [order, orderBy, pageIndex, rowsPerPage],
     );
 
     const handleChangePageIndex = useCallback(
         (event: unknown, newPageIndex: number) => {
-            props.setPageIndex(newPageIndex);
+            setPageIndex(newPageIndex);
         },
-        [props.order, props.orderBy, props.rowsPerPage],
+        [order, orderBy, rowsPerPage],
     );
 
     const handleChangeRowsPerPage = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
             const updatedRowsPerPage = parseInt(event.target.value, 10);
-            props.setRowsPerPage(updatedRowsPerPage);
-            props.setPageIndex(0);
+            setRowsPerPage(updatedRowsPerPage);
+            setPageIndex(0);
         },
-        [props.order, props.orderBy],
+        [order, orderBy],
     );
 
     const handleDeleteRow = (movie: MovieType) => {
@@ -168,7 +181,7 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                     description={"You cannot undo this action!"}
                     confirmText={"Yes"}
                     showCancelButton={true}
-                    setConfirmDelete={props.setConfirmDelete}/>
+                    setConfirmDelete={setConfirmDelete}/>
             }
 
             <Box sx={{width: "100%"}}>
@@ -179,13 +192,13 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                             aria-labelledby="tableTitle"
                         >
                             <EnhancedTableHead
-                                order={props.order}
-                                orderBy={props.orderBy}
+                                order={order!}
+                                orderBy={orderBy!}
                                 onRequestSort={handleRequestSort}
                             />
                             <TableBody>
-                                {props.page
-                                    ? props.page.data.map((row, index) => {
+                                {page
+                                    ? page.data?.map((row, index) => {
                                         const labelId = `enhanced-table-checkbox-${index}`;
 
                                         return (
@@ -236,9 +249,9 @@ export default function EnhancedTable(props: EnhancedTableProps) {
                     <TablePagination
                         rowsPerPageOptions={[5, 10, 25, 50]}
                         component="div"
-                        count={props.page.total_elements}
-                        rowsPerPage={props.rowsPerPage}
-                        page={props.pageIndex}
+                        count={page.total_elements!}
+                        rowsPerPage={rowsPerPage}
+                        page={pageIndex}
                         onPageChange={handleChangePageIndex}
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />

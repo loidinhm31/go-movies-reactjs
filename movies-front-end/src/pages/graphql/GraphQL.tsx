@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
-import {Link} from "react-router-dom";
-import Input from "../../components/shared/form/Input";
-import {environment} from "../../environments/environment";
+import Link from "next/link";
+import {MovieType} from "../../types/movies";
 
 const GraphQL = () => {
     // Set up stateful variables
@@ -31,15 +30,15 @@ const GraphQL = () => {
             headers: headers,
         }
 
-        fetch(`${environment.apiBaseUrl}/graph`, requestOptions)
-            .then((response) => response.json())
-            .then((response) => {
-                let theList = Object.values(response.data.search);
-                setMovies(theList);
-            })
-            .catch(err => {
-                console.log(err)
-            })
+        // fetch(`${environment.apiBaseUrl}/graph`, requestOptions)
+        //     .then((response) => response.json())
+        //     .then((response) => {
+        //         let theList = Object.values(response.data.search);
+        //         setMovies(theList);
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //     })
     }
 
     const handleChange = (event) => {
@@ -76,16 +75,16 @@ const GraphQL = () => {
             body: payload,
         }
 
-        fetch(`${environment.apiBaseUrl}/graph`, requestOptions)
-            .then((response) => response.json())
-            .then((response) => {
-                let theList = Object.values(response.data.list);
-                setMovies(theList);
-                setFullList(theList);
-            })
-            .catch(err => {
-                console.log(err)
-            })
+        // fetch(`${environment.apiBaseUrl}/graph`, requestOptions)
+        //     .then((response) => response.json())
+        //     .then((response) => {
+        //         let theList = Object.values(response.data.list);
+        //         setMovies(theList);
+        //         setFullList(theList);
+        //     })
+        //     .catch(err => {
+        //         console.log(err)
+        //     })
     }, [])
 
     return (
@@ -94,13 +93,13 @@ const GraphQL = () => {
             <hr/>
 
             <form onSubmit={handleChange}>
-                <Input
-                    title={"Search"}
-                    type={"search"}
-                    name={"search"}
-                    className={"form-control"}
-                    value={searchTerm}
-                    onChange={handleChange}/>
+                {/*<Input*/}
+                {/*    title={"Search"}*/}
+                {/*    type={"search"}*/}
+                {/*    name={"search"}*/}
+                {/*    className={"form-control"}*/}
+                {/*    value={searchTerm}*/}
+                {/*    onChange={handleChange}/>*/}
             </form>
 
             {movies ? (
@@ -113,14 +112,14 @@ const GraphQL = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {movies.map((m) => (
+                    {movies.map((m: MovieType) => (
                         <tr key={m.id}>
                             <td>
                                 <Link href={`/movies/${m.id}`}>
                                     {m.title}
                                 </Link>
                             </td>
-                            <td>{new Date(m.release_date).toLocaleDateString()}</td>
+                            <td>{new Date(m!.release_date!).toLocaleDateString()}</td>
                             <td>{m.mpaa_rating}</td>
                         </tr>
                     ))}

@@ -1,24 +1,25 @@
 import Link from "next/link";
 import {UserMenu} from "./UserMenu";
-import React from "react";
 import {useSession} from "next-auth/react";
 import {AppBarProps, Box, Button, Toolbar, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import PersonIcon from "@mui/icons-material/Person";
-function AccountButton() {
+ function AccountButton() {
     const {data: session} = useSession();
     if (session) {
-        return;
+        return null;
     }
     return (
-        <Link href="/auth/signin" aria-label="Home" style={{textDecoration: "none", color: "white"}}>
-            <Box alignItems="center">
-                <Button startIcon={<PersonIcon/>} sx={{color: "white"}}>
-                    Sign in
-                </Button>
-            </Box>
-        </Link>
+        <>
+            <Link href="/auth/signin" aria-label="Home" style={{textDecoration: "none", color: "white"}}>
+                <Box alignItems="center">
+                    <Button startIcon={<PersonIcon/>} sx={{color: "white"}}>
+                        Sign in
+                    </Button>
+                </Box>
+            </Link>
+        </>
     );
 }
 
@@ -43,7 +44,9 @@ export function Header() {
                     </Box>
                 </Link>
                 <Box sx={{display: "flex", alignItems: "center"}}>
-                    <AccountButton/>
+                    <Box>
+                        <AccountButton/>
+                    </Box>
                     <UserMenu/>
                 </Box>
             </Toolbar>

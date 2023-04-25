@@ -1,8 +1,6 @@
-import Link from "next/link";
 import React, {ElementType, useCallback} from "react";
 import {signOut, useSession} from "next-auth/react";
-import {Avatar, Box, Button, Divider, IconButton, Menu, MenuItem, MenuList, Tooltip, Typography} from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
+import {Avatar, Box, Divider, IconButton, Menu, MenuItem, MenuList, Tooltip, Typography} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -73,7 +71,9 @@ export function UserMenu() {
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                 >
-                    <Avatar sx={{ width: 32, height: 32 }}>{session.user.name.at(0).toUpperCase()}</Avatar>
+                    {session.user.name &&
+                        <Avatar sx={{ width: 32, height: 32 }}>{session.user.name!.at(0)!.toUpperCase()}</Avatar>
+                    }
                 </IconButton>
             </Tooltip>
             <Menu
@@ -85,9 +85,11 @@ export function UserMenu() {
                     <Box sx={{
                         display: "flex", flexDirection: "column", alignItems: "center",
                     }}>
-                        <MenuItem>
-                            <Avatar sx={{m: 1}}>{session.user.name.at(0).toUpperCase()}</Avatar> {session.user.name}
-                        </MenuItem>
+                        {session.user.name ??
+                            <MenuItem>
+                                <Avatar sx={{m: 1}}>{session.user.name!.at(0)!.toUpperCase()}</Avatar> {session.user.name}
+                            </MenuItem>
+                        }
                         {isAdminOrMod &&
                             <MenuItem>
                                 <MilitaryTech />{session.user.role}

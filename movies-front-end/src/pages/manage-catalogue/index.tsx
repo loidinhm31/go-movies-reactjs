@@ -3,7 +3,7 @@ import {useRouter} from "next/router";
 import {get, post} from "../../libs/api";
 import {Box, Button, Divider, Skeleton, Stack, Typography} from "@mui/material";
 import {useSession} from "next-auth/react";
-import EnhancedTable, {Data} from "../../components/movies/table/MoviesTable";
+import EnhancedTable, {Data} from "../../components/Tables/EnhancedMoviesTable";
 import useSWRMutation from "swr/mutation";
 import {Direction, PageType} from "../../types/page";
 import {MovieType} from "../../types/movies";
@@ -12,17 +12,17 @@ const ManageCatalogue = () => {
     const {data: session, status} = useSession();
     const router = useRouter();
 
-    const [page, setPage] = useState<PageType<MovieType>>(null);
+    const [page, setPage] = useState<PageType<MovieType> | null>(null);
 
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
-    const [deleteId, setDeleteId] = useState<number>();
+    const [deleteId, setDeleteId] = useState<number | null>();
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(5)
     const [order, setOrder] = useState<Direction>(Direction.ASC);
     const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
 
-    // Get movies
+    // Get Tables
     const {trigger: requestPage} =
         useSWRMutation(`../api/v1/movies?pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
     const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${deleteId}`, get);

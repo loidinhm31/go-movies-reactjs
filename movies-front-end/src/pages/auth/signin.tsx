@@ -4,25 +4,15 @@ import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {Footer} from "src/components/Footer";
 import {Header} from "src/components/Header";
-import {AuthLayout} from "../../components/layout/AuthLayout";
+import {AuthLayout} from "../../components/Layout/AuthLayout";
 import {ClientSafeProvider, getProviders, signIn} from "next-auth/react";
 import {Role, RoleSelect} from "../../components/RoleSelect";
 import {GetServerSideProps} from "next";
-import {
-    Box,
-    Button,
-    ButtonProps,
-    Chip,
-    Divider, FormHelperText,
-    InputAdornment,
-    OutlinedInput,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
+import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import {DrawerHeader} from "../../components/shared/drawer";
+import {BuiltInProviders, BuiltInProviderType, Provider} from "next-auth/providers";
 
 export type SignInErrorTypes =
     | "Signin"
@@ -42,7 +32,7 @@ const errorMessages: Record<SignInErrorTypes, string> = {
 };
 
 interface SigninProps {
-    providers: Awaited<ReturnType<typeof getProviders>>;
+    providers: Awaited<ReturnType<typeof getProviders>> | any;
 }
 
 function Signin({providers}: SigninProps) {
@@ -51,6 +41,8 @@ function Signin({providers}: SigninProps) {
     const [error, setError] = useState("");
 
     useEffect(() => {
+
+        console.log(debug)
         const err = router?.query?.error;
         if (err) {
             if (typeof err === "string") {
@@ -177,8 +169,9 @@ const DebugSigninForm = ({credentials}: { credentials: ClientSafeProvider; }) =>
         </Box>
     );
 };
-export const getServerSideProps: GetServerSideProps<SigninProps> = async ({locale}) => {
-    const providers = await getProviders();
+export const getServerSideProps: GetServerSideProps<SigninProps> = async () => {
+    const providers = (await getProviders())!;
+    console.log(providers)
     return {
         props: {
             providers,

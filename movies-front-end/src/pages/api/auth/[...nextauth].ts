@@ -17,9 +17,9 @@ if (boolean(process.env.DEBUG_LOGIN) || process.env.NODE_ENV === "development") 
 			},
 			async authorize(credentials) {
 				const user: DefaultUser = {
-					id: credentials.username,
-					name: credentials.username,
-					role: credentials.role,
+					id: credentials!.username,
+					name: credentials!.username,
+					role: credentials!.role,
 					token: ""
 				};
 				return user;
@@ -38,8 +38,8 @@ providers.push(
 		},
 		async authorize(credentials) {
 			const payload = {
-				username: credentials.username,
-				password: credentials.password
+				username: credentials!.username,
+				password: credentials!.password
 			};
 			const res = await fetch(`${process.env.API_BASE_URL}/api/v1/auth/login`, {
 				method: "POST",
@@ -68,7 +68,7 @@ export const authOptions: AuthOptions = {
 	providers,
 	pages: {
 		signIn: "/auth/signin"
-		// error: "/auth/error",
+		// TODO error: "/auth/error",
 	},
 	callbacks: {
 		async jwt({ token, user, account }) {
@@ -82,8 +82,8 @@ export const authOptions: AuthOptions = {
 			return token;
 		},
 		async session({ session, token }) {
-			session.user.id = token.name;
-			session.user.role = token.role;
+			session.user.id = token.name!.toString();
+			session.user.role = token.role!;
 			session.user.name = token.name;
 			session.user.accessToken = token.accessToken;
 			return session;

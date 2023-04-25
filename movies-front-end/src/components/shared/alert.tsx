@@ -17,41 +17,49 @@ interface AlertDialogProps {
     setConfirmDelete?: (flag: boolean) => void;
 }
 
-export default function AlertDialog(dialogProps: AlertDialogProps) {
+export default function AlertDialog({
+                                        confirmText,
+                                        description,
+                                        open,
+                                        setConfirmDelete,
+                                        setOpen,
+                                        showCancelButton,
+                                        title
+                                    }: AlertDialogProps) {
     const handleClose = () => {
-        dialogProps.setOpen(false);
+        setOpen(false);
     };
 
     const handleConfirmDelete = (flag: boolean) => {
-        dialogProps.setConfirmDelete(flag);
+        setConfirmDelete?.(flag);
         handleClose();
     };
 
     return (
         <div>
             <Dialog
-                open={dialogProps.open}
+                open={open}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    {dialogProps.title}
+                    {title}
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText id="alert-dialog-description">
-                        {dialogProps.description}
+                        {description}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     {
-                        !dialogProps.showCancelButton ? (
+                        !showCancelButton ? (
                             <Button onClick={handleClose} autoFocus>
-                                {dialogProps.confirmText}
+                                {confirmText}
                             </Button>
                         ) : (
                             <>
                                 <Button onClick={() => handleConfirmDelete(true)} variant="contained" color="success">
-                                    {dialogProps.confirmText}
+                                    {confirmText}
                                 </Button>
                                 <Button onClick={handleClose} variant="contained" color="error">
                                     No
