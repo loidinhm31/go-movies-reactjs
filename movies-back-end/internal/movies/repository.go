@@ -11,7 +11,7 @@ type MovieRepository interface {
 	FindAllMovies(ctx context.Context, pageRequest *pagination.PageRequest,
 		page *pagination.Page[*models.Movie]) (*pagination.Page[*models.Movie], error)
 	FindMovieById(ctx context.Context, id int) (*models.Movie, error)
-	FindMoviesByGenre(ctx context.Context, genreId int) ([]*models.Movie, error)
+	FindMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, page *pagination.Page[*models.Movie], genreId int) (*pagination.Page[*models.Movie], error)
 	UpdateMovie(ctx context.Context, movie *models.Movie) error
 	DeleteMovieById(ctx context.Context, id int) error
 	UpdateMovieGenres(ctx context.Context, movie *models.Movie, genres []*models.Genre) error

@@ -9,7 +9,7 @@ import (
 func MapMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
 	movieGroup.POST("/", h.FetchMovies())
 	movieGroup.GET("/:id", h.FetchMovieById())
-	movieGroup.GET("/genres/:id", h.FetchMovieByGenre())
+	movieGroup.POST("/genres/:id", h.FetchMovieByGenre())
 	movieGroup.PUT("/", h.PutMovie())
 	movieGroup.DELETE("/:id", h.DeleteMovie())
 	movieGroup.PATCH("/", h.PatchMovie())

@@ -23,7 +23,7 @@ CREATE TABLE public.roles
     updated_by TEXT                     NOT NULL
 );
 
-CREATE TABLE user_role
+CREATE TABLE public.user_role
 (
     id         SERIAL PRIMARY KEY       NOT NULL,
     user_id    SERIAL                   NOT NULL,
@@ -35,10 +35,10 @@ CREATE TABLE user_role
     updated_by TEXT                     NOT NULL
 );
 
-ALTER TABLE user_role
+ALTER TABLE public.user_role
     ADD FOREIGN KEY (user_id) REFERENCES users (id);
 
-ALTER TABLE user_role
+ALTER TABLE public.user_role
     ADD FOREIGN KEY (role_id) REFERENCES roles (id);
 
 CREATE TABLE public.genres

@@ -21,17 +21,17 @@ func NewMovieService(movieRepository movies.MovieRepository) movies.Service {
 	}
 }
 
-func (ms *movieService) GetAllMovies(ctx context.Context, pageable *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
+func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
 	page := &pagination.Page[*models.Movie]{}
 
-	allMovies, err := ms.movieRepository.FindAllMovies(ctx, pageable, page)
+	movieResults, err := ms.movieRepository.FindAllMovies(ctx, pageRequest, page)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range allMovies.Data {
+	for _, m := range movieResults.Data {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -56,11 +56,11 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageable *pagination.P
 		})
 	}
 	return &pagination.Page[*dto.MovieDto]{
-		PageSize:      pageable.PageSize,
-		PageNumber:    pageable.PageNumber,
-		Sort:          pageable.Sort,
-		TotalElements: allMovies.TotalElements,
-		TotalPages:    allMovies.TotalPages,
+		PageSize:      pageRequest.PageSize,
+		PageNumber:    pageRequest.PageNumber,
+		Sort:          pageRequest.Sort,
+		TotalElements: movieResults.TotalElements,
+		TotalPages:    movieResults.TotalPages,
 		Data:          movieDtos,
 	}, nil
 }
@@ -97,15 +97,17 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 	return movieDto, nil
 }
 
-func (ms *movieService) GetMoviesByGenre(ctx context.Context, genreId int) ([]*dto.MovieDto, error) {
-	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, genreId)
+func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId int) (*pagination.Page[*dto.MovieDto], error) {
+	page := &pagination.Page[*models.Movie]{}
+
+	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("not found")
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range movieResults {
+	for _, m := range movieResults.Data {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -129,7 +131,14 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, genreId int) ([]*d
 			Genres:      genreDtos,
 		})
 	}
-	return movieDtos, nil
+	return &pagination.Page[*dto.MovieDto]{
+		PageSize:      pageRequest.PageSize,
+		PageNumber:    pageRequest.PageNumber,
+		Sort:          pageRequest.Sort,
+		TotalElements: movieResults.TotalElements,
+		TotalPages:    movieResults.TotalPages,
+		Data:          movieDtos,
+	}, nil
 }
 
 func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error {

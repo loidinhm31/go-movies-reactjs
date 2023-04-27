@@ -76,7 +76,18 @@ func (mh *movieHandler) FetchMovieByGenre() gin.HandlerFunc {
 			return
 		}
 
-		movieDtos, err := mh.movieService.GetMoviesByGenre(c.Request.Context(), genreId)
+		pageable, _ := pagination.ReadPageRequest(c)
+
+		if err := utils.ReadRequest(c, pageable); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		movieDtos, err := mh.movieService.GetMoviesByGenre(c.Request.Context(), pageable, genreId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

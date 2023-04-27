@@ -40,8 +40,8 @@ func (mr *movieRepository) FindAllMovies(ctx context.Context,
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Scopes(pagination.PageImpl[*models.Movie](allMovies, pageRequest, page, mr.db)).
-		Preload("Genres").
+	err := tx.Model(allMovies).Preload("Genres").
+		Scopes(pagination.PageImpl[*models.Movie](allMovies, pageRequest, page, mr.db)).
 		Find(&allMovies).Error
 	if err != nil {
 		return nil, err
@@ -67,21 +67,27 @@ func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*models.M
 	return &movie, nil
 }
 
-func (mr *movieRepository) FindMoviesByGenre(ctx context.Context, genreId int) ([]*models.Movie, error) {
-	var m []*models.Movie
+func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
+	pageRequest *pagination.PageRequest,
+	page *pagination.Page[*models.Movie],
+	genreId int) (*pagination.Page[*models.Movie], error) {
+	var movieResults []*models.Movie
+	var totalRows int64
 
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
 
-	err := tx.Where("movies.id IN (SELECT movie_id FROM movies_genres WHERE genre_id = ?)", genreId).
-		Find(&m).Error
+	err := tx.Model(movieResults).Where("movies.id IN (SELECT movie_id FROM movies_genres WHERE genre_id = ?)", genreId).
+		Count(&totalRows).
+		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, pageRequest, page, mr.db)).
+		Find(&movieResults).Error
 	if err != nil {
 		return nil, err
 	}
-
-	return m, nil
+	page.Data = movieResults
+	return page, nil
 }
 
 func (mr *movieRepository) UpdateMovie(ctx context.Context, movie *models.Movie) error {
