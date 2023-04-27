@@ -2,7 +2,6 @@ import {withRole} from "../../../../../../../libs/auth";
 
 const handler = withRole("admin", async (req, res, token) => {
     let {id} = req.query;
-    console.log("hit " + id)
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${token.accessToken}`);

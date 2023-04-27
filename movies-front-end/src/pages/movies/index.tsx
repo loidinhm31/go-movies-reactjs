@@ -21,8 +21,6 @@ function Movies() {
         setPageIndex(0);
     }, [pageSize])
 
-
-
     return (
         <Stack spacing={2}>
             <Box sx={{p: 1, m: 1}}>

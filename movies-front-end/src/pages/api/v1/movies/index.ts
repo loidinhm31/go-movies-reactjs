@@ -29,7 +29,7 @@ const handler =  async (req, res) => {
         body: JSON.stringify(page),
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/movies/?page=${pageIndex}&size=${pageSize}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
         requestOptions
     );
     const pageResult = await response.json();
