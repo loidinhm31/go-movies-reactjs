@@ -12,7 +12,8 @@ import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/ma
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import {DrawerHeader} from "../../components/shared/drawer";
-import {BuiltInProviders, BuiltInProviderType, Provider} from "next-auth/providers";
+import Keycloak from "next-auth/providers/keycloak";
+import {Key} from "@mui/icons-material";
 
 export type SignInErrorTypes =
     | "Signin"
@@ -37,12 +38,10 @@ interface SigninProps {
 
 function Signin({providers}: SigninProps) {
     const router = useRouter();
-    const {debug, server} = providers;
+    const {debug, server, keycloak} = providers;
     const [error, setError] = useState("");
 
     useEffect(() => {
-
-        console.log(debug)
         const err = router?.query?.error;
         if (err) {
             if (typeof err === "string") {
@@ -62,7 +61,18 @@ function Signin({providers}: SigninProps) {
                 <DrawerHeader/>
                 <Stack spacing="2">
                     {debug && <DebugSigninForm credentials={debug}/>}
-                    {server && <SigninForm credentials={server}/>}
+                    {keycloak && (
+                        <Box sx={{m: 2, p: 2}}>
+                            <Box sx={{display: "flex", justifyContent: "center"}}>
+                                <SigninButton
+                                    startIcon={<Key />}
+                                    onClick={() => signIn(keycloak.id, { callbackUrl: "/" })}
+                                >
+                                    Continue with Keycloak
+                                </SigninButton>
+                            </Box>
+                        </Box>
+                    )}
                 </Stack>
 
                 {error && (
@@ -171,7 +181,6 @@ const DebugSigninForm = ({credentials}: { credentials: ClientSafeProvider; }) =>
 };
 export const getServerSideProps: GetServerSideProps<SigninProps> = async () => {
     const providers = (await getProviders())!;
-    console.log(providers)
     return {
         props: {
             providers,
