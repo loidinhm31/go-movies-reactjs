@@ -1,0 +1,16 @@
+FROM node:16.18.0
+WORKDIR /app
+
+ENV NODE_ENV docker
+
+COPY /public ./public
+
+# Set mode "standalone" in file "next.config.js"
+COPY /.next/standalone ./
+COPY /.next/static ./.next/static
+
+EXPOSE 3000
+
+ENV PORT 3000
+
+CMD ["node", "server.js"]

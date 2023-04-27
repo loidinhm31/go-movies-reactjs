@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  postgres:
+    image: "postgres:15.0"
+    ports:
+      - "5432:5432"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespw
+      POSTGRES_DB: mdb
+    volumes:
+      - ~/storage/data/postgres:/var/lib/postgresql/data
+
+  keycloak:
+    image: "quay.io/keycloak/keycloak:latest"
+    ports:
+      - "8086:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/postgres
+      - KC_DB_USERNAME=postgres
+      - KC_DB_PASSWORD=postgrespw
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import
+    command: start-dev --import-realm
+
+  go-api-service:
+    build:
+      context: ./../movies-back-end
+      dockerfile: ./../project/docker/Dockerfile.go-api-service
+    restart: always
+    ports:
+      - "9090:9090"
+    environment:
+      - profile=docker
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  nextjs-website:
+    build:
+      context: ./../movies-front-end
+      dockerfile: ./../project/docker/Dockerfile.nextjs-website
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_SECRET=cXVzaGlmdGhlbGxv
+      - NEXTAUTH_URL=http://localhost:3000
+      - DEBUG_LOGIN=true
+    deploy:
+      mode: replicated
+      replicas: 1

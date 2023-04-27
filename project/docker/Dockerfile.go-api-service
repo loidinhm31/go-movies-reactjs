@@ -1,0 +1,8 @@
+FROM alpine:latest
+
+RUN mkdir /app
+
+COPY apiBinary /app
+COPY /config /etc/config
+
+CMD ["/app/apiBinary"]
