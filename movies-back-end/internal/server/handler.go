@@ -1,12 +1,13 @@
 package server
 
 import (
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
 	"log"
 	authHttp "movies-service/internal/auth/delivery/http"
 	userRepository "movies-service/internal/auth/repository"
 	authService "movies-service/internal/auth/service"
-
+	"movies-service/internal/middlewares"
 	movieHttp "movies-service/internal/movies/delivery/http"
 	movieRepository "movies-service/internal/movies/repository"
 	movieService "movies-service/internal/movies/service"
@@ -26,24 +27,23 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 
 	// Init service
-	aService := authService.NewAuthService(uRepo,
-		[]byte(s.cfg.Server.SigningKey),
-		s.cfg.Server.TokenTTL,
-		s.cfg.Server.ClientId, s.cfg.Server.ClientSecret)
+	aService := authService.NewAuthService(uRepo)
 	mService := movieService.NewMovieService(mRepo)
 	gService := genreService.NewGenreService(gRepo)
 
 	// Init handler
-	aHandler := authHttp.NewAuthHandler(aService)
+	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
+	aHandler := authHttp.NewAuthHandler(aService, s.cfg.Keycloak, s.cloak)
 	mHandler := movieHttp.NewMovieHandler(mService)
 	gHandler := genreHttp.NewGenreHandler(gService)
 
 	// Init middlewares
-	//mw := middlewares.NewMiddlewareManager(aService)
+	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
 
 	apiV1 := g.Group("/api/v1")
 
 	health := apiV1.Group("/health")
+	health.Use(mw.JWTValidation())
 	authGroupPublic := apiV1.Group("/auth")
 
 	movieGroup := apiV1.Group("/movies")

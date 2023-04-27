@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
@@ -16,6 +17,7 @@ type Server struct {
 	gin   *gin.Engine
 	cfg   *config.Config
 	db    *gorm.DB
+	cloak *gocloak.GoCloak
 	ready chan bool
 }
 

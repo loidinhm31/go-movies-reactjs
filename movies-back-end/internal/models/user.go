@@ -1,32 +1,25 @@
 package models
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 type User struct {
-	UserID    string `gorm:"primary_key"`
+	ID        int `gorm:"primary_key"`
 	Username  string
-	Password  string
+	Email     string
 	FirstName string
 	LastName  string
+	RoleID    int
+	Role      Role `gorm:"foreignKey:RoleID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-func (u *User) HashPassword() error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	u.Password = string(hashedPassword)
-	return nil
-}
-
-func (u *User) ComparePassword(password string) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
-		return false
-	}
-	return true
+type Role struct {
+	ID        int `gorm:"primary_key"`
+	RoleName  string
+	RoleCode  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }

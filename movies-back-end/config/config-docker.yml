@@ -2,13 +2,6 @@ server:
   AppVersion: 1.0.0
   Port: :9090
   Mode: Development
-  ClientId: API_SECRET
-  ClientSecret: ofBYMfWcT48VYenq8kh0jzdYegxxSPAZ
-  SigningKey: LD_SECRET
-  TokenTTL: 86400
-  CookieName: jwt-token
-  ReadTimeout: 5
-  WriteTimeout: 5
   SSL: true
   CtxDefaultTimeout: 12
   CSRF: true
@@ -22,3 +15,9 @@ postgres:
   PostgresqlDbname: mdb
   PostgresqlSslmode: false
   PgDriver: pgx
+
+keycloak:
+  EndPoint: http://keycloak:8086
+  ClientId: mdb-client
+  ClientSecret: D0x5ScPy7dr4fWD04CuMB7pP7BBh7Qxk
+  Realm: mdb

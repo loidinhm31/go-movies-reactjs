@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Server   ServerConfig
 	Postgres PostgresConfig
+	Keycloak KeycloakConfig
 }
 
 // ServerConfig Server config struct
@@ -19,13 +20,6 @@ type ServerConfig struct {
 	AppVersion        string
 	Port              string
 	Mode              string
-	ClientId          string
-	ClientSecret      string
-	SigningKey        string
-	TokenTTL          int64
-	CookieName        string
-	ReadTimeout       time.Duration
-	WriteTimeout      time.Duration
 	SSL               bool
 	CtxDefaultTimeout time.Duration
 	CSRF              bool
@@ -41,6 +35,13 @@ type PostgresConfig struct {
 	PostgresqlDbname   string
 	PostgresqlSSLMode  bool
 	PgDriver           string
+}
+
+type KeycloakConfig struct {
+	EndPoint     string
+	ClientId     string // clientId specified in KeycloakConfig
+	ClientSecret string // client secret specified in KeycloakConfig
+	Realm        string // realm specified in KeycloakConfig
 }
 
 // LoadConfig Load config file from given path

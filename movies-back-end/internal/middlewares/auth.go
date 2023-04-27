@@ -1,8 +1,9 @@
 package middlewares
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/errors"
 	"net/http"
 	"strings"
 )
@@ -24,7 +25,7 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 		extractHeader := authHeader[0]
 		headerParts := strings.Split(extractHeader, " ")
 		if len(headerParts) != 2 {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Unauthorized",
 			})
 			c.Abort()
@@ -32,27 +33,47 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 		}
 
 		if headerParts[0] != "Bearer" {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Unauthorized",
 			})
 			c.Abort()
 			return
 		}
 
-		userId, err := mw.authService.ParseToken(c.Request.Context(), headerParts[1])
+		// Call Keycloak API to verify the access token
+		result, err := mw.gocloak.RetrospectToken(
+			c.Request.Context(),
+			headerParts[1],
+			mw.keycloak.ClientId,
+			mw.keycloak.ClientSecret,
+			mw.keycloak.Realm,
+		)
 		if err != nil {
-			status := http.StatusInternalServerError
-			if err == errors.ErrInvalidAccessToken {
-				status = http.StatusUnauthorized
-			}
-			c.JSON(status, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": err.Error(),
 			})
 			c.Abort()
 			return
 		}
 
-		c.Set(CtxUserKey, userId)
+		jwt, _, err := mw.gocloak.DecodeAccessToken(
+			c.Request.Context(),
+			headerParts[1],
+			mw.keycloak.Realm,
+		)
+
+		jwtj, _ := json.Marshal(jwt)
+		fmt.Printf("token: %v\n", string(jwtj))
+
+		// Check if the token isn't expired and valid
+		if !*result.Active {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "invalid token",
+			})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

@@ -31,7 +31,7 @@ func (ur *userRepository) FindUserByUsername(ctx context.Context, username strin
 	var user models.User
 	err := ur.db.WithContext(ctx).Where(&models.User{
 		Username: strings.ToLower(username),
-	}).First(&user).Error
+	}).Preload("Role").First(&user).Error
 
 	if err != nil {
 		return nil, err
@@ -40,10 +40,10 @@ func (ur *userRepository) FindUserByUsername(ctx context.Context, username strin
 	return &user, nil
 }
 
-func (ur *userRepository) FindUserById(ctx context.Context, userId string) (*models.User, error) {
+func (ur *userRepository) FindUserById(ctx context.Context, userId int) (*models.User, error) {
 	var user models.User
 	err := ur.db.WithContext(ctx).Where(&models.User{
-		UserID: userId,
+		ID: userId,
 	}).First(&user).Error
 
 	if err != nil {
