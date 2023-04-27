@@ -1,11 +1,10 @@
-import {useEffect, useState} from "react";
-import useSWR from "swr";
 import {get} from "../../libs/api";
-import {Box, Stack, Typography,} from "@mui/material";
 import {MovieType} from "../../types/movies";
-import Divider from "@mui/material/Divider";
 import {PageType} from "../../types/page";
 import {GridMovies} from "../../components/Tables/GridMoviesTable";
+import {useEffect, useState } from "react";
+import useSWR from "swr";
+import {Box, Divider, Stack, Typography} from "@mui/material";
 
 
 function Movies() {
