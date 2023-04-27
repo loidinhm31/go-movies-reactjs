@@ -1,5 +1,9 @@
 # STRUCTURE
 
+1. `API`: port `9090`
+2. `Website`: port `3000`
+3. `Keycloak Admin Console`: port `8086`
+
 ## ShiftFlix API
 This API build using
 ### Major Dependencies
