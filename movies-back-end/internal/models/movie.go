@@ -11,7 +11,9 @@ type Movie struct {
 	Description string
 	Image       string
 	CreatedAt   time.Time
+	CreatedBy   string
 	UpdatedAt   time.Time
+	UpdatedBy   string
 	Genres      []*Genre `gorm:"many2many:movies_genres;"`
 }
 
@@ -19,6 +21,8 @@ type Genre struct {
 	ID        int `gorm:"primary_key"`
 	Genre     string
 	CreatedAt time.Time
+	CreatedBy string
 	UpdatedAt time.Time
+	UpdatedBy string
 	Movie     []*Movie `gorm:"many2many:movies_genres;"`
 }

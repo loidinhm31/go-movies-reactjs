@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"movies-service/internal/models"
 	"net/http"
 	"strings"
 )
 
-const CtxUserKey = "userId"
+const CtxUserKey = "username"
 
 func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -56,14 +57,21 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 			return
 		}
 
-		jwt, _, err := mw.gocloak.DecodeAccessToken(
+		jwt, _, _ := mw.gocloak.DecodeAccessToken(
 			c.Request.Context(),
 			headerParts[1],
 			mw.keycloak.Realm,
 		)
 
 		jwtj, _ := json.Marshal(jwt)
-		fmt.Printf("token: %v\n", string(jwtj))
+
+		var userToken models.UserToken
+		err = json.Unmarshal(jwtj, &userToken)
+		if err != nil {
+			fmt.Printf(err.Error())
+			return
+		}
+		c.Set(CtxUserKey, userToken.Claims.Username)
 
 		// Check if the token isn't expired and valid
 		if !*result.Active {

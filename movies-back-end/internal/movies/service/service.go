@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
 	"movies-service/internal/movies"
 	"movies-service/pkg/pagination"
@@ -12,11 +15,13 @@ import (
 )
 
 type movieService struct {
+	mgmtCtrl        control.Service
 	movieRepository movies.MovieRepository
 }
 
-func NewMovieService(movieRepository movies.MovieRepository) movies.Service {
+func NewMovieService(mgmtCtrl control.Service, movieRepository movies.MovieRepository) movies.Service {
 	return &movieService{
+		mgmtCtrl:        mgmtCtrl,
 		movieRepository: movieRepository,
 	}
 }
@@ -142,6 +147,12 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 }
 
 func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !ms.mgmtCtrl.CheckPrivilege(author) {
+		return errors.New("unauthorized")
+	}
+
 	var genreObjects []*models.Genre
 
 	if movie.ID > 0 ||
@@ -156,8 +167,10 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			genreObjects = append(genreObjects, &models.Genre{
-				ID:    genre.ID,
-				Genre: genre.Genre,
+				ID:        genre.ID,
+				Genre:     genre.Genre,
+				CreatedBy: author,
+				UpdatedBy: author,
 			})
 		}
 	}
@@ -170,7 +183,9 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		Description: movie.Description,
 		Image:       movie.Image,
 		CreatedAt:   time.Now(),
+		CreatedBy:   author,
 		UpdatedAt:   time.Now(),
+		UpdatedBy:   author,
 		Genres:      genreObjects,
 	}
 
@@ -182,6 +197,12 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 }
 
 func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) error {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !ms.mgmtCtrl.CheckPrivilege(author) {
+		return errors.New("unauthorized")
+	}
+
 	if movie.ID == 0 ||
 		movie.Title == "" ||
 		movie.Runtime == 0 ||
@@ -205,6 +226,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		Description: movie.Description,
 		Image:       movie.Image,
 		UpdatedAt:   time.Now(),
+		UpdatedBy:   author,
 	}
 
 	err = ms.movieRepository.UpdateMovie(ctx, movieObj)
@@ -216,7 +238,9 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			genreObjects = append(genreObjects, &models.Genre{
-				ID: genre.ID,
+				ID:        genre.ID,
+				CreatedBy: author,
+				UpdatedBy: author,
 			})
 		}
 	}
@@ -228,6 +252,12 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 }
 
 func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !ms.mgmtCtrl.CheckPrivilege(author) {
+		return errors.New("unauthorized")
+	}
+
 	err := ms.movieRepository.DeleteMovieById(ctx, id)
 	if err != nil {
 		return err

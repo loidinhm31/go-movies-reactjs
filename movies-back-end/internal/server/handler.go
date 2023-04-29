@@ -7,6 +7,7 @@ import (
 	authHttp "movies-service/internal/auth/delivery/http"
 	userRepository "movies-service/internal/auth/repository"
 	authService "movies-service/internal/auth/service"
+	managementService "movies-service/internal/control/service"
 	"movies-service/internal/middlewares"
 	movieHttp "movies-service/internal/movies/delivery/http"
 	movieRepository "movies-service/internal/movies/repository"
@@ -27,8 +28,9 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 
 	// Init service
+	managementCtrl := managementService.NewManagementCtrl(uRepo)
 	aService := authService.NewAuthService(uRepo)
-	mService := movieService.NewMovieService(mRepo)
+	mService := movieService.NewMovieService(managementCtrl, mRepo)
 	gService := genreService.NewGenreService(gRepo)
 
 	// Init handler
@@ -43,7 +45,11 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	apiV1 := g.Group("/api/v1")
 
 	health := apiV1.Group("/health")
-	health.Use(mw.JWTValidation())
+
+	privateMovieGroup := apiV1.Group("/private/movies")
+	privateMovieGroup.Use(mw.JWTValidation())
+	movieHttp.MapRoleMovieRoutes(privateMovieGroup, mHandler)
+
 	authGroupPublic := apiV1.Group("/auth")
 
 	movieGroup := apiV1.Group("/movies")
