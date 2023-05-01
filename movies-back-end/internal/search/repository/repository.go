@@ -78,6 +78,11 @@ func (sr *searchRepository) Search(ctx context.Context, searchParams *models.Sea
 			}
 			break
 		case Genres:
+			if len(f.TypeValue.Values) > 0 {
+				tx.Where("id IN (SELECT m.id FROM movies m "+
+					"JOIN movies_genres mg on m.id = mg.movie_id "+
+					"JOIN genres g on g.id = mg.genre_id WHERE genre IN ?)", f.TypeValue.Values)
+			}
 			break
 		}
 	}
