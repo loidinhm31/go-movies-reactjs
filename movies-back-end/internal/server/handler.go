@@ -17,6 +17,10 @@ import (
 	genreRepository "movies-service/internal/genres/repository"
 	genreService "movies-service/internal/genres/service"
 
+	searchHttp "movies-service/internal/search/delivery/http"
+	searchRepository "movies-service/internal/search/repository"
+	searchService "movies-service/internal/search/service"
+
 	"net/http"
 	"time"
 )
@@ -26,24 +30,27 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	uRepo := userRepository.NewUserRepository(s.cfg, s.db)
 	mRepo := movieRepository.NewMovieRepository(s.cfg, s.db)
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
+	sRepo := searchRepository.NewSearchRepository(s.cfg, s.db)
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(uRepo)
 	aService := authService.NewAuthService(uRepo)
 	mService := movieService.NewMovieService(managementCtrl, mRepo)
 	gService := genreService.NewGenreService(gRepo)
+	gqlService := searchService.NewSearchService(sRepo)
 
 	// Init handler
 	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
 	aHandler := authHttp.NewAuthHandler(aService, s.cfg.Keycloak, s.cloak)
 	mHandler := movieHttp.NewMovieHandler(mService)
 	gHandler := genreHttp.NewGenreHandler(gService)
+	gqlHandler := searchHttp.NewGraphHandler(gqlService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
 
+	// Init Group
 	apiV1 := g.Group("/api/v1")
-
 	health := apiV1.Group("/health")
 
 	privateMovieGroup := apiV1.Group("/private/movies")
@@ -54,11 +61,12 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	movieGroup := apiV1.Group("/movies")
 	genreGroup := apiV1.Group("/genres")
-
+	graphGroup := apiV1.Group("/search")
 	// Map routes
 	authHttp.MapAuthRoutes(authGroupPublic, aHandler)
 	movieHttp.MapMovieRoutes(movieGroup, mHandler)
 	genreHttp.MapGenreRoutes(genreGroup, gHandler)
+	searchHttp.MapGraphRoutes(graphGroup, gqlHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())
