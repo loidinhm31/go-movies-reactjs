@@ -81,7 +81,7 @@ func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 
 	err := tx.Model(movieResults).Where("movies.id IN (SELECT movie_id FROM movies_genres WHERE genre_id = ?)", genreId).
 		Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, pageRequest, page, mr.db)).
+		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, pageRequest, page)).
 		Find(&movieResults).Error
 	if err != nil {
 		return nil, err

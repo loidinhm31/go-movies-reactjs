@@ -83,7 +83,7 @@ func (sr *searchRepository) Search(ctx context.Context, searchParams *models.Sea
 	}
 
 	err := tx.Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, searchParams.Page, page, sr.db)).
+		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, searchParams.Page, page)).
 		Preload("Genres").
 		Find(&movies).Error
 	if err != nil {
@@ -95,9 +95,9 @@ func (sr *searchRepository) Search(ctx context.Context, searchParams *models.Sea
 }
 
 func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, def models.TypeValue) error {
-	if len(def.Value) > 0 && def.Type != models.DATE {
+	if len(def.Values) > 0 && def.Type != models.DATE {
 		var orBuild = sr.db
-		for _, val := range def.Value {
+		for _, val := range def.Values {
 			tempVal := fmt.Sprintf("%%%s%%", val)
 			orBuild = orBuild.Or("LOWER("+field+") LIKE ?", tempVal)
 		}
@@ -113,9 +113,9 @@ func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, 
 }
 
 func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string, def models.TypeValue) error {
-	if len(def.Value) > 0 && def.Type != models.DATE {
+	if len(def.Values) > 0 && def.Type != models.DATE {
 		var orBuild = sr.db
-		for _, val := range def.Value {
+		for _, val := range def.Values {
 			orBuild = orBuild.Or(field+" = ?", val)
 		}
 
@@ -130,11 +130,11 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 }
 
 func buildDateQuery(tx *gorm.DB, field, operator string, def models.TypeValue) error {
-	if len(def.Value) == 2 && def.Type == models.DATE {
+	if len(def.Values) == 2 && def.Type == models.DATE {
 		if strings.EqualFold(operator, models.AND) {
-			tx = tx.Where(field+" BETWEEN ? AND ?", def.Value[0], def.Value[1])
+			tx = tx.Where(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
 		} else if strings.EqualFold(operator, models.OR) {
-			tx = tx.Or(field+" BETWEEN ? AND ?", def.Value[0], def.Value[1])
+			tx = tx.Or(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
 		}
 		return nil
 	}

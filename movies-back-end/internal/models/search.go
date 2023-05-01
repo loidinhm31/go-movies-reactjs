@@ -24,6 +24,6 @@ type FieldData struct {
 }
 
 type TypeValue struct {
-	Type  string
-	Value []string
+	Type   string   `json:"type"`
+	Values []string `json:"values"`
 }
