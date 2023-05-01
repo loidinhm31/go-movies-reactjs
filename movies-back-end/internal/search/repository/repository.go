@@ -103,8 +103,8 @@ func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, 
 	if len(def.Values) > 0 && def.Type != models.DATE {
 		var orBuild = sr.db
 		for _, val := range def.Values {
-			tempVal := fmt.Sprintf("%%%s%%", val)
-			orBuild = orBuild.Or("LOWER("+field+") LIKE ?", tempVal)
+			val = fmt.Sprintf("%%%s%%", strings.ToLower(val))
+			orBuild = orBuild.Or("LOWER("+field+") LIKE ?", val)
 		}
 
 		if strings.EqualFold(operator, models.AND) {
@@ -121,7 +121,7 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 	if len(def.Values) > 0 && def.Type != models.DATE {
 		var orBuild = sr.db
 		for _, val := range def.Values {
-			orBuild = orBuild.Or(field+" = ?", val)
+			orBuild = orBuild.Or(field+" = ?", strings.ToLower(val))
 		}
 
 		if strings.EqualFold(operator, models.AND) {
