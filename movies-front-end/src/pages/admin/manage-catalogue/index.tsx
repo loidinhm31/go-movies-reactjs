@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {useRouter} from "next/router";
-import {get, post} from "../../libs/api";
+import {get, post} from "../../../libs/api";
 import {Box, Button, Divider, Skeleton, Stack, Typography} from "@mui/material";
 import {useSession} from "next-auth/react";
-import EnhancedTable, {Data} from "../../components/Tables/EnhancedMoviesTable";
+import EnhancedTable, {Data} from "../../../components/Tables/EnhancedMoviesTable";
 import useSWRMutation from "swr/mutation";
-import {Direction, PageType} from "../../types/page";
-import {MovieType} from "../../types/movies";
+import {Direction, PageType} from "../../../types/page";
+import {MovieType} from "../../../types/movies";
+import NotifySnackbar, {NotifyState} from "../../../components/shared/snackbar";
 
 const ManageCatalogue = () => {
     const {data: session, status} = useSession();
@@ -21,6 +22,8 @@ const ManageCatalogue = () => {
     const [pageSize, setPageSize] = useState(5)
     const [order, setOrder] = useState<Direction>(Direction.ASC);
     const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
+
+    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     // Get Tables
     const {trigger: requestPage} =
@@ -51,7 +54,15 @@ const ManageCatalogue = () => {
             }
         }).then((data) => {
             setPage(data);
-        }).catch((error) => console.log(error))
+        }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
+        })
     }, [pageIndex, pageSize, order, orderBy])
 
     // Ensure the page index has been reset when the page size changes
@@ -66,7 +77,7 @@ const ManageCatalogue = () => {
                     if (data.error) {
                         console.log(data.error);
                     } else {
-                        router.push("/manage-catalogue");
+                        router.push("/admin/manage-catalogue");
                     }
                 })
                 .catch(err => {
@@ -80,40 +91,43 @@ const ManageCatalogue = () => {
     }, [deleteId])
 
     return (
-        <Stack spacing={2}>
-            <Box sx={{display: "flex", p: 1, m: 1}}>
-                <Typography variant="h4">Manage Catalogue</Typography>
-            </Box>
-            <Divider/>
-            <Box>
-                <Button variant="contained" href="/admin/movies">Add Movie</Button>
-            </Box>
+        <>
+            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <Stack spacing={2}>
+                <Box sx={{display: "flex", p: 1, m: 1}}>
+                    <Typography variant="h4">Manage Catalogue</Typography>
+                </Box>
+                <Divider/>
+                <Box>
+                    <Button variant="contained" href="/admin/movies">Add Movie</Button>
+                </Box>
 
-            {!page &&
-                <>
-                    <Skeleton/>
-                    <Skeleton animation="wave"/>
-                    <Skeleton animation={false}/>
-                </>
-            }
+                {!page &&
+                    <>
+                        <Skeleton/>
+                        <Skeleton animation="wave"/>
+                        <Skeleton animation={false}/>
+                    </>
+                }
 
-            {page && page.data &&
-                <EnhancedTable
-                    page={page}
-                    setDeleteId={setDeleteId}
-                    confirmDelete={isConfirmDelete}
-                    setConfirmDelete={setIsConfirmDelete}
-                    pageIndex={pageIndex}
-                    setPageIndex={setPageIndex}
-                    rowsPerPage={pageSize}
-                    setRowsPerPage={setPageSize}
-                    order={order}
-                    setOrder={setOrder}
-                    orderBy={orderBy}
-                    setOrderBy={setOrderBy}
-                />
-            }
-        </Stack>
+                {page && page.data &&
+                    <EnhancedTable
+                        page={page}
+                        setDeleteId={setDeleteId}
+                        confirmDelete={isConfirmDelete}
+                        setConfirmDelete={setIsConfirmDelete}
+                        pageIndex={pageIndex}
+                        setPageIndex={setPageIndex}
+                        rowsPerPage={pageSize}
+                        setRowsPerPage={setPageSize}
+                        order={order}
+                        setOrder={setOrder}
+                        orderBy={orderBy}
+                        setOrderBy={setOrderBy}
+                    />
+                }
+            </Stack>
+        </>
     )
 }
 

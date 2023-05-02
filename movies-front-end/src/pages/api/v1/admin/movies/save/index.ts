@@ -3,8 +3,6 @@ import moment from "moment";
 import {MovieType} from "../../../../../../types/movies";
 
 const handler = withRole("admin", async (req, res, token) => {
-    let {id} = req.query;
-
     const data: MovieType = req.body;
 
     const headers = new Headers();
@@ -13,7 +11,6 @@ const handler = withRole("admin", async (req, res, token) => {
 
     // Define date format
     data.release_date = moment(data.release_date).toISOString();
-
     let method = "PUT";
 
     if (data.id !== undefined) {
@@ -25,9 +22,12 @@ const handler = withRole("admin", async (req, res, token) => {
         body: JSON.stringify(data)
     };
 
-    const response = await fetch(`${process.env.API_BASE_URL}/movies`, requestOptions);
-
-    res.status(200).json({});
+    const response = await fetch(`${process.env.API_BASE_URL}/private/movies`, requestOptions);
+    if (response.ok) {
+        res.status(200).json({});
+    } else {
+        res.status(response.status).json(response.json())
+    }
 });
 
 export default handler;

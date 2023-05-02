@@ -7,6 +7,7 @@ import SearchTable, {Data} from "../../components/Tables/SearchTable";
 import {post} from "../../libs/api";
 import {MovieType} from "../../types/movies";
 import {Direction, PageType} from "../../types/page";
+import NotifySnackbar, {NotifyState} from "../../components/shared/snackbar";
 
 
 function Search() {
@@ -19,6 +20,8 @@ function Search() {
 
     const [fieldDataMap, setFieldDataMap] = useState<Map<string, FieldData>>(new Map());
     const searchRequest: SearchRequest = {};
+
+    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     // Get Tables
     const {trigger: requestPage} = useSWRMutation(`../api/v1/search`, post);
@@ -47,45 +50,56 @@ function Search() {
                 searchRequest
             ).then((data) => {
                 setPage(data);
-            }).catch((error) => console.log(error))
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
+            })
         }
     }
 
     return (
-        <Stack spacing={2}>
-            <Box sx={{display: "flex", p: 1, m: 1}}>
-                <Typography variant="h4">Search</Typography>
-            </Box>
-            <Divider/>
+        <>
+            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <Stack spacing={2}>
+                <Box sx={{display: "flex", p: 1, m: 1}}>
+                    <Typography variant="h4">Search</Typography>
+                </Box>
+                <Divider/>
 
-            <SearchField
-                trigger={handleChangeSearchRequest}
-                fieldDataMap={fieldDataMap}
-                setFieldDataMap={setFieldDataMap}
-            />
-
-            {!page &&
-                <>
-                    <Skeleton/>
-                    <Skeleton animation="wave"/>
-                    <Skeleton animation={false}/>
-                </>
-            }
-
-            {page && page.data &&
-                <SearchTable
-                    page={page}
-                    pageIndex={pageIndex}
-                    setPageIndex={setPageIndex}
-                    rowsPerPage={pageSize}
-                    setRowsPerPage={setPageSize}
-                    order={order}
-                    setOrder={setOrder}
-                    orderBy={orderBy}
-                    setOrderBy={setOrderBy}
+                <SearchField
+                    trigger={handleChangeSearchRequest}
+                    fieldDataMap={fieldDataMap}
+                    setFieldDataMap={setFieldDataMap}
                 />
-            }
-        </Stack>
+
+                {!page &&
+                    <>
+                        <Skeleton/>
+                        <Skeleton animation="wave"/>
+                        <Skeleton animation={false}/>
+                    </>
+                }
+
+                {page && page.data &&
+                    <SearchTable
+                        page={page}
+                        pageIndex={pageIndex}
+                        setPageIndex={setPageIndex}
+                        rowsPerPage={pageSize}
+                        setRowsPerPage={setPageSize}
+                        order={order}
+                        setOrder={setOrder}
+                        orderBy={orderBy}
+                        setOrderBy={setOrderBy}
+                    />
+                }
+            </Stack>
+        </>
     )
 }
 

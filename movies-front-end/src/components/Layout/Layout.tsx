@@ -43,13 +43,13 @@ export const getDefaultLayout = (page: React.ReactElement) => (
             adminMenuButtonOptions={[
                 {
                     label: "Dashboard",
-                    pathname: "/dashboard",
+                    pathname: "/admin/dashboard",
                     desc: "Dashboard",
                     icon: DashboardIcon,
                 },
                 {
                     label: "Manage Catalogue",
-                    pathname: "/manage-catalogue",
+                    pathname: "/admin/manage-catalogue",
                     desc: "Manage Catalogue",
                     icon: LibraryBooksIcon,
                 },

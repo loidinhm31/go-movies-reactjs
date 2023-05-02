@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import AlertDialog from "../../../components/shared/alert";
 import moment from "moment";
+import NotifySnackbar, {NotifyState} from "../../../components/shared/snackbar";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -28,6 +29,8 @@ const EditMovie = () => {
     const [isOpenAlertDialog, setIsOpenAlertDialog] = useState<boolean>(false);
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
+
+    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     const {data: session, status} = useSession();
 
@@ -111,8 +114,14 @@ const EditMovie = () => {
                             genres: checks,
                         } as MovieType);
                     })
-                    .catch((err) => {
-                        console.log(err);
+                    .catch((error) => {
+                        setNotifyState({
+                            open: true,
+                            message: error.message,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "error"
+                        });
                     });
             }
         }
@@ -124,13 +133,25 @@ const EditMovie = () => {
             deleteMovie()
                 .then((data) => {
                     if (data.error) {
-                        console.log(data.error);
+                        setNotifyState({
+                            open: true,
+                            message: data.error,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "error"
+                        });
                     } else {
-                        router.push("/manage-catalogue");
+                        router.push("/admin/manage-catalogue");
                     }
                 })
-                .catch(err => {
-                    console.log(err)
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error"
+                    });
                 });
         }
     }, [isConfirmDelete])
@@ -165,12 +186,24 @@ const EditMovie = () => {
 
         triggerMovie(movie).then((data) => {
             if (data.error) {
-                console.log(data.error);
+                setNotifyState({
+                    open: true,
+                    message: data.error,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
             } else {
-                router.push("/manage-catalogue");
+                router.push("/admin/manage-catalogue");
             }
-        }).catch((err) => {
-            console.log(err);
+        }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
         });
     };
 
@@ -203,6 +236,8 @@ const EditMovie = () => {
 
     return (
         <>
+            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+
             {isOpenAlertDialog &&
                 <AlertDialog
                     open={isOpenAlertDialog}

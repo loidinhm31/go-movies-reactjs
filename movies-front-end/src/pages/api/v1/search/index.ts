@@ -15,8 +15,13 @@ const handler = async (req, res) => {
     const response = await fetch(`${process.env.API_BASE_URL}/search`,
         requestOptions
     );
-    const pageResult = await response.json();
-    res.status(200).json(pageResult);
+
+    if (response.ok) {
+        const pageResult = await response.json();
+        res.status(200).json(pageResult);
+    } else {
+        res.status(response.status).json(response.json())
+    }
 };
 
 export default handler;

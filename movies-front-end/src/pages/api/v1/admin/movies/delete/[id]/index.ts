@@ -11,11 +11,15 @@ const handler = withRole("admin", async (req, res, token) => {
         headers: headers,
     }
 
-    await fetch(`${process.env.API_BASE_URL}/movies/${id}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/private/movies/${id}`,
         requestOptions
     );
 
-    res.status(200).json({});
+    if (response.ok) {
+        res.status(200).json({});
+    } else {
+        res.status(response.status).json(response.json())
+    }
 });
 
 export default handler;
