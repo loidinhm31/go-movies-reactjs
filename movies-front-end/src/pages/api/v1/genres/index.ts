@@ -1,4 +1,4 @@
-const handler =  async (req, res) => {
+const handler = async (req, res) => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 

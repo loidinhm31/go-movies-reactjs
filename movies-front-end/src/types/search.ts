@@ -1,4 +1,4 @@
-import {PageType, SortType} from "./page";
+import {PageType} from "./page";
 
 export type SearchRequest = {
     filters?: FieldData[],

@@ -4,16 +4,17 @@ import {
     FormControl,
     Grid,
     InputLabel,
-    MenuItem, Pagination,
+    MenuItem,
+    Pagination,
     Paper,
-    Select, SelectChangeEvent,
+    Select,
+    SelectChangeEvent,
     Stack,
     Typography
 } from "@mui/material";
 import Link from "next/link";
-import {Direction, PageType} from "../../types/page";
+import {PageType} from "../../types/page";
 import {MovieType} from "../../types/movies";
-import {Data} from "./EnhancedMoviesTable";
 import {styled} from "@mui/material/styles";
 
 const Img = styled("img")({

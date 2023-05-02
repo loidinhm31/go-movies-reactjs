@@ -121,16 +121,16 @@ interface SearchTableProps {
 }
 
 export default function SearchTable({
-                                          order,
-                                          orderBy,
-                                          page,
-                                          pageIndex,
-                                          rowsPerPage,
-                                          setOrder,
-                                          setOrderBy,
-                                          setPageIndex,
-                                          setRowsPerPage,
-                                      }: SearchTableProps) {
+                                        order,
+                                        orderBy,
+                                        page,
+                                        pageIndex,
+                                        rowsPerPage,
+                                        setOrder,
+                                        setOrderBy,
+                                        setPageIndex,
+                                        setRowsPerPage,
+                                    }: SearchTableProps) {
 
 
     const handleRequestSort = useCallback(

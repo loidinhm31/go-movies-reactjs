@@ -22,7 +22,7 @@ function OneGenre() {
     const {genreName} = router.query;
 
     // Get list of Tables
-    const { data: page } = useSWR<PageType<MovieType>>(`../api/v1/movies/genres/${id}?pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
+    const {data: page} = useSWR<PageType<MovieType>>(`../api/v1/movies/genres/${id}?pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
 
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {

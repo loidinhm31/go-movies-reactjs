@@ -54,13 +54,15 @@ function MiniDrawer(props: SideMenuLayoutProps) {
                 <Divider/>
                 <List>
                     {props.menuButtonOptions.map((item, itemIndex) => (
-                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item} itemIndex={itemIndex}/>
+                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item}
+                                      itemIndex={itemIndex}/>
                     ))}
                 </List>
                 <Divider/>
                 <List>
                     {props.adminMenuButtonOptions!.map((item, itemIndex) => (
-                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item} itemIndex={itemIndex}/>
+                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item}
+                                      itemIndex={itemIndex}/>
                     ))}
                 </List>
             </Drawer>

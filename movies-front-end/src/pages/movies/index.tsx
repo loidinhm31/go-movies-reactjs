@@ -2,7 +2,7 @@ import {get} from "../../libs/api";
 import {MovieType} from "../../types/movies";
 import {PageType} from "../../types/page";
 import {GridMovies} from "../../components/Tables/GridMoviesTable";
-import {useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import useSWR from "swr";
 import {Box, Divider, Stack, Typography} from "@mui/material";
 

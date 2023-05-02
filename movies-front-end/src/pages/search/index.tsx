@@ -1,13 +1,12 @@
-import { Box, Divider, Skeleton, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { SearchField } from "src/components/Search/SearchField";
-import { FieldData, SearchRequest } from "src/types/search";
+import {Box, Divider, Skeleton, Stack, Typography} from "@mui/material";
+import {useEffect, useState} from "react";
+import {SearchField} from "src/components/Search/SearchField";
+import {FieldData, SearchRequest} from "src/types/search";
 import useSWRMutation from "swr/mutation";
-import { Data } from "../../components/Tables/SearchTable";
-import SearchTable from "../../components/Tables/SearchTable";
-import { post } from "../../libs/api";
-import { MovieType } from "../../types/movies";
-import { Direction, PageType } from "../../types/page";
+import SearchTable, {Data} from "../../components/Tables/SearchTable";
+import {post} from "../../libs/api";
+import {MovieType} from "../../types/movies";
+import {Direction, PageType} from "../../types/page";
 
 
 function Search() {
@@ -22,7 +21,7 @@ function Search() {
     const searchRequest: SearchRequest = {};
 
     // Get Tables
-    const { trigger: requestPage } = useSWRMutation(`../api/v1/search`, post);
+    const {trigger: requestPage} = useSWRMutation(`../api/v1/search`, post);
 
     useEffect(() => {
         handleChangeSearchRequest(searchRequest!.filters!);
@@ -54,10 +53,10 @@ function Search() {
 
     return (
         <Stack spacing={2}>
-            <Box sx={{ display: "flex", p: 1, m: 1 }}>
+            <Box sx={{display: "flex", p: 1, m: 1}}>
                 <Typography variant="h4">Search</Typography>
             </Box>
-            <Divider />
+            <Divider/>
 
             <SearchField
                 trigger={handleChangeSearchRequest}
@@ -67,9 +66,9 @@ function Search() {
 
             {!page &&
                 <>
-                    <Skeleton />
-                    <Skeleton animation="wave" />
-                    <Skeleton animation={false} />
+                    <Skeleton/>
+                    <Skeleton animation="wave"/>
+                    <Skeleton animation={false}/>
                 </>
             }
 

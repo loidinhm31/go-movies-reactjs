@@ -2,7 +2,7 @@ import {useRouter} from "next/router";
 import {MovieType} from "../../../types/movies";
 import useSWR from "swr";
 import {get} from "../../../libs/api";
-import {Box, Chip, Container, Divider, Grid, Stack, Typography} from "@mui/material";
+import {Box, Chip, Divider, Grid, Stack, Typography} from "@mui/material";
 import moment from "moment";
 
 function Movie() {

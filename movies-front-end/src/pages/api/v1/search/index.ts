@@ -1,6 +1,6 @@
 import {SearchRequest} from "../../../../types/search";
 
-const handler =  async (req, res) => {
+const handler = async (req, res) => {
     let searchRequest: SearchRequest = req.body
 
     const headers = new Headers();

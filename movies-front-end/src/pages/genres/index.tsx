@@ -1,7 +1,7 @@
 import Link from "next/link";
 import useSWR from "swr";
 import {get} from "../../libs/api";
-import {Box, Chip, List, ListItem, Paper, Stack, Typography} from "@mui/material";
+import {Box, Chip, ListItem, Paper, Stack, Typography} from "@mui/material";
 import Divider from "@mui/material/Divider";
 import {GenreType} from "../../types/movies";
 

@@ -1,4 +1,4 @@
-const handler =  async (req, res) => {
+const handler = async (req, res) => {
     let {id} = req.query;
 
     const headers = new Headers();

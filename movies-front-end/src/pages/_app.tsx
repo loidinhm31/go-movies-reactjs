@@ -14,7 +14,7 @@ const swrConfig: SWRConfiguration = {
     revalidateOnMount: true,
 };
 
-function MyApp({ Component, pageProps: { session, cookies, ...pageProps } }: AppPropsWithLayout) {
+function MyApp({Component, pageProps: {session, cookies, ...pageProps}}: AppPropsWithLayout) {
     const getLayout = Component.getLayout ?? getDefaultLayout;
     const page = getLayout(<Component {...pageProps} />);
 
@@ -23,7 +23,7 @@ function MyApp({ Component, pageProps: { session, cookies, ...pageProps } }: App
         <SWRConfig value={swrConfig}>
             <SessionProvider session={session}>
                 <Head>
-                    <meta name="viewport" content="initial-scale=1, width=device-width" />
+                    <meta name="viewport" content="initial-scale=1, width=device-width"/>
                 </Head>
                 {page}
             </SessionProvider>

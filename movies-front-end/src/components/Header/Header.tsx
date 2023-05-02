@@ -5,7 +5,8 @@ import {AppBarProps, Box, Button, Toolbar, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import PersonIcon from "@mui/icons-material/Person";
- function AccountButton() {
+
+function AccountButton() {
     const {data: session} = useSession();
     if (session) {
         return null;

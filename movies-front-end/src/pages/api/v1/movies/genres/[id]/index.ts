@@ -1,8 +1,7 @@
-import {useState} from "react";
 import {Direction, PageType} from "../../../../../../types/page";
 import {MovieType} from "../../../../../../types/movies";
 
-const handler =  async (req, res) => {
+const handler = async (req, res) => {
     let {id} = req.query;
 
     let {pageIndex} = req.query;

@@ -1,10 +1,10 @@
-export { default } from "next-auth/middleware";
+export {default} from "next-auth/middleware";
 
 /**
  * Guards these pages and redirects them to the sign-in page.
  */
 export const config = {
-  matcher: [
-    // "/admin/:path*",
-  ],
+    matcher: [
+        // "/admin/:path*",
+    ],
 };

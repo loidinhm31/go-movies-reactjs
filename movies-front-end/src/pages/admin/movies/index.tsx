@@ -29,7 +29,7 @@ const EditMovie = () => {
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
 
-    const {data: session} = useSession();
+    const {data: session, status} = useSession();
 
     const [movie, setMovie] = useState<MovieType>({
         title: "",
@@ -58,10 +58,18 @@ const EditMovie = () => {
     ];
 
     useEffect(() => {
-        // Check user
-        // if (!session) {
-        //     router.push("/auth/signin")
-        // }
+        if (status === "loading") {
+            return;
+        }
+        const role = session?.user.role;
+
+        if (role === "admin" || role === "moderator") {
+            return;
+        }
+        router.push("/");
+    }, [router, session, status])
+
+    useEffect(() => {
         if (!isLoading) {
             if (id === undefined) {
 

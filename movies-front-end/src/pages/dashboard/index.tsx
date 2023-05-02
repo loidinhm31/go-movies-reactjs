@@ -7,7 +7,7 @@ function Dashboard() {
             <Box sx={{p: 1, m: 1}}>
                 <Typography variant="h4">Dashboard</Typography>
             </Box>
-            <Divider />
+            <Divider/>
         </Stack>
     );
 }

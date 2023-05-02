@@ -66,13 +66,13 @@ export function UserMenu() {
                 <IconButton
                     onClick={handleClick}
                     size="small"
-                    sx={{ ml: 2 }}
+                    sx={{ml: 2}}
                     aria-controls={open ? 'account-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                 >
                     {session.user.name &&
-                        <Avatar sx={{ width: 32, height: 32 }}>{session.user.name!.at(0)!.toUpperCase()}</Avatar>
+                        <Avatar sx={{width: 32, height: 32}}>{session.user.name!.at(0)!.toUpperCase()}</Avatar>
                     }
                 </IconButton>
             </Tooltip>
@@ -87,12 +87,13 @@ export function UserMenu() {
                     }}>
                         {session.user.name ??
                             <MenuItem>
-                                <Avatar sx={{m: 1}}>{session.user.name!.at(0)!.toUpperCase()}</Avatar> {session.user.name}
+                                <Avatar
+                                    sx={{m: 1}}>{session.user.name!.at(0)!.toUpperCase()}</Avatar> {session.user.name}
                             </MenuItem>
                         }
                         {isAdminOrMod &&
                             <MenuItem>
-                                <MilitaryTech />{session.user.role}
+                                <MilitaryTech/>{session.user.role}
                             </MenuItem>
                         }
                     </Box>

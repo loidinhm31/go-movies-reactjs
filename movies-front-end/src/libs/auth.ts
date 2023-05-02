@@ -7,14 +7,14 @@ import { Role } from "src/components/RoleSelect";
  * specified role.  Returns a 403 if they do, otherwise runs the handler.
  */
 const withoutRole = (role: Role, handler: (arg0: NextApiRequest, arg1: NextApiResponse, arg2: JWT) => void) => {
-	return async (req: NextApiRequest, res: NextApiResponse) => {
-		const token = await getToken({ req });
-		if (!token || token.role === role) {
-			res.status(403).end();
-			return;
-		}
-		return handler(req, res, token);
-	};
+    return async (req: NextApiRequest, res: NextApiResponse) => {
+        const token = await getToken({ req });
+        if (!token || token.role === role) {
+            res.status(403).end();
+            return;
+        }
+        return handler(req, res, token);
+    };
 };
 
 /**
@@ -22,14 +22,14 @@ const withoutRole = (role: Role, handler: (arg0: NextApiRequest, arg1: NextApiRe
  * role before running the handler.  Returns a 403 otherwise.
  */
 const withRole = (role: Role, handler: (arg0: NextApiRequest, arg1: NextApiResponse, arg2: JWT) => void) => {
-	return async (req: NextApiRequest, res: NextApiResponse) => {
-		const token = await getToken({ req });
-		if (!token || token.role !== role) {
-			res.status(403).end();
-			return;
-		}
-		return handler(req, res, token);
-	};
+    return async (req: NextApiRequest, res: NextApiResponse) => {
+        const token = await getToken({ req });
+        if (!token || token.role !== role) {
+            res.status(403).end();
+            return;
+        }
+        return handler(req, res, token);
+    };
 };
 
 export { withoutRole, withRole };

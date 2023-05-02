@@ -1,7 +1,7 @@
 import {Direction, PageType} from "../../../../types/page";
 import {MovieType} from "../../../../types/movies";
 
-const handler =  async (req, res) => {
+const handler = async (req, res) => {
     let {pageIndex} = req.query;
     let {pageSize} = req.query;
 
