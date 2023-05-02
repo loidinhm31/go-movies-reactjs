@@ -54,9 +54,9 @@ export const getDefaultLayout = (page: React.ReactElement) => (
                     icon: LibraryBooksIcon,
                 },
                 {
-                    label: "GraphQL",
-                    pathname: "/graphql",
-                    desc: "GraphQL",
+                    label: "Search",
+                    pathname: "/search",
+                    desc: "Search",
                     icon: SearchIcon,
                 },
             ]}
