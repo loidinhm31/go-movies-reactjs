@@ -21,6 +21,10 @@ import (
 	searchRepository "movies-service/internal/search/repository"
 	searchService "movies-service/internal/search/service"
 
+	analysisHttp "movies-service/internal/analysis/delivery/http"
+	analysisRepository "movies-service/internal/analysis/repository"
+	analysisService "movies-service/internal/analysis/service"
+
 	"net/http"
 	"time"
 )
@@ -31,20 +35,23 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	mRepo := movieRepository.NewMovieRepository(s.cfg, s.db)
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 	sRepo := searchRepository.NewSearchRepository(s.cfg, s.db)
+	anRepo := analysisRepository.NewAnalysisRepository(s.cfg, s.db)
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(uRepo)
 	aService := authService.NewAuthService(uRepo)
 	mService := movieService.NewMovieService(managementCtrl, mRepo)
 	gService := genreService.NewGenreService(gRepo)
-	gqlService := searchService.NewSearchService(sRepo)
+	sService := searchService.NewSearchService(sRepo)
+	anService := analysisService.NewAnalysisService(managementCtrl, anRepo)
 
 	// Init handler
 	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
 	aHandler := authHttp.NewAuthHandler(aService, s.cfg.Keycloak, s.cloak)
 	mHandler := movieHttp.NewMovieHandler(mService)
 	gHandler := genreHttp.NewGenreHandler(gService)
-	gqlHandler := searchHttp.NewGraphHandler(gqlService)
+	sHandler := searchHttp.NewGraphHandler(sService)
+	anHandler := analysisHttp.NewAnalysisHandler(anService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
@@ -61,12 +68,15 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	movieGroup := apiV1.Group("/movies")
 	genreGroup := apiV1.Group("/genres")
-	graphGroup := apiV1.Group("/search")
+	searchGroup := apiV1.Group("/search")
+	analysisGroup := apiV1.Group("/analysis")
+
 	// Map routes
 	authHttp.MapAuthRoutes(authGroupPublic, aHandler)
 	movieHttp.MapMovieRoutes(movieGroup, mHandler)
 	genreHttp.MapGenreRoutes(genreGroup, gHandler)
-	searchHttp.MapGraphRoutes(graphGroup, gqlHandler)
+	searchHttp.MapGraphRoutes(searchGroup, sHandler)
+	analysisHttp.MapAnalysisRoutes(analysisGroup, anHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())

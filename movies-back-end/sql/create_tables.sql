@@ -73,6 +73,14 @@ CREATE TABLE public.mpaa
     updated_by TEXT                     NOT NULL
 );
 
+CREATE TABLE public.view
+(
+    id         SERIAL PRIMARY KEY,
+    viewed_by  TEXT      NOT NULL,
+    viewed_at TIMESTAMP NOT NULL,
+    movie_id   INTEGER REFERENCES movies (id)
+);
+
 INSERT INTO mpaa(code, name, created_at, created_by, updated_at, updated_by)
 VALUES ('G', 'G', now(), 'admin', now(), 'admin'),
        ('PG', 'PG', now(), 'admin', now(), 'admin'),
@@ -146,3 +154,13 @@ INSERT INTO public.users(first_name, last_name, username, email, role_id, create
 VALUES ('Admin', 'User', 'root', 'admin@example.com', (SELECT r.id FROM public.roles r WHERE role_code = 'ADMIN'),
         now(), 'admin', now(), 'admin');
 
+INSERT INTO public.view(viewed_at, viewed_by, movie_id)
+VALUES ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-04-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-04-05', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander'));
