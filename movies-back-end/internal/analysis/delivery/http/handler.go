@@ -85,7 +85,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByCreatedDate() gin.HandlerFunc {
 
 func (rh *researchHandler) FetchNumberOfViewsByGenreAndViewedDate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		input := &dto.AnalysisDto{}
+		input := &dto.RequestData{}
 
 		if err := utils.ReadRequest(c, input); err != nil {
 			log.Println(err)
@@ -96,8 +96,32 @@ func (rh *researchHandler) FetchNumberOfViewsByGenreAndViewedDate() gin.HandlerF
 			return
 		}
 
-		result, err := rh.researchService.GetNumberOfViewsByGenreAndViewedDate(c.Request.Context(), input.Genre,
-			input.Year, input.Months)
+		result, err := rh.researchService.GetNumberOfViewsByGenreAndViewedDate(c.Request.Context(), input)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+func (rh *researchHandler) FetchNumberOfViewsByViewedDate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		request := &dto.RequestData{}
+
+		if err := utils.ReadRequest(c, request); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		result, err := rh.researchService.GetNumberOfViewsByViewedDate(c.Request.Context(), request)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 	"movies-service/config"
 	"movies-service/internal/analysis"
+	"movies-service/internal/dto"
 	"movies-service/internal/models"
 )
 
@@ -76,26 +77,55 @@ func (ar *analysisRepository) CountMoviesByCreatedDate(ctx context.Context, year
 	return result, nil
 }
 
-func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context, genre, year string, months []string) ([]*models.ViewCount, error) {
+func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
 	var result []*models.ViewCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Raw("SELECT EXTRACT(YEAR FROM v.viewed_at) AS year, EXTRACT(MONTH FROM v.viewed_at) AS month, COUNT(v.id) AS num_viewers "+
-		"FROM view v "+
-		"INNER JOIN movies m on m.id = v.movie_id "+
-		"INNER JOIN movies_genres mg on m.id = mg.movie_id "+
-		"INNER JOIN genres g on g.id = mg.genre_id "+
-		"WHERE LOWER(g.genre) = LOWER(?) "+
-		"AND EXTRACT(YEAR FROM m.created_at) = ? "+
-		"AND EXTRACT(MONTH FROM m.created_at) IN ? "+
-		"GROUP BY EXTRACT(YEAR FROM v.viewed_at), EXTRACT(MONTH FROM v.viewed_at);", genre, year, months).
-		Scan(&result).Error
+
+	tx = tx.Table("views").
+		Select("EXTRACT(YEAR FROM views.viewed_at) AS year, EXTRACT(MONTH FROM views.viewed_at) AS month, COUNT(views.id) AS num_viewers").
+		InnerJoins("INNER JOIN movies on movies.id = views.movie_id").
+		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
+		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
+		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+
+	orBuild := ar.db
+	for _, a := range request.Analysis {
+		orBuild = orBuild.Or("EXTRACT(YEAR FROM views.viewed_at) = ? AND EXTRACT(MONTH FROM views.viewed_at) IN ?", a.Year, a.Months)
+	}
+
+	err := tx.Where(orBuild).Group("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
+		Find(&result).Error
+
 	if err != nil {
 		return nil, err
 	}
 
+	return result, nil
+}
+
+func (ar *analysisRepository) CountViewsByViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
+	var result []*models.ViewCount
+
+	tx := ar.db.WithContext(ctx)
+	if ar.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+
+	tx = tx.Table("views").
+		Select("EXTRACT(YEAR FROM views.viewed_at) AS year, EXTRACT(MONTH FROM views.viewed_at) AS month, COUNT(views.id) AS num_viewers")
+
+	for _, a := range request.Analysis {
+		tx.Or("EXTRACT(YEAR FROM views.viewed_at) = ? AND EXTRACT(MONTH FROM views.viewed_at) IN ?", a.Year, a.Months)
+	}
+
+	err := tx.Group("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
+		Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }

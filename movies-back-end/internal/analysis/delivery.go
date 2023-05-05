@@ -7,4 +7,5 @@ type Handler interface {
 	FetchNumberOfMoviesByReleaseDate() gin.HandlerFunc
 	FetchNumberOfMoviesByCreatedDate() gin.HandlerFunc
 	FetchNumberOfViewsByGenreAndViewedDate() gin.HandlerFunc
+	FetchNumberOfViewsByViewedDate() gin.HandlerFunc
 }

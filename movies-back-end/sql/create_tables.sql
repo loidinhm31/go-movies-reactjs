@@ -73,12 +73,12 @@ CREATE TABLE public.mpaa
     updated_by TEXT                     NOT NULL
 );
 
-CREATE TABLE public.view
+CREATE TABLE public.views
 (
-    id         SERIAL PRIMARY KEY,
-    viewed_by  TEXT      NOT NULL,
-    viewed_at TIMESTAMP NOT NULL,
-    movie_id   INTEGER REFERENCES movies (id)
+    id        SERIAL PRIMARY KEY,
+    viewed_by TEXT                     NOT NULL,
+    viewed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    movie_id  INTEGER REFERENCES movies (id)
 );
 
 INSERT INTO mpaa(code, name, created_at, created_by, updated_at, updated_by)
@@ -154,7 +154,7 @@ INSERT INTO public.users(first_name, last_name, username, email, role_id, create
 VALUES ('Admin', 'User', 'root', 'admin@example.com', (SELECT r.id FROM public.roles r WHERE role_code = 'ADMIN'),
         now(), 'admin', now(), 'admin');
 
-INSERT INTO public.view(viewed_at, viewed_by, movie_id)
+INSERT INTO public.views(viewed_at, viewed_by, movie_id)
 VALUES ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
        ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
        ('2023-04-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),

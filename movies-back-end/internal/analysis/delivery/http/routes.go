@@ -11,4 +11,5 @@ func MapAnalysisRoutes(analysisGroup *gin.RouterGroup, h analysis.Handler) {
 	analysisGroup.POST("/movies/release-date", h.FetchNumberOfMoviesByReleaseDate())
 	analysisGroup.POST("/movies/created-date", h.FetchNumberOfMoviesByCreatedDate())
 	analysisGroup.POST("/genres/views", h.FetchNumberOfViewsByGenreAndViewedDate())
+	analysisGroup.POST("/views", h.FetchNumberOfViewsByViewedDate())
 }

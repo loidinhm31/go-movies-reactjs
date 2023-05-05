@@ -70,8 +70,26 @@ func (as *analysisService) GetNumberOfMoviesByCreatedDate(ctx context.Context, y
 	return &dto.ResultDto{Data: dataSlice}, nil
 }
 
-func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Context, genre, year string, months []string) (*dto.ResultDto, error) {
-	result, err := as.analysisRepository.CountViewsByGenreAndViewedDate(ctx, genre, year, months)
+func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	result, err := as.analysisRepository.CountViewsByGenreAndViewedDate(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	var dataSlice []*dto.DataDto
+	for _, r := range result {
+		dataSlice = append(dataSlice, &dto.DataDto{
+			Genre: request.Genre,
+			Year:  r.Year,
+			Month: r.Month,
+			Count: r.NumViewers,
+		})
+	}
+	return &dto.ResultDto{Data: dataSlice}, nil
+}
+
+func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	result, err := as.analysisRepository.CountViewsByViewedDate(ctx, request)
 	if err != nil {
 		return nil, err
 	}
