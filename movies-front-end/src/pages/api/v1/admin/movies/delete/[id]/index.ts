@@ -18,7 +18,7 @@ const handler = withRole("admin", async (req, res, token) => {
     if (response.ok) {
         res.status(200).json({});
     } else {
-        res.status(response.status).json(response.json())
+        res.status(response.status).json(await response.json())
     }
 });
 

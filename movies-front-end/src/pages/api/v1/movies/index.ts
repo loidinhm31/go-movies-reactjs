@@ -36,7 +36,7 @@ const handler = async (req, res) => {
         const pageResult = await response.json();
         res.status(200).json(pageResult);
     } else {
-        res.status(response.status).json(response.json())
+        res.status(response.status).json(await response.json())
     }
 };
 
