@@ -25,6 +25,10 @@ import (
 	analysisRepository "movies-service/internal/analysis/repository"
 	analysisService "movies-service/internal/analysis/service"
 
+	viewHttp "movies-service/internal/views/delivery/http"
+	viewRepository "movies-service/internal/views/repository"
+	viewService "movies-service/internal/views/service"
+
 	"net/http"
 	"time"
 )
@@ -36,6 +40,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 	sRepo := searchRepository.NewSearchRepository(s.cfg, s.db)
 	anRepo := analysisRepository.NewAnalysisRepository(s.cfg, s.db)
+	vRepo := viewRepository.NewViewRepository(s.cfg, s.db)
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(uRepo)
@@ -44,6 +49,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	gService := genreService.NewGenreService(gRepo)
 	sService := searchService.NewSearchService(sRepo)
 	anService := analysisService.NewAnalysisService(managementCtrl, anRepo)
+	vService := viewService.NewViewService(managementCtrl, vRepo)
 
 	// Init handler
 	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
@@ -52,6 +58,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	gHandler := genreHttp.NewGenreHandler(gService)
 	sHandler := searchHttp.NewGraphHandler(sService)
 	anHandler := analysisHttp.NewAnalysisHandler(anService)
+	vHandler := viewHttp.NewViewHandler(vService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
@@ -70,6 +77,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	genreGroup := apiV1.Group("/genres")
 	searchGroup := apiV1.Group("/search")
 	analysisGroup := apiV1.Group("/analysis")
+	viewGroup := apiV1.Group("/views")
 
 	// Map routes
 	authHttp.MapAuthRoutes(authGroupPublic, aHandler)
@@ -77,6 +85,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	genreHttp.MapGenreRoutes(genreGroup, gHandler)
 	searchHttp.MapGraphRoutes(searchGroup, sHandler)
 	analysisHttp.MapAnalysisRoutes(analysisGroup, anHandler)
+	viewHttp.MapViewRoutes(viewGroup, vHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())

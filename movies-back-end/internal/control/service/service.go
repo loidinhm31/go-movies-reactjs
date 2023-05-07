@@ -26,3 +26,14 @@ func (mc *managementCtrl) CheckPrivilege(username string) bool {
 	}
 	return false
 }
+
+func (mc *managementCtrl) CheckUser(username string) bool {
+	user, err := mc.userRepository.FindUserByUsername(context.Background(), username)
+	if err != nil {
+		return false
+	}
+	if user.Username == username && user.Role.RoleCode != "BANNED" {
+		return true
+	}
+	return false
+}
