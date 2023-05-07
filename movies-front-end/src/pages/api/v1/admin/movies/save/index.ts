@@ -1,8 +1,8 @@
-import {withRole} from "../../../../../../libs/auth";
+import {withAnyRole} from "src/libs/auth";
 import moment from "moment";
-import {MovieType} from "../../../../../../types/movies";
+import {MovieType} from "src/types/movies";
 
-const handler = withRole("admin", async (req, res, token) => {
+const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     const data: MovieType = req.body;
 
     const headers = new Headers();
@@ -24,9 +24,10 @@ const handler = withRole("admin", async (req, res, token) => {
 
     const response = await fetch(`${process.env.API_BASE_URL}/private/movies`, requestOptions);
     if (response.ok) {
-        res.status(200).json({});
+        res.status(200).json({message: "Movie saved"});
     } else {
-        res.status(response.status).json(await response.json())
+        const message = await response.json()
+        res.status(response.status).json(message.message! || "Failed to save movie");
     }
 });
 

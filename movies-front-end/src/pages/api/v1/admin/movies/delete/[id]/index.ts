@@ -1,6 +1,6 @@
-import {withRole} from "../../../../../../../libs/auth";
+import {withAnyRole} from "src/libs/auth";
 
-const handler = withRole("admin", async (req, res, token) => {
+const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     let {id} = req.query;
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -16,9 +16,10 @@ const handler = withRole("admin", async (req, res, token) => {
     );
 
     if (response.ok) {
-        res.status(200).json({});
+        res.status(200).json({message: "Movie deleted"});
     } else {
-        res.status(response.status).json(await response.json())
+        const message = await response.json()
+        res.status(response.status).json(message.message! || "Failed to delete movie");
     }
 });
 
