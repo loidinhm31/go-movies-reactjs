@@ -20,7 +20,13 @@ func NewGenreRepository(cfg *config.Config, db *gorm.DB) genres.GenreRepository 
 func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, error) {
 	var allGenres []*models.Genre
 
-	err := gr.db.WithContext(ctx).Find(&allGenres).Error
+	tx := gr.db.WithContext(ctx)
+	if gr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Order("genre").
+		Find(&allGenres).
+		Error
 	if err != nil {
 		return nil, err
 	}
