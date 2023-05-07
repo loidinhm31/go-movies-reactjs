@@ -34,7 +34,7 @@ func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
 			return
 		}
 
-		allMovies, err := mh.movieService.GetAllMovies(c.Request.Context(), pageable)
+		allMovies, err := mh.movieService.GetAllMovies(c, pageable)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -55,7 +55,7 @@ func (mh *movieHandler) FetchMovieById() gin.HandlerFunc {
 			return
 		}
 
-		movie, err := mh.movieService.GetMovieById(c.Request.Context(), movieId)
+		movie, err := mh.movieService.GetMovieById(c, movieId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -87,7 +87,7 @@ func (mh *movieHandler) FetchMovieByGenre() gin.HandlerFunc {
 			return
 		}
 
-		movieDtos, err := mh.movieService.GetMoviesByGenre(c.Request.Context(), pageable, genreId)
+		movieDtos, err := mh.movieService.GetMoviesByGenre(c, pageable, genreId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -132,7 +132,7 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 			return
 		}
 
-		err = mh.movieService.DeleteMovieById(c.Request.Context(), movieId)
+		err = mh.movieService.DeleteMovieById(c, movieId)
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{

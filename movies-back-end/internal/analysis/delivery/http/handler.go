@@ -21,7 +21,7 @@ func NewAnalysisHandler(researchService analysis.Service) analysis.Handler {
 
 func (rh *researchHandler) FetchNumberOfMoviesByGenre() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		result, err := rh.researchService.GetNumberOfMoviesByGenre(c.Request.Context())
+		result, err := rh.researchService.GetNumberOfMoviesByGenre(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -46,7 +46,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByReleaseDate() gin.HandlerFunc {
 			return
 		}
 
-		result, err := rh.researchService.GetNumberOfMoviesByReleaseDate(c.Request.Context(), input.Year, input.Months)
+		result, err := rh.researchService.GetNumberOfMoviesByReleaseDate(c, input.Year, input.Months)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -71,7 +71,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByCreatedDate() gin.HandlerFunc {
 			return
 		}
 
-		result, err := rh.researchService.GetNumberOfMoviesByCreatedDate(c.Request.Context(), input.Year, input.Months)
+		result, err := rh.researchService.GetNumberOfMoviesByCreatedDate(c, input.Year, input.Months)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -96,7 +96,7 @@ func (rh *researchHandler) FetchNumberOfViewsByGenreAndViewedDate() gin.HandlerF
 			return
 		}
 
-		result, err := rh.researchService.GetNumberOfViewsByGenreAndViewedDate(c.Request.Context(), input)
+		result, err := rh.researchService.GetNumberOfViewsByGenreAndViewedDate(c, input)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -121,7 +121,7 @@ func (rh *researchHandler) FetchNumberOfViewsByViewedDate() gin.HandlerFunc {
 			return
 		}
 
-		result, err := rh.researchService.GetNumberOfViewsByViewedDate(c.Request.Context(), request)
+		result, err := rh.researchService.GetNumberOfViewsByViewedDate(c, request)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

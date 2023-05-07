@@ -18,7 +18,7 @@ func NewGenreHandler(genreService genres.Service) genres.GenreHandler {
 
 func (mh *genreHandler) FetchGenres() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		genres, err := mh.genreService.GetAllGenres(c.Request.Context())
+		genres, err := mh.genreService.GetAllGenres(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
