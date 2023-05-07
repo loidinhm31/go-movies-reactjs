@@ -33,7 +33,7 @@ function OneGenre() {
         <Stack spacing={2}>
 
             <Box sx={{p: 1, m: 1}}>
-                <Typography variant="h4">Genre: {genreName}s</Typography>
+                <Typography variant="h4">Genre: {genreName}</Typography>
             </Box>
             <Divider/>
 
