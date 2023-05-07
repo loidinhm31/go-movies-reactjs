@@ -1,22 +1,23 @@
 const handler = async (req, res) => {
-    let {id} = req.query;
+    let searchRequest = req.body;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
     const requestOptions = {
-        method: "GET",
+        method: "POST",
         headers: headers,
+        body: JSON.stringify(searchRequest),
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/movies/${id}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/views`,
         requestOptions
     );
-    const movie = await response.json();
+
     if (response.ok) {
-        res.status(200).json(movie);
+        res.status(200).json({});
     } else {
-        res.status(response.status);
+        res.status(response.status).json({})
     }
 };
 
