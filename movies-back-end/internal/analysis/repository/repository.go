@@ -28,7 +28,8 @@ func (ar *analysisRepository) CountMoviesByGenre(ctx context.Context) ([]*models
 	err := tx.Raw("SELECT g.genre, COUNT(mg.movie_id) AS num_movies " +
 		"FROM genres g " +
 		"INNER JOIN movies_genres mg on g.id = mg.genre_id " +
-		"GROUP BY g.genre").
+		"GROUP BY g.genre " +
+		"ORDER BY g.genre;").
 		Scan(&result).Error
 	if err != nil {
 		return nil, err
@@ -98,12 +99,45 @@ func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context
 	}
 
 	err := tx.Where(orBuild).Group("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
+		Order("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
 		Find(&result).Error
 
 	if err != nil {
 		return nil, err
 	}
 
+	return result, nil
+}
+
+func (ar *analysisRepository) CountCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
+	var result []*models.ViewCount
+
+	tx := ar.db.WithContext(ctx)
+	if ar.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+
+	tx = tx.Table("views").
+		Select("EXTRACT(YEAR FROM views.viewed_at) AS year, "+
+			"EXTRACT(MONTH FROM views.viewed_at) AS month, "+
+			"COUNT(views.id) AS num_viewers, "+
+			"SUM(COUNT(views.id)) OVER (ORDER BY EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)) AS cumulative").
+		InnerJoins("INNER JOIN movies on movies.id = views.movie_id").
+		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
+		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
+		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+
+	orBuild := ar.db
+	for _, a := range request.Analysis {
+		orBuild = orBuild.Or("EXTRACT(YEAR FROM views.viewed_at) = ? AND EXTRACT(MONTH FROM views.viewed_at) IN ?", a.Year, a.Months)
+	}
+
+	err := tx.Group("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
+		Order("EXTRACT(YEAR FROM views.viewed_at), EXTRACT(MONTH FROM views.viewed_at)").
+		Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
@@ -127,5 +161,39 @@ func (ar *analysisRepository) CountViewsByViewedDate(ctx context.Context, reques
 	if err != nil {
 		return nil, err
 	}
+	return result, nil
+}
+
+func (ar *analysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) ([]*models.MovieCount, error) {
+	var result []*models.MovieCount
+
+	tx := ar.db.WithContext(ctx)
+	if ar.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+
+	tx = tx.Table("movies").
+		Select("EXTRACT(YEAR FROM movies.release_date) AS year, "+
+			"EXTRACT(MONTH FROM movies.release_date) AS month, "+
+			"COUNT(movies.id) AS num_movies, "+
+			"SUM(COUNT(movies.id)) OVER (ORDER BY EXTRACT(YEAR FROM movies.release_date), EXTRACT(MONTH FROM movies.release_date)) AS cumulative").
+		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
+		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
+		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+
+	orBuild := ar.db
+	for _, a := range request.Analysis {
+		orBuild = orBuild.Or("EXTRACT(YEAR FROM movies.release_date) = ? AND EXTRACT(MONTH FROM movies.release_date) IN ?", a.Year, a.Months)
+	}
+
+	err := tx.Where(orBuild).
+		Group("EXTRACT(YEAR FROM movies.release_date), EXTRACT(MONTH FROM movies.release_date)").
+		Order("EXTRACT(YEAR FROM movies.release_date), EXTRACT(MONTH FROM movies.release_date)").
+		Find(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }

@@ -88,6 +88,25 @@ func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Cont
 	return &dto.ResultDto{Data: dataSlice}, nil
 }
 
+func (as *analysisService) GetCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	result, err := as.analysisRepository.CountCumulativeViewsByGenreAndViewedDate(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	var dataSlice []*dto.DataDto
+	for _, r := range result {
+		dataSlice = append(dataSlice, &dto.DataDto{
+			Genre:      request.Genre,
+			Year:       r.Year,
+			Month:      r.Month,
+			Count:      r.NumViewers,
+			Cumulative: r.Cumulative,
+		})
+	}
+	return &dto.ResultDto{Data: dataSlice}, nil
+}
+
 func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
 	result, err := as.analysisRepository.CountViewsByViewedDate(ctx, request)
 	if err != nil {
@@ -100,6 +119,25 @@ func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, req
 			Year:  r.Year,
 			Month: r.Month,
 			Count: r.NumViewers,
+		})
+	}
+	return &dto.ResultDto{Data: dataSlice}, nil
+}
+
+func (as *analysisService) GetNumberOfMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	result, err := as.analysisRepository.CountMoviesByGenreAndReleasedDate(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+
+	var dataSlice []*dto.DataDto
+	for _, r := range result {
+		dataSlice = append(dataSlice, &dto.DataDto{
+			Genre:      request.Genre,
+			Year:       r.Year,
+			Month:      r.Month,
+			Count:      r.NumMovies,
+			Cumulative: r.Cumulative,
 		})
 	}
 	return &dto.ResultDto{Data: dataSlice}, nil

@@ -7,9 +7,10 @@ import (
 
 // MapAnalysisRoutes Map auth routes
 func MapAnalysisRoutes(analysisGroup *gin.RouterGroup, h analysis.Handler) {
-	analysisGroup.GET("/genres/movies", h.FetchNumberOfMoviesByGenre())
+	analysisGroup.GET("/movies/genres", h.FetchNumberOfMoviesByGenre())
 	analysisGroup.POST("/movies/release-date", h.FetchNumberOfMoviesByReleaseDate())
 	analysisGroup.POST("/movies/created-date", h.FetchNumberOfMoviesByCreatedDate())
-	analysisGroup.POST("/genres/views", h.FetchNumberOfViewsByGenreAndViewedDate())
+	analysisGroup.POST("/views/genres", h.FetchViewsByGenreAndViewedDate())
+	analysisGroup.POST("/movies/genres/release-date", h.FetchNumberOfMoviesByGenreAndReleaseDate())
 	analysisGroup.POST("/views", h.FetchNumberOfViewsByViewedDate())
 }
