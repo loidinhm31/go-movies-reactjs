@@ -47,7 +47,8 @@ CREATE TABLE public.movies
     runtime      INTEGER                  NOT NULL,
     mpaa_rating  VARCHAR(25)              NOT NULL,
     description  TEXT                     NOT NULL,
-    image        VARCHAR(255),
+    image_path   VARCHAR(255),
+    video_path   VARCHAR(255),
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     created_by   TEXT                     NOT NULL,
     updated_at   TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -104,7 +105,7 @@ VALUES ('Comedy', now(), 'admin', now(), 'admin'),
        ('Fantasy', now(), 'admin', now(), 'admin'),
        ('Superhero', now(), 'admin', now(), 'admin');
 
-INSERT INTO public.movies (title, release_date, runtime, mpaa_rating, description, image, created_at, created_by,
+INSERT INTO public.movies (title, release_date, runtime, mpaa_rating, description, image_path, created_at, created_by,
                            updated_at, updated_by)
 VALUES ('Highlander', '1986-03-07', 116, 'R',
         'He fought his first battle on the Scottish Highlands in 1536. He will fight his greatest battle on the streets of New York City in 1986. His name is Connor MacLeod. He is immortal.',
