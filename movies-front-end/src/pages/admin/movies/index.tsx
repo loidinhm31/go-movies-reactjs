@@ -80,7 +80,7 @@ const EditMovie = () => {
                 setMovie({
                     title: "",
                     description: "",
-                    release_date: null,
+                    release_date: format(new Date(), "yyyy-MM-dd"),
                     runtime: 0,
                     mpaa_rating: "",
                     genres: [],
@@ -290,7 +290,7 @@ const EditMovie = () => {
                                     label="Release Date"
                                     type="date"
                                     name="release_date"
-                                    value={format(new Date(movie.release_date!), "yyyy-MM-DD")}
+                                    value={format(new Date(movie.release_date!), "yyyy-MM-dd")}
                                     onChange={e => handleChange(e, "release_date")}
                                 />
                             </Grid>

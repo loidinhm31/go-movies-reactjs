@@ -17,7 +17,7 @@ import {visuallyHidden} from "@mui/utils";
 import {MovieType} from "../../types/movies";
 import AlertDialog from "../shared/alert";
 import {Direction, PageType} from "../../types/page";
-import format from "date-fns/format";
+import {format} from "date-fns";
 
 export interface Data {
     title: string;
@@ -220,7 +220,7 @@ export default function EnhancedTable({
                                                 <TableCell
                                                     id={labelId}
                                                 >
-                                                    {format(new Date(row.release_date!), "yyyy-MM-DD")}
+                                                    {format(new Date(row.release_date!), "yyyy-MM-dd")}
                                                 </TableCell>
                                                 <TableCell
                                                     id={labelId}
