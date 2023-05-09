@@ -16,6 +16,7 @@ import Link from "next/link";
 import {PageType} from "../../types/page";
 import {MovieType} from "../../types/movies";
 import {styled} from "@mui/material/styles";
+import format from "date-fns/format";
 
 const Img = styled("img")({
     margin: "auto",
@@ -73,7 +74,7 @@ export function GridMovies({
                                             <b>{movie.title}</b>
                                         </Typography>
                                         <Typography variant="body2" gutterBottom>
-                                            {new Date(movie.release_date!).toDateString()}
+                                            {format(new Date(movie.release_date!), "MMMM do, yyyy")}
                                         </Typography>
                                         <Chip label={movie.mpaa_rating} color="error"/>
                                     </Grid>

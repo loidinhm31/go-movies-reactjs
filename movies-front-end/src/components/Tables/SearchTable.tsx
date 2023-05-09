@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
 import {MovieType} from "../../types/movies";
-import moment from "moment";
 import {Direction, PageType} from "../../types/page";
+import format from "date-fns/format";
 
 export interface Data {
     title: string;
@@ -197,7 +197,7 @@ export default function SearchTable({
                                                 <TableCell
                                                     id={labelId}
                                                 >
-                                                    {moment(row.release_date).format("yyyy-MM-DD")}
+                                                    {format(new Date(row.release_date!), "yyyy-MM-DD")}
                                                 </TableCell>
                                                 <TableCell
                                                     id={labelId}

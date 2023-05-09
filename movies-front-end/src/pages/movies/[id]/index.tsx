@@ -3,10 +3,10 @@ import {MovieType} from "../../../types/movies";
 import useSWR from "swr";
 import {get, post} from "src/libs/api";
 import {Box, Chip, Divider, Grid, Stack, Typography} from "@mui/material";
-import moment from "moment";
 import useSWRMutation from "swr/mutation";
 import {useEffect, useState} from "react";
 import {useSession} from "next-auth/react";
+import format from "date-fns/format";
 
 function Movie() {
     const router = useRouter();
@@ -52,7 +52,7 @@ function Movie() {
                     </Box>
                     <Box sx={{p: 1, m: 1}}>
                         <Typography>
-                            <small><em>{moment(movie.release_date).format("MMMM Do, yyyy")} | </em></small>
+                            <small><em>{format(new Date(movie.release_date!), "MMMM do, yyyy")} | </em></small>
                             <small><em>{movie.runtime} minutes | </em></small>
                             <small><em>Rated {movie.mpaa_rating}</em></small>
                         </Typography>

@@ -3,7 +3,7 @@ import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
 import useSWR from "swr";
 import {GenreType, MovieType} from "../../../types/movies";
-import {get, post} from "../../../libs/api";
+import {del, get, post} from "../../../libs/api";
 import useSWRMutation from "swr/mutation";
 import {
     Box,
@@ -20,8 +20,8 @@ import {
     Typography
 } from "@mui/material";
 import AlertDialog from "../../../components/shared/alert";
-import moment from "moment";
-import NotifySnackbar, {NotifyState} from "../../../components/shared/snackbar";
+import NotifySnackbar, {NotifyState, sleep} from "../../../components/shared/snackbar";
+import {format} from "date-fns";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -49,7 +49,7 @@ const EditMovie = () => {
     const {data: genres, isLoading} = useSWR<GenreType[]>(`../api/v1/genres`, get);
     const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../api/v1/movies/${id}`, get);
     const {trigger: triggerMovie} = useSWRMutation(`../api/v1/admin/movies/save`, post);
-    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${id}`, get);
+    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${id}`, del);
 
     const mpaaOptions = [
         {id: "G", value: "G"},
@@ -132,16 +132,19 @@ const EditMovie = () => {
         if (isConfirmDelete) {
             deleteMovie()
                 .then((data) => {
-                    if (data.error) {
+                    if (data) {
                         setNotifyState({
                             open: true,
-                            message: data.error,
+                            message: data.message,
                             vertical: "top",
                             horizontal: "right",
-                            severity: "error"
+                            severity: "info"
                         });
-                    } else {
-                        router.push("/admin/manage-catalogue");
+
+                        (async () => {
+                            await sleep(1500);
+                            await router.push("/admin/manage-catalogue");
+                        })();
                     }
                 })
                 .catch((error) => {
@@ -185,16 +188,19 @@ const EditMovie = () => {
         }
 
         triggerMovie(movie).then((data) => {
-            if (data.error) {
+            if (data) {
                 setNotifyState({
                     open: true,
-                    message: data.error,
+                    message: "Movie Saved",
                     vertical: "top",
                     horizontal: "right",
-                    severity: "error"
+                    severity: "success"
                 });
-            } else {
-                router.push("/admin/manage-catalogue");
+
+                (async () => {
+                    await sleep(1500);
+                    await router.push("/admin/manage-catalogue");
+                })();
             }
         }).catch((error) => {
             setNotifyState({
@@ -284,7 +290,7 @@ const EditMovie = () => {
                                     label="Release Date"
                                     type="date"
                                     name="release_date"
-                                    value={moment(movie.release_date, "yyyy-MM-DD").format("yyyy-MM-DD")}
+                                    value={format(new Date(movie.release_date!), "yyyy-MM-DD")}
                                     onChange={e => handleChange(e, "release_date")}
                                 />
                             </Grid>

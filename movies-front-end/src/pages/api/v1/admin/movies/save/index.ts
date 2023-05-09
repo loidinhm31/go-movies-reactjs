@@ -1,5 +1,4 @@
 import {withAnyRole} from "src/libs/auth";
-import moment from "moment";
 import {MovieType} from "src/types/movies";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
@@ -10,7 +9,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     headers.append("Authorization", `Bearer ${token.accessToken}`)
 
     // Define date format
-    data.release_date = moment(data.release_date).toISOString();
+    data.release_date = new Date(data.release_date!).toISOString();
     let method = "PUT";
 
     if (data.id !== undefined) {
