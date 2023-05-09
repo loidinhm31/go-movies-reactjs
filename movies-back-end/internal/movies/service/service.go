@@ -11,6 +11,7 @@ import (
 	"movies-service/internal/models"
 	"movies-service/internal/movies"
 	"movies-service/pkg/pagination"
+	"movies-service/pkg/utils"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *paginatio
 			Runtime:     m.Runtime,
 			MpaaRating:  m.MpaaRating,
 			Description: m.Description,
-			Image:       m.Image,
+			ImagePath:   m.ImagePath.String,
 			CreatedAt:   m.CreatedAt,
 			UpdatedAt:   m.UpdatedAt,
 			Genres:      genreDtos,
@@ -94,7 +95,7 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 		Runtime:     movie.Runtime,
 		MpaaRating:  movie.MpaaRating,
 		Description: movie.Description,
-		Image:       movie.Image,
+		ImagePath:   movie.ImagePath.String,
 		CreatedAt:   movie.CreatedAt,
 		UpdatedAt:   movie.UpdatedAt,
 		Genres:      genreDtos,
@@ -130,7 +131,7 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 			Runtime:     m.Runtime,
 			MpaaRating:  m.MpaaRating,
 			Description: m.Description,
-			Image:       m.Image,
+			ImagePath:   m.ImagePath.String,
 			CreatedAt:   m.CreatedAt,
 			UpdatedAt:   m.UpdatedAt,
 			Genres:      genreDtos,
@@ -181,7 +182,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		Runtime:     movie.Runtime,
 		MpaaRating:  movie.MpaaRating,
 		Description: movie.Description,
-		Image:       movie.Image,
+		ImagePath:   utils.StringToSQLNullString(movie.ImagePath),
 		CreatedAt:   time.Now(),
 		CreatedBy:   author,
 		UpdatedAt:   time.Now(),
@@ -224,7 +225,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		Runtime:     movie.Runtime,
 		MpaaRating:  movie.MpaaRating,
 		Description: movie.Description,
-		Image:       movie.Image,
+		ImagePath:   utils.StringToSQLNullString(movie.ImagePath),
 		UpdatedAt:   time.Now(),
 		UpdatedBy:   author,
 	}

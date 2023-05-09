@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"database/sql"
+	"time"
+)
 
 type Movie struct {
 	ID          int `gorm:"primary_key"`
@@ -9,7 +12,8 @@ type Movie struct {
 	Runtime     int
 	MpaaRating  string
 	Description string
-	Image       string
+	ImagePath   sql.NullString `gorm:"type:varchar(255), default:null"`
+	VideoPath   sql.NullString `gorm:"type:varchar(255), default:null"`
 	CreatedAt   time.Time
 	CreatedBy   string
 	UpdatedAt   time.Time
@@ -25,4 +29,11 @@ type Genre struct {
 	UpdatedAt time.Time
 	UpdatedBy string
 	Movie     []*Movie `gorm:"many2many:movies_genres;"`
+}
+
+type View struct {
+	ID       int `gorm:"primary_key"`
+	ViewedBy string
+	ViewedAt time.Time
+	MovieId  int
 }
