@@ -1,12 +1,16 @@
-import {useRouter} from "next/router";
-import {MovieType} from "../../../types/movies";
-import useSWR from "swr";
-import {get, post} from "src/libs/api";
-import {Box, Chip, Divider, Grid, Stack, Typography} from "@mui/material";
-import useSWRMutation from "swr/mutation";
-import {useEffect, useState} from "react";
+import {Box, CardMedia, Chip, Divider, Grid, Stack, Typography} from "@mui/material";
 import {useSession} from "next-auth/react";
-import format from "date-fns/format";
+import {useRouter} from "next/router";
+import {useEffect, useState} from "react";
+import {get, post} from "src/libs/api";
+import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
+import {MovieType} from "../../../types/movies";
+import VideoPlayer, {VideoJsOption} from "src/components/Player/VideoPlayer";
+import {format} from "date-fns"
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
 
 function Movie() {
     const router = useRouter();
@@ -15,33 +19,60 @@ function Movie() {
 
     const [isRecognize, setIsRecognize] = useState(false);
 
+    const [open, setOpen] = useState(false);
+
+    const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
+        autoplay: true,
+        controls: true,
+    });
+
     const {data: movie, error} = useSWR<MovieType>(`../api/v1/movies/${id}`, get, {
         onSuccess: (result) => {
-            if (!isRecognize) {
-                let author;
-                if (session && session.data?.user) {
-                    author = session.data.user.id;
-                }
-                if (!author) {
-                    author = "anonymous";
-                }
-
-                const request: any = {
-                    movie_id: id,
-                    viewer: author
-                };
-                trigger(request)
-                    .catch((error) => console.log(error))
-                    .finally(() => setIsRecognize(true));
+            if (result.video_path) {
+                setVideoJsOptions({
+                    ...videoJsOptions,
+                    sources: [
+                        {
+                            src: `${process.env.NEXT_PUBLIC_URL}/video/upload/${result.video_path}`,
+                            type: "video/mp4",
+                        }
+                    ],
+                });
             }
         }
     });
 
     const {trigger} = useSWRMutation(`../api/v1/users`, post);
 
+
     useEffect(() => {
         setIsRecognize(false);
     }, [id]);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+
+        if (!isRecognize) {
+            let author: string = "anonymous";
+            if (session && session.data?.user) {
+                author = session.data.user.id;
+            }
+
+            const request: any = {
+                movie_id: id,
+                viewer: author
+            };
+            trigger(request)
+                .catch((error) => {
+
+                })
+                .finally(() => setIsRecognize(true));
+        }
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     return (
         <Stack spacing={2}>
@@ -66,25 +97,53 @@ function Movie() {
                     </Stack>
                     <Divider/>
 
-                    <Box component="span"
-                         sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
-                        <Grid container spacing={1}>
+                    <Stack component="span"
+                           sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
+                        <Grid container spacing={3}>
                             <Grid item xs={12} md={2}>
-                                {movie.image !== "" &&
-                                    <Box sx={{display: "flex", justifyContent: "center", width: 1, height: 1}}>
-                                        <img src={`https://image.tmdb.org/t/p/w200/${movie.image}`} alt="poster"/>
-                                    </Box>
-                                }
+                                <Stack>
+                                    {movie.image_path !== "" &&
+                                        <Box sx={{display: "flex", justifyContent: "center", width: 1, height: 1}}>
+                                            <CardMedia
+                                                sx={{borderRadius: "16px"}}
+                                                component="img"
+                                                src={`https://image.tmdb.org/t/p/w200/${movie.image_path}`}
+                                                alt="poster"/>
+                                        </Box>
+                                    }
+
+                                    {movie.video_path && movie.video_path !== "" &&
+                                        <Box sx={{m: 1, p: 1}}>
+                                            <Button variant="contained" color="secondary" onClick={handleClickOpen}>
+                                                Watch this movie
+                                            </Button>
+                                            <Dialog
+                                                fullWidth={true}
+                                                maxWidth={"lg"}
+                                                open={open}
+                                                onClose={handleClose}
+                                            >
+                                                <DialogContent>
+                                                    <VideoPlayer
+                                                        options={videoJsOptions}
+                                                        title={movie.title}
+                                                        duration={movie.runtime}/>
+
+                                                </DialogContent>
+                                            </Dialog>
+                                        </Box>
+                                    }
+                                </Stack>
                             </Grid>
                             <Grid item xs={12} md={10}>
-                                <Typography variant="body1">{movie.description}</Typography>
+                                <Typography sx={{m: 2}} variant="body1">{movie.description}</Typography>
                             </Grid>
                         </Grid>
-                    </Box>
+
+                    </Stack>
                 </>
             }
         </Stack>
-
     )
 }
 
