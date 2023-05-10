@@ -65,7 +65,7 @@ export function GridMovies({
                             <Grid container spacing={2}>
                                 <Grid item>
                                     <ButtonBase sx={{width: 128, height: 128}}>
-                                        <Img src={`https://image.tmdb.org/t/p/w200/${movie.image}`}/>
+                                        <Img src={`https://image.tmdb.org/t/p/w200/${movie.image_path}`}/>
                                     </ButtonBase>
                                 </Grid>
                                 <Grid item xs container direction="column" spacing={2}>

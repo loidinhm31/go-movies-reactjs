@@ -5,7 +5,8 @@ export type MovieType = {
     release_date: string | null,
     runtime: number,
     mpaa_rating: string,
-    image?: string,
+    image_path?: string,
+    video_path?: string,
     genres: GenreType[],
 }
 

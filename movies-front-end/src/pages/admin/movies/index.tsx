@@ -1,9 +1,9 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
 import useSWR from "swr";
-import {GenreType, MovieType} from "../../../types/movies";
-import {del, get, post} from "../../../libs/api";
+import {GenreType, MovieType} from "src/types/movies";
+import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
     Box,
@@ -13,7 +13,9 @@ import {
     FormControlLabel,
     FormGroup,
     Grid,
+    IconButton,
     InputAdornment,
+    Link,
     MenuItem,
     Stack,
     TextField,
@@ -22,6 +24,7 @@ import {
 import AlertDialog from "../../../components/shared/alert";
 import NotifySnackbar, {NotifyState, sleep} from "../../../components/shared/snackbar";
 import {format} from "date-fns";
+import {RemoveCircle} from "@mui/icons-material";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -41,15 +44,22 @@ const EditMovie = () => {
         runtime: 0,
         mpaa_rating: "",
         genres: [],
+        image_path: "",
     });
 
     // Get id from the URL
     let {id} = router.query;
 
+    const videoFileRef = useRef<any>(null);
+    const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
+    const [videoPath, setVideoPath] = useState<string>("");
+
     const {data: genres, isLoading} = useSWR<GenreType[]>(`../api/v1/genres`, get);
     const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../api/v1/movies/${id}`, get);
     const {trigger: triggerMovie} = useSWRMutation(`../api/v1/admin/movies/save`, post);
     const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${id}`, del);
+    const {trigger: uploadVideo} = useSWRMutation(`../api/v1/admin/movies/video/upload`, postForm);
+    const {trigger: removeVideo} = useSWRMutation(`../api/v1/admin/movies/video/remove`, post);
 
     const mpaaOptions = [
         {id: "G", value: "G"},
@@ -75,8 +85,6 @@ const EditMovie = () => {
     useEffect(() => {
         if (!isLoading) {
             if (id === undefined) {
-
-                // Adding a Tables
                 setMovie({
                     title: "",
                     description: "",
@@ -97,32 +105,35 @@ const EditMovie = () => {
                 }));
 
             } else {
-                fetchMovie()
-                    .then((movie) => {
-                        const checks: GenreType[] = [];
+                fetchMovie().then((movie) => {
+                    const checks: GenreType[] = [];
 
-                        genres?.forEach((g) => {
-                            if (movie?.genres.some(mg => mg.id === g.id)) {
-                                checks.push({id: g.id, genre: g.genre, checked: true});
-                            } else {
-                                checks.push({id: g.id, genre: g.genre, checked: false});
-                            }
-                        });
-
-                        setMovie({
-                            ...movie,
-                            genres: checks,
-                        } as MovieType);
-                    })
-                    .catch((error) => {
-                        setNotifyState({
-                            open: true,
-                            message: error.message,
-                            vertical: "top",
-                            horizontal: "right",
-                            severity: "error"
-                        });
+                    genres?.forEach((g) => {
+                        if (movie?.genres.some(mg => mg.id === g.id)) {
+                            checks.push({id: g.id, genre: g.genre, checked: true});
+                        } else {
+                            checks.push({id: g.id, genre: g.genre, checked: false});
+                        }
                     });
+
+                    setMovie({
+                        ...movie,
+                        genres: checks,
+                    } as MovieType);
+
+                    // Set file video
+                    if (movie?.video_path) {
+                        setVideoPath(movie?.video_path!);
+                    }
+                }).catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error"
+                    });
+                });
             }
         }
 
@@ -240,6 +251,96 @@ const EditMovie = () => {
         setIsOpenDeleteDialog(true);
     }
 
+    const handleChooseVideoFileClick = () => {
+        videoFileRef.current.click();
+    };
+
+    const handleVideoFileChange = event => {
+        const fileObj = event.target.files && event.target.files[0];
+        if (!fileObj) {
+            return;
+        }
+
+        // Reset file input
+        event.target.value = null;
+
+        setVideoFile(fileObj);
+
+        const formData = new FormData();
+        formData.append("video", fileObj);
+
+        uploadVideo(formData).then((result) => {
+            if (result.fileName) {
+                setVideoPath(result.fileName);
+
+                setMovie({
+                    ...movie,
+                    video_path: result.fileName.split(".")[0],
+                });
+
+                setNotifyState({
+                    open: true,
+                    message: "Video Uploaded",
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "info"
+                });
+            }
+        }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
+        });
+    };
+
+    const handleRemoveVideoFileClick = () => {
+        if (videoPath !== "") {
+            const paths = videoPath.split("/");
+            const fileName = paths[paths.length - 1];
+            removeVideo({
+                fileName: fileName,
+            }).then((result) => {
+                if (result.result === "ok") {
+                    setVideoFile(null);
+                    setVideoPath("");
+
+                    setMovie({
+                        ...movie,
+                        video_path: "",
+                    });
+
+                    setNotifyState({
+                        open: true,
+                        message: "Video Removed",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info"
+                    });
+                } else {
+                    setNotifyState({
+                        open: true,
+                        message: `Cannot remove video, ${result.result}`,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info"
+                    });
+                }
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
+            })
+        }
+    };
+
     return (
         <>
             <NotifySnackbar state={notifyState} setState={setNotifyState}/>
@@ -275,7 +376,7 @@ const EditMovie = () => {
                             <input type="hidden" name="id" defaultValue={movie.id} id="id" readOnly={true}></input>
                             <Grid item xs={12}>
                                 <TextField
-                                    sx={{width: 1}}
+                                    fullWidth
                                     label="Title"
                                     variant="outlined"
                                     value={movie.title}
@@ -328,13 +429,54 @@ const EditMovie = () => {
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
-                                    type="text"
-                                    name="image"
                                     label="Image Path"
                                     variant="outlined"
-                                    value={movie.image || ""}
-                                    onChange={e => handleChange(e, "image")}
+                                    value={movie.image_path}
+                                    onChange={e => handleChange(e, "image_path")}
                                 />
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <input
+                                    ref={videoFileRef}
+                                    hidden={true}
+                                    type="file"
+                                    name="video"
+                                    onChange={handleVideoFileChange}
+                                />
+                                <Stack spacing={2} direction="row">
+                                    <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Typography variant="subtitle1">Upload Video</Typography>
+                                    </Box>
+
+                                    <Button variant="contained" onClick={handleChooseVideoFileClick}>
+                                        Choose File
+                                    </Button>
+
+                                    <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Typography>{videoFile?.name}</Typography>
+                                    </Box>
+
+                                    {videoPath !== "" &&
+                                        <>
+                                            <Box sx={{display: "flex", alignItems: "center"}}>
+                                                <Link
+                                                    href={`${process.env.NEXT_PUBLIC_URL}/video/upload/${videoPath}`}
+                                                    target="_blank"
+                                                >
+                                                    {
+                                                        videoPath.split("/").reverse()[0]
+                                                    }
+                                                </Link>
+                                            </Box>
+                                            <IconButton aria-label="delete" color="error"
+                                                        onClick={handleRemoveVideoFileClick}>
+                                                <RemoveCircle/>
+                                            </IconButton>
+                                        </>
+                                    }
+                                </Stack>
+
                             </Grid>
 
                             <Grid item xs={12}>

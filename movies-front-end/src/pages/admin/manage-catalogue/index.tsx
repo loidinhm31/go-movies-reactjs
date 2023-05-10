@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useRouter} from "next/router";
-import {get, post} from "../../../libs/api";
+import {del, post} from "src/libs/api";
 import {Box, Button, Divider, Skeleton, Stack, Typography} from "@mui/material";
 import {useSession} from "next-auth/react";
 import EnhancedTable, {Data} from "../../../components/Tables/EnhancedMoviesTable";
@@ -28,7 +28,7 @@ const ManageCatalogue = () => {
     // Get Tables
     const {trigger: requestPage} =
         useSWRMutation(`../api/v1/movies?pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
-    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${deleteId}`, get);
+    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${deleteId}`, del);
 
     useEffect(() => {
         if (status === "loading") {
@@ -43,6 +43,46 @@ const ManageCatalogue = () => {
     }, [router, session, status])
 
     useEffect(() => {
+        handeRequestPage();
+    }, [pageIndex, pageSize, order, orderBy])
+
+    // Ensure the page index has been reset when the page size changes
+    useEffect(() => {
+        setPageIndex(0);
+    }, [pageSize])
+
+    useEffect(() => {
+        if (deleteId && isConfirmDelete) {
+            deleteMovie()
+                .then((data) => {
+                    if (data) {
+                        setNotifyState({
+                            open: true,
+                            message: data.message,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "info"
+                        });
+
+                        setIsConfirmDelete(false);
+                        setDeleteId(null);
+
+                        handeRequestPage();
+                    }
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error"
+                    });
+                });
+        }
+    }, [deleteId]);
+
+    const handeRequestPage = () => {
         requestPage({
             sort: {
                 orders: [
@@ -62,33 +102,8 @@ const ManageCatalogue = () => {
                 horizontal: "right",
                 severity: "error"
             });
-        })
-    }, [pageIndex, pageSize, order, orderBy])
-
-    // Ensure the page index has been reset when the page size changes
-    useEffect(() => {
-        setPageIndex(0);
-    }, [pageSize])
-
-    useEffect(() => {
-        if (deleteId && isConfirmDelete) {
-            deleteMovie()
-                .then((data) => {
-                    if (data.error) {
-                        console.log(data.error);
-                    } else {
-                        router.push("/admin/manage-catalogue");
-                    }
-                })
-                .catch(err => {
-                    console.log(err);
-                })
-                .finally(() => {
-                    setIsConfirmDelete(false);
-                    setDeleteId(null);
-                })
-        }
-    }, [deleteId])
+        });
+    }
 
     return (
         <>
