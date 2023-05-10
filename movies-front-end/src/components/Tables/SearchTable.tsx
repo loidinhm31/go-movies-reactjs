@@ -197,7 +197,7 @@ export default function SearchTable({
                                                 <TableCell
                                                     id={labelId}
                                                 >
-                                                    {format(new Date(row.release_date!), "yyyy-MM-DD")}
+                                                    {format(new Date(row.release_date!), "yyyy-MM-dd")}
                                                 </TableCell>
                                                 <TableCell
                                                     id={labelId}
