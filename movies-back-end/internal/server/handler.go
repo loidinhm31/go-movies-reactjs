@@ -29,6 +29,9 @@ import (
 	viewRepository "movies-service/internal/views/repository"
 	viewService "movies-service/internal/views/service"
 
+	integrationHttp "movies-service/internal/integration/delivery/http"
+	integrationService "movies-service/internal/integration/service"
+
 	"net/http"
 	"time"
 )
@@ -50,6 +53,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	sService := searchService.NewSearchService(sRepo)
 	anService := analysisService.NewAnalysisService(managementCtrl, anRepo)
 	vService := viewService.NewViewService(managementCtrl, vRepo)
+	iService := integrationService.NewIntegrationService(s.cfg, managementCtrl, mRepo)
 
 	// Init handler
 	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
@@ -59,6 +63,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	sHandler := searchHttp.NewGraphHandler(sService)
 	anHandler := analysisHttp.NewAnalysisHandler(anService)
 	vHandler := viewHttp.NewViewHandler(vService)
+	iHandler := integrationHttp.NewIntegrationHandler(iService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
@@ -74,10 +79,17 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	authGroupPublic := apiV1.Group("/auth")
 
 	movieGroup := apiV1.Group("/movies")
+
 	genreGroup := apiV1.Group("/genres")
+
 	searchGroup := apiV1.Group("/search")
+
 	analysisGroup := apiV1.Group("/analysis")
+
 	viewGroup := apiV1.Group("/views")
+
+	integrationGroup := apiV1.Group("/integration")
+	integrationGroup.Use(mw.JWTValidation())
 
 	// Map routes
 	authHttp.MapAuthRoutes(authGroupPublic, aHandler)
@@ -86,6 +98,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	searchHttp.MapGraphRoutes(searchGroup, sHandler)
 	analysisHttp.MapAnalysisRoutes(analysisGroup, anHandler)
 	viewHttp.MapViewRoutes(viewGroup, vHandler)
+	integrationHttp.MapIntegrationRoutes(integrationGroup, iHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())
