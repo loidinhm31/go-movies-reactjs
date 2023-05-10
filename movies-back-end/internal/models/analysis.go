@@ -6,13 +6,15 @@ type GenreCount struct {
 }
 
 type MovieCount struct {
-	Year      string
-	Month     string
-	NumMovies int
+	Year       string
+	Month      string
+	NumMovies  int
+	Cumulative int
 }
 
 type ViewCount struct {
 	Year       string
 	Month      string
 	NumViewers int
+	Cumulative int
 }

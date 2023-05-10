@@ -20,3 +20,8 @@ type RoleDto struct {
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
+
+type Viewer struct {
+	MovieId string `json:"movie_id"`
+	Viewer  string `json:"viewer"`
+}
