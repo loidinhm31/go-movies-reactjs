@@ -21,3 +21,9 @@ keycloak:
   ClientId: mdb-client
   ClientSecret: D0x5ScPy7dr4fWD04CuMB7pP7BBh7Qxk
   Realm: mdb
+
+cloudinary:
+  CloudName: dln5uctjy
+  ApiKey:
+  ApiSecret:
+  FolderPath: shiftflix/files/

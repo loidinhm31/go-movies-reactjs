@@ -10,9 +10,10 @@ import (
 
 // Config App config struct
 type Config struct {
-	Server   ServerConfig
-	Postgres PostgresConfig
-	Keycloak KeycloakConfig
+	Server     ServerConfig
+	Postgres   PostgresConfig
+	Keycloak   KeycloakConfig
+	Cloudinary CloudinaryConfig
 }
 
 // ServerConfig Server config struct
@@ -42,6 +43,13 @@ type KeycloakConfig struct {
 	ClientId     string // clientId specified in KeycloakConfig
 	ClientSecret string // client secret specified in KeycloakConfig
 	Realm        string // realm specified in KeycloakConfig
+}
+
+type CloudinaryConfig struct {
+	CloudName  string
+	ApiKey     string
+	ApiSecret  string
+	FolderPath string
 }
 
 // LoadConfig Load config file from given path
