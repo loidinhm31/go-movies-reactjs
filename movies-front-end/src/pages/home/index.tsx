@@ -14,7 +14,7 @@ function Home() {
             <Box component="span"
                  sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
                 <Link href="/movies">
-                    <Image src={Wallpaper} alt="movie tickets"></Image>
+                    <Image style={{borderRadius: "50px"}} src={Wallpaper} alt="movie tickets"></Image>
                 </Link>
             </Box>
         </Stack>
