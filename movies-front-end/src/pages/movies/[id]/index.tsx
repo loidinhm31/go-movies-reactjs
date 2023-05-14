@@ -11,6 +11,7 @@ import {format} from "date-fns"
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import {Views} from "../../../components/Views";
 
 function Movie() {
     const router = useRouter();
@@ -24,7 +25,10 @@ function Movie() {
     const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
         autoplay: true,
         controls: true,
+
     });
+
+    const [mutateView, setMutateView] = useState(false);
 
     const {data: movie, error} = useSWR<MovieType>(`../api/v1/movies/${id}`, get, {
         onSuccess: (result) => {
@@ -44,7 +48,6 @@ function Movie() {
 
     const {trigger} = useSWRMutation(`../api/v1/users`, post);
 
-
     useEffect(() => {
         setIsRecognize(false);
     }, [id]);
@@ -62,6 +65,9 @@ function Movie() {
                 movie_id: id,
                 viewer: author
             };
+
+            setMutateView(true);
+
             trigger(request)
                 .catch((error) => {
 
@@ -72,6 +78,8 @@ function Movie() {
 
     const handleClose = () => {
         setOpen(false);
+
+        setMutateView(false);
     };
 
     return (
@@ -136,7 +144,14 @@ function Movie() {
                                 </Stack>
                             </Grid>
                             <Grid item xs={12} md={10}>
-                                <Typography sx={{m: 2}} variant="body1">{movie.description}</Typography>
+                                <Stack spacing={2}>
+                                    <Box sx={{m: 1}}>
+                                        {!mutateView &&
+                                            <Views movieId={id}/>
+                                        }
+                                    </Box>
+                                    <Typography sx={{m: 2}} variant="body1">{movie.description}</Typography>
+                                </Stack>
                             </Grid>
                         </Grid>
 
