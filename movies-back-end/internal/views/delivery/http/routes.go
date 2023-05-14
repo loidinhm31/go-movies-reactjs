@@ -8,4 +8,5 @@ import (
 // MapViewRoutes Map auth routes
 func MapViewRoutes(viewGroup *gin.RouterGroup, h views.Handler) {
 	viewGroup.POST("/", h.RecognizeViewForMovie())
+	viewGroup.GET("/:movieId", h.FetchNumberOfViewsByMovieId())
 }

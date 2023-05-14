@@ -7,4 +7,5 @@ import (
 
 type Service interface {
 	RecognizeViewForMovie(ctx context.Context, viewer *dto.Viewer) error
+	GetNumberOfViewsByMovieId(ctx context.Context, movieId int) (int64, error)
 }
