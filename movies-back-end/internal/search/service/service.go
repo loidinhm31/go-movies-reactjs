@@ -25,7 +25,7 @@ func (gs *searchService) Search(ctx context.Context, searchParams *models.Search
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range page.Data {
+	for _, m := range page.Content {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -43,7 +43,7 @@ func (gs *searchService) Search(ctx context.Context, searchParams *models.Search
 			Runtime:     m.Runtime,
 			MpaaRating:  m.MpaaRating,
 			Description: m.Description,
-			Image:       m.Image,
+			ImagePath:   m.ImagePath.String,
 			CreatedAt:   m.CreatedAt,
 			UpdatedAt:   m.UpdatedAt,
 			Genres:      genreDtos,
@@ -55,6 +55,6 @@ func (gs *searchService) Search(ctx context.Context, searchParams *models.Search
 		Sort:          searchParams.Page.Sort,
 		TotalElements: page.TotalElements,
 		TotalPages:    page.TotalPages,
-		Data:          movieDtos,
+		Content:       movieDtos,
 	}, nil
 }

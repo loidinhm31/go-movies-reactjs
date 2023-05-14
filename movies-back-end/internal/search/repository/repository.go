@@ -94,7 +94,7 @@ func (sr *searchRepository) Search(ctx context.Context, searchParams *models.Sea
 	if err != nil {
 		fmt.Println(err)
 	}
-	page.Data = movies
+	page.Content = movies
 	page.TotalElements = totalRows
 	return page, nil
 }

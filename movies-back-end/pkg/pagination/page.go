@@ -11,7 +11,7 @@ type Page[K any] struct {
 	Sort          Sort  `json:"sort"`
 	TotalElements int64 `json:"total_elements"`
 	TotalPages    int   `json:"total_pages"`
-	Data          []K   `json:"data"`
+	Content       []K   `json:"content"`
 }
 
 func PageImpl[K any](value []K, pageRequest *PageRequest, page *Page[K], db *gorm.DB) func(db *gorm.DB) *gorm.DB {

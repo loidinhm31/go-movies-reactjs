@@ -3,7 +3,7 @@ export type PageType<T> = {
     page?: number,
     total_elements?: number,
     total_pages?: number,
-    data?: T[],
+    content?: T[],
     sort?: SortType
 }
 

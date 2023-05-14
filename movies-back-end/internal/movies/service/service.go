@@ -37,7 +37,7 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *paginatio
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range movieResults.Data {
+	for _, m := range movieResults.Content {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -68,7 +68,7 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *paginatio
 		Sort:          pageRequest.Sort,
 		TotalElements: movieResults.TotalElements,
 		TotalPages:    movieResults.TotalPages,
-		Data:          movieDtos,
+		Content:       movieDtos,
 	}, nil
 }
 
@@ -115,7 +115,7 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 	}
 
 	var movieDtos []*dto.MovieDto
-	for _, m := range movieResults.Data {
+	for _, m := range movieResults.Content {
 		var genreDtos []*dto.GenreDto
 		if m.Genres != nil {
 			for _, g := range m.Genres {
@@ -146,7 +146,7 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 		Sort:          pageRequest.Sort,
 		TotalElements: movieResults.TotalElements,
 		TotalPages:    movieResults.TotalPages,
-		Data:          movieDtos,
+		Content:       movieDtos,
 	}, nil
 }
 
@@ -164,6 +164,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		movie.Runtime == 0 ||
 		movie.Description == "" ||
 		movie.ReleaseDate.IsZero() ||
+		movie.MpaaRating == "" ||
 		(movie.Genres == nil || len(movie.Genres) == 0) {
 		return errors.New("invalid input")
 	}

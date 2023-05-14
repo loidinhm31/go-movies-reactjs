@@ -46,7 +46,7 @@ func (mr *movieRepository) FindAllMovies(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	page.Data = allMovies
+	page.Content = allMovies
 	return page, nil
 }
 
@@ -86,7 +86,7 @@ func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
-	page.Data = movieResults
+	page.Content = movieResults
 	return page, nil
 }
 

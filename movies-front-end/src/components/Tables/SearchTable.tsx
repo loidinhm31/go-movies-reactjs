@@ -175,7 +175,7 @@ export default function SearchTable({
                             />
                             <TableBody>
                                 {page
-                                    ? page.data?.map((row, index) => {
+                                    ? page.content?.map((row, index) => {
                                         const labelId = `search-table-checkbox-${index}`;
 
                                         return (

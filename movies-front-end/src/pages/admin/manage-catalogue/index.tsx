@@ -125,7 +125,7 @@ const ManageCatalogue = () => {
                     </>
                 }
 
-                {page && page.data &&
+                {page && page.content &&
                     <EnhancedTable
                         page={page}
                         setDeleteId={setDeleteId}

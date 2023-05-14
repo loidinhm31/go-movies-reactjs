@@ -85,7 +85,7 @@ function Search() {
                     </>
                 }
 
-                {page && page.data &&
+                {page && page.content &&
                     <SearchTable
                         page={page}
                         pageIndex={pageIndex}
