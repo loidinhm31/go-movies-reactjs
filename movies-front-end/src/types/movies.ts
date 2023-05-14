@@ -8,6 +8,8 @@ export type MovieType = {
     image_path?: string,
     video_path?: string,
     genres: GenreType[],
+    vote_average?: number,
+    vote_count?: number,
 }
 
 export type GenreType = {
