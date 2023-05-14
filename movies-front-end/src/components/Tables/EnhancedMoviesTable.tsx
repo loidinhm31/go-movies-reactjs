@@ -198,7 +198,7 @@ export default function EnhancedTable({
                             />
                             <TableBody>
                                 {page
-                                    ? page.data?.map((row, index) => {
+                                    ? page.content?.map((row, index) => {
                                         const labelId = `enhanced-table-checkbox-${index}`;
 
                                         return (
