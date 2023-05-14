@@ -14,6 +14,9 @@ type MovieDto struct {
 	CreatedAt   time.Time   `json:"-"`
 	UpdatedAt   time.Time   `json:"-"`
 	Genres      []*GenreDto `json:"genres,omitempty"`
+
+	VoteAverage float32 `json:"vote_average,omitempty"`
+	VoteCount   int     `json:"vote_count,omitempty"`
 }
 
 type GenreDto struct {

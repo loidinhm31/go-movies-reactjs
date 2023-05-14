@@ -1,9 +1,14 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
+	"movies-service/internal/dto"
 	"movies-service/internal/integration"
+	"movies-service/pkg/utils"
 	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type integrationHandler struct {
@@ -16,7 +21,7 @@ func NewIntegrationHandler(integrationService integration.Service) integration.H
 	}
 }
 
-func (mh *integrationHandler) UploadVideo() gin.HandlerFunc {
+func (ih *integrationHandler) UploadVideo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		file, _, err := c.Request.FormFile("file")
 		if err != nil {
@@ -28,7 +33,7 @@ func (mh *integrationHandler) UploadVideo() gin.HandlerFunc {
 			return
 		}
 
-		resp, err := mh.integrationService.UploadVideo(c, file)
+		resp, err := ih.integrationService.UploadVideo(c, file)
 		if err != nil || resp == "" {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -42,11 +47,11 @@ func (mh *integrationHandler) UploadVideo() gin.HandlerFunc {
 	}
 }
 
-func (mh *integrationHandler) DeleteVideo() gin.HandlerFunc {
+func (ih *integrationHandler) DeleteVideo() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		videoKey := c.Param("key")
 
-		res, err := mh.integrationService.DeleteVideo(c, videoKey)
+		res, err := ih.integrationService.DeleteVideo(c, videoKey)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -57,5 +62,48 @@ func (mh *integrationHandler) DeleteVideo() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"result": res,
 		})
+	}
+}
+
+func (ih *integrationHandler) FindMovies() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		movie := &dto.MovieDto{}
+		if err := utils.ReadRequest(c, movie); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		results, err := ih.integrationService.GetMovies(c, movie)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "cannot access resource",
+			})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, results)
+	}
+}
+
+func (ih *integrationHandler) FindMovieById() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ID := c.Param("id")
+		movieId, _ := strconv.ParseInt(ID, 10, 64)
+
+		result, err := ih.integrationService.GetMovieById(c, movieId)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "cannot access resource",
+			})
+			c.Abort()
+			return
+		}
+
+		c.JSON(http.StatusOK, result)
 	}
 }
