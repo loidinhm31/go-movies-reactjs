@@ -11,6 +11,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import HomeIcon from "@mui/icons-material/Home";
 import LiveTvIcon from "@mui/icons-material/LiveTv";
 import ClassIcon from "@mui/icons-material/Class";
+import LinkIcon from "@mui/icons-material/Link";
 
 export type NextPageWithLayout<P = unknown, IP = P> = NextPage<P, IP> & {
     getLayout?: (page: React.ReactElement) => React.ReactNode;
@@ -39,6 +40,12 @@ export const getDefaultLayout = (page: React.ReactElement) => (
                     desc: "Genres",
                     icon: ClassIcon,
                 },
+                {
+                    label: "Search",
+                    pathname: "/search",
+                    desc: "Search",
+                    icon: SearchIcon,
+                },
             ]}
             adminMenuButtonOptions={[
                 {
@@ -54,10 +61,10 @@ export const getDefaultLayout = (page: React.ReactElement) => (
                     icon: LibraryBooksIcon,
                 },
                 {
-                    label: "Search",
-                    pathname: "/search",
-                    desc: "Search",
-                    icon: SearchIcon,
+                    label: "Reference Search",
+                    pathname: "/admin/references",
+                    desc: "Reference Search",
+                    icon: LinkIcon,
                 },
             ]}
         >
