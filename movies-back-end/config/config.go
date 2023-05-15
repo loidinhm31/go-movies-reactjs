@@ -14,6 +14,7 @@ type Config struct {
 	Postgres   PostgresConfig
 	Keycloak   KeycloakConfig
 	Cloudinary CloudinaryConfig
+	Tmdb       TmdbConfig
 }
 
 // ServerConfig Server config struct
@@ -50,6 +51,11 @@ type CloudinaryConfig struct {
 	ApiKey     string
 	ApiSecret  string
 	FolderPath string
+}
+
+type TmdbConfig struct {
+	Url    string
+	ApiKey string
 }
 
 // LoadConfig Load config file from given path

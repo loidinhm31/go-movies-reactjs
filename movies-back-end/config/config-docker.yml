@@ -27,3 +27,7 @@ cloudinary:
   ApiKey:
   ApiSecret:
   FolderPath: shiftflix/files/
+
+tmdb:
+  Url: https://api.themoviedb.org/3
+  ApiKey:
