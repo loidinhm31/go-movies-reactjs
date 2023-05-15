@@ -4,7 +4,41 @@ import NextAuth from "next-auth";
 import {Provider} from "next-auth/providers";
 import CredentialsProvider from "next-auth/providers/credentials";
 import KeycloakProvider from "next-auth/providers/keycloak";
+import {NextApiRequest} from "next";
 
+async function refreshAccessToken(token) {
+    try {
+        console.log("Refreshing token...");
+        const response = await fetch(`${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/token`, {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Authorization": `Basic ${btoa(`${process.env.KEYCLOAK_CLIENT_ID}:${process.env.KEYCLOAK_CLIENT_SECRET}`)}`,
+            },
+            body: new URLSearchParams({
+                grant_type: "refresh_token",
+                refresh_token: token.refreshToken!,
+            }),
+            method: "POST",
+        })
+        const refreshedTokens = await response.json();
+        if (!response.ok) {
+            throw refreshedTokens
+        }
+
+        return {
+            ...token, // Keep the previous token properties
+            accessToken: refreshedTokens.access_token,
+            expiresAt: Date.now() + refreshedTokens.expires_in * 1000,
+            // Fall back to old refresh token, but note that
+            // many providers may only allow using a refresh token once.
+            refreshToken: refreshedTokens.refresh_token,
+        }
+    } catch (error) {
+        console.error("Error refreshing access token", error)
+        // The error property will be used client-side to handle the refresh token error
+        return {...token, error: "RefreshAccessTokenError" as const}
+    }
+}
 
 const providers: Provider[] = [];
 if (boolean(process.env.DEBUG_LOGIN) || process.env.NODE_ENV === "development") {
@@ -88,55 +122,93 @@ export const authOptions: AuthOptions = {
                         return true;
                     }
                 } else {
-                    const payload = {
-                        username: user.name,
-                    };
-                    const res = await fetch(`${process.env.API_BASE_URL}/auth/login`, {
-                        method: "POST",
-                        body: JSON.stringify(payload),
-                        headers: {
-                            "Content-Type": "application/json"
+                    if (profile) {
+                        const payload = {
+                            username: profile.preferred_username,
+                        };
+                        const res = await fetch(`${process.env.API_BASE_URL}/auth/login`, {
+                            method: "POST",
+                            body: JSON.stringify(payload),
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${account?.access_token}`
+                            }
+                        });
+                        const userResponse = await res.json();
+                        if (res.ok && userResponse) {
+                            user.id = userResponse.username;
+                            user.name = userResponse.first_name + ' ' + userResponse.last_name;
+                            user.role = userResponse.role.role_name;
+                            user.token = account?.access_token!;
+                            return true;
+                        } else {    // Create pending user into the database
+                            const registerPayload = {
+                                username: profile.preferred_username,
+                                first_name: profile.family_name,
+                                last_name: profile.family_name,
+                                email: profile.email,
+                                is_new: true,
+                            };
+                            const registerRes = await fetch(`${process.env.API_BASE_URL}/auth/signup`, {
+                                method: "POST",
+                                body: JSON.stringify(registerPayload),
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${account?.access_token}`
+                                }
+                            });
                         }
-                    });
-                    const userResponse = await res.json();
-                    if (res.ok && userResponse) {
-                        user.id = userResponse.username;
-                        user.name = userResponse.first_name + ' ' + userResponse.last_name;
-                        user.role = userResponse.role.role_name
-                        return true;
                     }
                 }
-                return false
+                return false;
             },
             async jwt({token, user, account}) {
                 if (account && user) {
                     return {
                         ...token,
+                        id: user.id,
                         accessToken: user.token,
-                        role: user.role
+                        expiresAt: account.expires_at!,
+                        refreshToken: account.refresh_token,
+                        role: user.role,
                     };
+                } else if (Date.now() < token.expiresAt!) {
+                    // If the access token has not expired yet, return it
+                    return token;
                 }
-                return token;
+                return refreshAccessToken(token);
             },
-            async session({session, token}) {
-                session.user.id = token.name!.toString();
-                session.user.role = token.role!;
-                session.user.name = token.name;
-                session.user.accessToken = token.accessToken;
+            async session({session, token }) {
+                if (token) {
+                    session.user.id = token.id;
+                    session.user.role = token.role!;
+                    session.user.name = token.name;
+                    session.user.accessToken = token.accessToken;
+                    session.error = token.error
+                }
                 return session;
             },
-
         },
         events: {
             async signIn() {
                 console.log("handle event sign in");
-            }
-            ,
+            },
         },
         session: {
             strategy: "jwt"
         }
     }
 ;
+
+const getIp = (req: NextApiRequest) => {
+    try {
+        // https://stackoverflow.com/questions/66111742/get-the-client-ip-on-nextjs-and-use-ssr
+        const forwarded = req.headers["x-forwarded-for"];
+        return typeof forwarded === "string" ? forwarded.split(/, /)[0] : req.socket.remoteAddress;
+    } catch {
+        return "";
+    }
+};
+
 
 export default NextAuth(authOptions);

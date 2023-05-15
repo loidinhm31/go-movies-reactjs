@@ -12,7 +12,6 @@ import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/ma
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
 import {DrawerHeader} from "../../components/shared/drawer";
-import Keycloak from "next-auth/providers/keycloak";
 import {Key} from "@mui/icons-material";
 
 export type SignInErrorTypes =
@@ -65,8 +64,8 @@ function Signin({providers}: SigninProps) {
                         <Box sx={{m: 2, p: 2}}>
                             <Box sx={{display: "flex", justifyContent: "center"}}>
                                 <SigninButton
-                                    startIcon={<Key />}
-                                    onClick={() => signIn(keycloak.id, { callbackUrl: "/" })}
+                                    startIcon={<Key/>}
+                                    onClick={() => signIn(keycloak.id, {callbackUrl: "/"})}
                                 >
                                     Continue with Keycloak
                                 </SigninButton>
@@ -116,7 +115,7 @@ const SigninForm = ({credentials}: { credentials: ClientSafeProvider; }) => {
 
     function signinWithCredentials(data: SigninFormData) {
         signIn(credentials.id, {
-            callbackUrl: "/dashboard",
+            callbackUrl: "/admin/dashboard",
             ...data
         });
     }
@@ -151,7 +150,7 @@ const DebugSigninForm = ({credentials}: { credentials: ClientSafeProvider; }) =>
 
     function signinWithDebugCredentials(data: DebugSigninFormData) {
         signIn(credentials.id, {
-            callbackUrl: "/dashboard",
+            callbackUrl: "/admin/dashboard",
             ...data
         });
     }

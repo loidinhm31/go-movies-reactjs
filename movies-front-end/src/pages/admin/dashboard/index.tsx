@@ -7,6 +7,14 @@ import {signIn, useSession} from "next-auth/react";
 import {useEffect} from "react";
 
 function Dashboard() {
+    const {data: session} = useSession();
+
+    useEffect(() => {
+        if (session?.error === "RefreshAccessTokenError") {
+            signIn(); // Force sign in to hopefully resolve error
+        }
+    }, [session]);
+
     return (
         <Stack spacing={2}>
             <Box sx={{p: 1, m: 1}}>
