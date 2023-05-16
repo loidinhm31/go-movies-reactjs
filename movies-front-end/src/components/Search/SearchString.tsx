@@ -33,7 +33,7 @@ export function SearchString({label, field, defType, handleStringField}: SearchS
                         variant="filled"
                         sx={{minWidth: 100}}
                         id={`${field}-1`}
-                        label={label}
+                        label={"Operator"}
                         onChange={(event) =>
                             handleStringField(field, event.target.value, "operator", defType)}
                     >
