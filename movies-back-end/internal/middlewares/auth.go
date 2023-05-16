@@ -10,6 +10,7 @@ import (
 )
 
 const CtxUserKey = "username"
+const CtxAccessToken = "access_token"
 
 func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -71,7 +72,6 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 			fmt.Printf(err.Error())
 			return
 		}
-		c.Set(CtxUserKey, userToken.Claims.Username)
 
 		// Check if the token isn't expired and valid
 		if !*result.Active {
@@ -81,6 +81,8 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.Set(CtxUserKey, userToken.Claims.Username)
+		c.Set(CtxAccessToken, headerParts[1])
 
 		c.Next()
 	}
