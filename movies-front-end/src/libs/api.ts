@@ -19,6 +19,8 @@ export const del = (url: string) => api.delete(url).then((res) => res.data);
 
 export const put = (url: string, data?: { arg: any }) => api.put(url, data?.arg).then((res) => res.data);
 
+export const patch = (url: string, data?: { arg: any }) => api.patch(url, data?.arg).then((res) => res.data);
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
