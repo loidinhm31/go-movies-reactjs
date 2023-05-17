@@ -77,7 +77,7 @@ func (ih *integrationHandler) FindMovies() gin.HandlerFunc {
 			return
 		}
 
-		results, err := ih.integrationService.GetMovies(c, movie)
+		results, err := ih.integrationService.GetMoviesByType(c, movie)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "cannot access resource",

@@ -92,7 +92,7 @@ func (is *integrationService) DeleteVideo(ctx context.Context, fileId string) (s
 	return res.Result, nil
 }
 
-func (is *integrationService) GetMovies(ctx context.Context, movie *dto.MovieDto) ([]*dto.MovieDto, error) {
+func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.MovieDto) ([]*dto.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
@@ -100,7 +100,13 @@ func (is *integrationService) GetMovies(ctx context.Context, movie *dto.MovieDto
 	}
 
 	client := &http.Client{}
-	theUrl := fmt.Sprintf("%s/search/movie?api_key=%s", is.cfg.Tmdb.Url, is.cfg.Tmdb.ApiKey)
+
+	var theUrl string
+	if movie.Type == "tv" {
+		theUrl = fmt.Sprintf("%s/search/tv?api_key=%s", is.cfg.Tmdb.Url, is.cfg.Tmdb.ApiKey)
+	} else {
+		theUrl = fmt.Sprintf("%s/search/movie?api_key=%s", is.cfg.Tmdb.Url, is.cfg.Tmdb.ApiKey)
+	}
 
 	req, err := http.NewRequest("GET", theUrl+"&query="+url.QueryEscape(movie.Title), nil)
 	if err != nil {
@@ -204,8 +210,8 @@ func (is *integrationService) GetMovieById(ctx context.Context, movieId int64) (
 	var genres []*dto.GenreDto
 	for _, g := range responseObject.Genres {
 		genres = append(genres, &dto.GenreDto{
-			ID:    g.ID,
-			Genre: g.Name,
+			ID:   g.ID,
+			Name: g.Name,
 		})
 	}
 
