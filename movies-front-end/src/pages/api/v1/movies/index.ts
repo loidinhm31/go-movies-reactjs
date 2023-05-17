@@ -29,15 +29,15 @@ const handler = async (req, res) => {
         body: JSON.stringify(page),
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
-        requestOptions
-    );
-    if (response.ok) {
-        const pageResult = await response.json();
-        res.status(200).json(pageResult);
-    } else {
-        res.status(response.status).json(await response.json())
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
+            requestOptions
+        );
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
+
 };
 
 export default handler;
