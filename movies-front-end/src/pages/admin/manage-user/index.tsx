@@ -23,6 +23,7 @@ export default function Users() {
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
+    const [wasUpdated, setWasUpdated] = useState(false);
 
     const {trigger: requestPage} = useSWRMutation(`../../api/v1/admin/users?pageSize=${pageSize}&pageIndex=${pageIndex}&isNew=${isNew}&query=${searchKey}`, post);
 
@@ -30,11 +31,17 @@ export default function Users() {
         handeRequestPage();
     }, [pageIndex, pageSize, order, orderBy, isNew])
 
+    useEffect(() => {
+        if (wasUpdated) {
+            handeRequestPage();
+            setWasUpdated(false);
+        }
+    }, [wasUpdated])
+
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {
         setPageIndex(0);
     }, [pageSize])
-
     const handeRequestPage = () => {
         requestPage({
             sort: {
@@ -120,6 +127,7 @@ export default function Users() {
                         orderBy={orderBy}
                         setOrderBy={setOrderBy}
                         setNotifyState={setNotifyState}
+                        setWasUpdated={setWasUpdated}
                     />
                 }
             </Stack>

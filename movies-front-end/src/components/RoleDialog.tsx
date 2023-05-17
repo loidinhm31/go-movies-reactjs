@@ -14,24 +14,30 @@ interface RoleDialogProps {
     open: boolean;
     setOpen: (flag: boolean) => void;
     setNotifyState: (state: NotifyState) => void;
+    setWasUpdated: (flag: boolean) => void;
 }
 
-const RoleDialog = ({user, open, setOpen, setNotifyState}: RoleDialogProps) => {
+const RoleDialog = ({user, open, setOpen, setNotifyState, setWasUpdated}: RoleDialogProps) => {
     const [selectedRole, setSelectedRole] = useState<string>(user!.role.role_code);
 
     const {data} = useSWR<RoleType[]>("/api/v1/admin/roles", get);
     const {trigger: updateRole} = useSWRMutation("/api/v1/admin/users", patch)
 
     const handleUpdateRole = () => {
-        user!.role = {
-            id: undefined,
-            role_name: undefined,
-            role_code: selectedRole,
-        }
-        updateRole(user).then((result) => {
+
+        updateRole({
+            ...user,
+            role: {
+                id: undefined,
+                role_name: undefined,
+                role_code: selectedRole,
+            }
+        } as UserType).then((result) => {
             if (result.message === "ok") {
-                user!.is_new = false;
+                setWasUpdated(true);
+
                 handleClose();
+
                 setNotifyState({
                     open: true,
                     message: "Update role successfully",
@@ -51,7 +57,7 @@ const RoleDialog = ({user, open, setOpen, setNotifyState}: RoleDialogProps) => {
         }).catch((error) => {
             setNotifyState({
                 open: true,
-                message: error,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"
