@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"errors"
-	"github.com/Nerzal/gocloak/v13"
-	"github.com/golang-jwt/jwt"
+	"fmt"
 	"log"
-	"movies-service/config"
+	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
 	"movies-service/internal/roles"
 	"movies-service/internal/users"
@@ -15,29 +15,27 @@ import (
 	"strconv"
 )
 
-type AuthClaims struct {
-	jwt.StandardClaims
-	Username string `json:"username"`
-	UserId   string `json:"userId"`
-}
-
 type userService struct {
-	keycload       config.KeycloakConfig
-	cloak          *gocloak.GoCloak
+	mgmtCtrl       control.Service
 	roleRepository roles.Repository
 	userRepository users.UserRepository
 }
 
-func NewUserService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, roleRepository roles.Repository, userRepository users.UserRepository) users.Service {
+func NewUserService(mgmtCtrl control.Service, roleRepository roles.Repository, userRepository users.UserRepository) users.Service {
 	return &userService{
-		keycload:       keycloak,
-		cloak:          cloak,
+		mgmtCtrl:       mgmtCtrl,
 		roleRepository: roleRepository,
 		userRepository: userRepository,
 	}
 }
 
 func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.PageRequest, key string, isNew string) (*pagination.Page[*dto.UserDto], error) {
+	log.Println("checking admin privilege...")
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
+		return nil, errors.New("unauthorized")
+	}
+
 	isNewBool, _ := strconv.ParseBool(isNew)
 
 	page := &pagination.Page[*models.User]{}
@@ -77,6 +75,12 @@ func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.Page
 }
 
 func (u *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) error {
+	log.Println("checking admin privilege...")
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
+		return errors.New("unauthorized")
+	}
+
 	user, err := u.userRepository.FindUserById(ctx, userDto.ID)
 	if err != nil {
 		return err
