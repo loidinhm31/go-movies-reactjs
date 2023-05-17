@@ -12,17 +12,17 @@ interface NotifyProps {
     setState: (state: NotifyState) => void;
 }
 
+export function sleep(delay = 0) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, delay);
+    });
+}
+
 export default function NotifySnackbar({state, setState}: NotifyProps) {
     const {
         vertical, horizontal,
         open, message, severity
     } = state;
-
-    function sleep(delay = 0) {
-        return new Promise((resolve) => {
-            setTimeout(resolve, delay);
-        });
-    }
 
     useEffect(() => {
         if (!open) {
