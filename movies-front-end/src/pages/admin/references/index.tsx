@@ -1,11 +1,26 @@
-import {Box, Divider, LinearProgress, Stack, TextField, Typography} from "@mui/material";
+import {
+    Box,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    LinearProgress,
+    Radio,
+    RadioGroup,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
 import Button from "@mui/material/Button";
-import {useCallback, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import useSWRMutation from "swr/mutation";
 import {ReferencesTable} from "../../../components/Tables/ReferencesTable";
 import {post} from "../../../libs/api";
 import {MovieType} from "../../../types/movies";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
+
+
+const types = ["MOVIE", "TV"] as const;
 
 export default function References() {
     const [searchKey, setSearchKey] = useState<string>("");
@@ -16,18 +31,12 @@ export default function References() {
 
     const [data, setData] = useState<MovieType[] | null>(null);
 
+    const [selectedType, setSelectedType] = useState<string>(types[0]);
+
     // Get Tables
     const {trigger} =
         useSWRMutation(`../api/v1/admin/movies/references`, post);
 
-    const decrementTimer = useCallback(() => {
-        if (progress < 100) {
-            setProgress((oldProgress) => {
-                const diff = Math.random() * 65;
-                return Math.min(oldProgress + diff, 100);
-            });
-        }
-    }, [])
 
     useEffect(() => {
         if (isClickSearch) {
@@ -38,17 +47,17 @@ export default function References() {
                 })
             } else if (progress === 100) {
                 trigger({
+                    type: selectedType,
                     title: searchKey,
-                }).then((data) => setData(data))
+                })
+                    .then((data) => setData(data))
                     .finally(() => {
                         setIsClickSearch(false);
                     })
                     .catch((error) => {
-                        console.log(error);
-
                         setNotifyState({
                             open: true,
-                            message: error.message,
+                            message: error.message.message,
                             vertical: "top",
                             horizontal: "right",
                             severity: "error"
@@ -80,6 +89,28 @@ export default function References() {
                     <Typography variant="h4">The Movie Database Reference</Typography>
                 </Box>
                 <Divider/>
+
+
+                <FormControl>
+                    <FormLabel>Type</FormLabel>
+                    <RadioGroup
+                        row
+                        value={selectedType}
+                        onChange={(event) => setSelectedType(event.target.value)}
+                    >
+                        {types.map((t) => {
+                            let label;
+                            if (t === "MOVIE") {
+                                label = "Movie";
+                            } else if (t === "TV") {
+                                label = "TV Series";
+                            }
+                            return (
+                                <FormControlLabel value={t} control={<Radio/>} label={label}/>
+                            );
+                        })}
+                    </RadioGroup>
+                </FormControl>
 
                 <TextField
                     fullWidth

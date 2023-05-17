@@ -1,6 +1,7 @@
 export type MovieType = {
     id?: number,
     title: string,
+    type_code: string,
     description: string,
     release_date: string | null,
     runtime: number,
@@ -14,6 +15,7 @@ export type MovieType = {
 
 export type GenreType = {
     id: number,
-    genre: string,
+    name: string,
+    type_code: string,
     checked: boolean,
 }
