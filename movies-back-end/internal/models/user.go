@@ -11,9 +11,12 @@ type User struct {
 	FirstName string
 	LastName  string
 	RoleID    int
-	Role      Role `gorm:"foreignKey:RoleID"`
+	IsNew     bool
+	Role      *Role `gorm:"foreignKey:RoleID"`
 	CreatedAt time.Time
+	CreatedBy string
 	UpdatedAt time.Time
+	UpdatedBy string
 }
 
 type Role struct {
@@ -21,5 +24,7 @@ type Role struct {
 	RoleName  string
 	RoleCode  string
 	CreatedAt time.Time
+	CreatedBy string
 	UpdatedAt time.Time
+	UpdatedBy string
 }

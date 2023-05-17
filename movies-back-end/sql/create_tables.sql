@@ -21,6 +21,7 @@ CREATE TABLE public.users
     username   VARCHAR(50),
     email      VARCHAR(50),
     role_id    INTEGER REFERENCES roles (id) NOT NULL,
+    is_new     BOOLEAN DEFAULT TRUE          NOT NULL,
     created_at TIMESTAMP,
     created_by TEXT                          NOT NULL,
     updated_at TIMESTAMP,
@@ -150,9 +151,9 @@ VALUES ('admin', 'ADMIN', now(), 'admin', now(), 'admin'),
        ('general', 'GENERAL', now(), 'admin', now(), 'admin'),
        ('banned', 'BANNED', now(), 'admin', now(), 'admin');
 
-INSERT INTO public.users(first_name, last_name, username, email, role_id, created_at, created_by, updated_at,
+INSERT INTO public.users(first_name, last_name, username, email, role_id, is_new, created_at, created_by, updated_at,
                          updated_by)
-VALUES ('Admin', 'User', 'root', 'admin@example.com', (SELECT r.id FROM public.roles r WHERE role_code = 'ADMIN'),
+VALUES ('Admin', 'User', 'root', 'admin@example.com', (SELECT r.id FROM public.roles r WHERE role_code = 'ADMIN'), false,
         now(), 'admin', now(), 'admin');
 
 INSERT INTO public.views(viewed_at, viewed_by, movie_id)
