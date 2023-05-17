@@ -6,6 +6,6 @@ import (
 )
 
 type Service interface {
-	SignUp(ctx context.Context, userDto *dto.UserDto) error
+	SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error)
 	SignIn(ctx context.Context, username string) (*dto.UserDto, error)
 }

@@ -2,12 +2,17 @@ package service
 
 import (
 	"context"
+	"github.com/Nerzal/gocloak/v13"
 	"github.com/golang-jwt/jwt"
+	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/models"
+	"movies-service/internal/roles"
+	"movies-service/internal/users"
 	"strings"
+	"time"
 )
 
 type AuthClaims struct {
@@ -17,39 +22,60 @@ type AuthClaims struct {
 }
 
 type authService struct {
-	userRepository auth.UserRepository
+	keycloak       config.KeycloakConfig
+	cloak          *gocloak.GoCloak
+	roleRepository roles.Repository
+	userRepository users.UserRepository
 }
 
-func NewAuthService(
-	userRepository auth.UserRepository,
-) auth.Service {
+func NewAuthService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, roleRepository roles.Repository, userRepository users.UserRepository) auth.Service {
 	return &authService{
+		keycloak:       keycloak,
+		cloak:          cloak,
+		roleRepository: roleRepository,
 		userRepository: userRepository,
 	}
 }
 
-func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) error {
+func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
 	fmtUsername := strings.ToLower(userDto.Username)
-	euser, _ := a.userRepository.FindUserByUsername(ctx, fmtUsername)
-
-	if euser != nil {
-		return errors.ErrUserExisted
+	euser, _ := a.userRepository.FindUserByUsername(ctx, &models.User{
+		Username: fmtUsername,
+		IsNew:    false,
+	})
+	if euser != nil && !userDto.IsNew {
+		return nil, errors.ErrUserExisted
 	}
+
+	role, err := a.roleRepository.FindRoleByRoleCode(ctx, "BANNED")
+	if err != nil {
+		return nil, err
+	}
+
 	user := &models.User{
 		Username:  fmtUsername,
 		FirstName: userDto.FirstName,
 		LastName:  userDto.LastName,
+		Email:     userDto.Email,
+		IsNew:     userDto.IsNew,
+		CreatedAt: time.Now(),
+		CreatedBy: "keycloak",
+		UpdatedAt: time.Now(),
+		UpdatedBy: "keycloak",
+		Role:      role,
 	}
-	err := a.userRepository.InsertUser(ctx, user)
+	err = a.userRepository.InsertUser(ctx, user)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	return userDto, nil
 }
 
 func (a *authService) SignIn(ctx context.Context, username string) (*dto.UserDto, error) {
-	user, _ := a.userRepository.FindUserByUsername(ctx, username)
+	user, _ := a.userRepository.FindUserByUsername(ctx, &models.User{
+		Username: username,
+		IsNew:    false,
+	})
 	if user == nil {
 		return nil, errors.ErrNotFound
 	}
