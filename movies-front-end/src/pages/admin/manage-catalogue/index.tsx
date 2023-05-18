@@ -55,10 +55,10 @@ const ManageCatalogue = () => {
         if (deleteId && isConfirmDelete) {
             deleteMovie()
                 .then((data) => {
-                    if (data) {
+                    if (data.message === "ok") {
                         setNotifyState({
                             open: true,
-                            message: data.message,
+                            message: "Movie deleted",
                             vertical: "top",
                             horizontal: "right",
                             severity: "info"
@@ -73,7 +73,7 @@ const ManageCatalogue = () => {
                 .catch((error) => {
                     setNotifyState({
                         open: true,
-                        message: error.message,
+                        message: error.message.message,
                         vertical: "top",
                         horizontal: "right",
                         severity: "error"
@@ -97,7 +97,7 @@ const ManageCatalogue = () => {
         }).catch((error) => {
             setNotifyState({
                 open: true,
-                message: error.message,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"

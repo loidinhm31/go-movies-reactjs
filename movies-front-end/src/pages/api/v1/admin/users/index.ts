@@ -29,14 +29,14 @@ const handler = withRole("admin", async (req, res, token) => {
             headers: headers,
             body: JSON.stringify(page),
         }
-        const response = await fetch(`${process.env.API_BASE_URL}/users?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
-            requestOptions
-        );
-        if (response.ok) {
-            const pageResult = await response.json();
-            res.status(200).json(pageResult);
-        } else {
+
+        try {
+            const response = await fetch(`${process.env.API_BASE_URL}/auth/users?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
+                requestOptions
+            );
             res.status(response.status).json(await response.json())
+        } catch (error) {
+            res.status(500).json({message: "server error"});
         }
     } else if (req.method === "PATCH") {
         const data = req.body;
@@ -48,7 +48,7 @@ const handler = withRole("admin", async (req, res, token) => {
         }
 
         try {
-            const response = await fetch(`${process.env.API_BASE_URL}/users/role`,
+            const response = await fetch(`${process.env.API_BASE_URL}/auth/users/role`,
                 requestOptions
             );            res.status(response.status).json(await response.json());
         } catch (error) {

@@ -10,11 +10,11 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     };
 
-    const response = await fetch(`${process.env.API_BASE_URL}/analysis/movies/genres`, requestOptions);
-    if (response.ok) {
-        res.status(200).json(await response.json());
-    } else {
-        res.status(response.status).json(await response.json())
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/analysis/movies/genres`, requestOptions);
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
 });
 

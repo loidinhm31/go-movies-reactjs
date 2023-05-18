@@ -12,16 +12,15 @@ const handler = async (req, res) => {
         body: JSON.stringify(searchRequest),
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/search`,
-        requestOptions
-    );
-
-    if (response.ok) {
-        const pageResult = await response.json();
-        res.status(200).json(pageResult);
-    } else {
-        res.status(response.status).json(await response.json())
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/search`,
+            requestOptions
+        );
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
+
 };
 
 export default handler;

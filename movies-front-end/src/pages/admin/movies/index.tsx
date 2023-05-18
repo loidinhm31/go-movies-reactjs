@@ -96,7 +96,7 @@ const EditMovie = () => {
 
                 const checks: GenreType[] = [];
                 genres?.forEach((g) => {
-                    checks.push({id: g.id, checked: false, genre: g.genre});
+                    checks.push({id: g.id, checked: false, name: g.name});
                 });
 
                 setMovie((m) => ({
@@ -110,9 +110,9 @@ const EditMovie = () => {
 
                     genres?.forEach((g) => {
                         if (movie?.genres.some(mg => mg.id === g.id)) {
-                            checks.push({id: g.id, genre: g.genre, checked: true});
+                            checks.push({id: g.id, name: g.name, checked: true});
                         } else {
-                            checks.push({id: g.id, genre: g.genre, checked: false});
+                            checks.push({id: g.id, name: g.name, checked: false});
                         }
                     });
 
@@ -503,7 +503,7 @@ const EditMovie = () => {
                                             {Array.from(movie.genres).map((g, index) => (
                                                 <Grid key={g.id} item xs={2} sx={{m: 1}}>
                                                     <FormControlLabel
-                                                        label={g.genre}
+                                                        label={g.name}
                                                         name="genre"
                                                         key={index}
                                                         id={"genre-" + index}

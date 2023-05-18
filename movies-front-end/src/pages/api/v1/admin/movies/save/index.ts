@@ -21,12 +21,11 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         body: JSON.stringify(data)
     };
 
-    const response = await fetch(`${process.env.API_BASE_URL}/private/movies`, requestOptions);
-    if (response.ok) {
-        res.status(200).json({message: "Movie saved"});
-    } else {
-        const message = await response.json()
-        res.status(response.status).json(message.message! || "Failed to save movie");
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/movies`, requestOptions);
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
 });
 

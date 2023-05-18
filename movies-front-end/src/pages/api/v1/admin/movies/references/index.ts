@@ -15,14 +15,13 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         body: JSON.stringify(data),
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/integration/tmdb`,
-        requestOptions
-    );
-    if (response.ok) {
-        const pageResult = await response.json();
-        res.status(200).json(pageResult);
-    } else {
-        res.status(response.status).json(await response.json())
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/tmdb`,
+            requestOptions
+        );
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
 });
 

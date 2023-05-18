@@ -11,15 +11,13 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/private/movies/${id}`,
-        requestOptions
-    );
-
-    if (response.ok) {
-        res.status(200).json({message: "Movie deleted"});
-    } else {
-        const message = await response.json()
-        res.status(response.status).json(message.message! || "Failed to delete movie");
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/movies/${id}`,
+            requestOptions
+        );
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
 });
 
