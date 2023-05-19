@@ -30,8 +30,8 @@ func (gs *searchService) Search(ctx context.Context, searchParams *models.Search
 		if m.Genres != nil {
 			for _, g := range m.Genres {
 				genreDtos = append(genreDtos, &dto.GenreDto{
-					ID:    g.ID,
-					Genre: g.Genre,
+					ID:   g.ID,
+					Name: g.Name,
 				})
 			}
 		}

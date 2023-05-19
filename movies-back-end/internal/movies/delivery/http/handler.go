@@ -120,6 +120,7 @@ func (mh *movieHandler) PutMovie() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	}
 }
 
@@ -141,7 +142,7 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	}
 }
 
@@ -166,5 +167,6 @@ func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.JSON(http.StatusOK, gin.H{"message": "ok"})
 	}
 }

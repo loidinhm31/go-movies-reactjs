@@ -12,7 +12,7 @@ func MapMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
 	movieGroup.POST("/genres/:id", h.FetchMovieByGenre())
 }
 
-func MapRoleMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
+func MapAuthMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
 	movieGroup.PUT("/", h.PutMovie())
 	movieGroup.DELETE("/:id", h.DeleteMovie())
 	movieGroup.PATCH("/", h.PatchMovie())

@@ -7,12 +7,11 @@ import (
 	"log"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
 	"movies-service/internal/movies"
 	"movies-service/pkg/pagination"
-	"movies-service/pkg/utils"
-	"time"
 )
 
 type movieService struct {
@@ -36,32 +35,8 @@ func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *paginatio
 		return nil, errors.New("not found")
 	}
 
-	var movieDtos []*dto.MovieDto
-	for _, m := range movieResults.Content {
-		var genreDtos []*dto.GenreDto
-		if m.Genres != nil {
-			for _, g := range m.Genres {
-				genreDtos = append(genreDtos, &dto.GenreDto{
-					ID:    g.ID,
-					Genre: g.Genre,
-				})
-			}
-		}
+	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
 
-		movieDtos = append(movieDtos, &dto.MovieDto{
-			ID:          m.ID,
-			Title:       m.Title,
-			ReleaseDate: m.ReleaseDate,
-			Runtime:     m.Runtime,
-			MpaaRating:  m.MpaaRating,
-			Description: m.Description,
-			ImagePath:   m.ImagePath.String,
-			VideoPath:   m.VideoPath.String,
-			CreatedAt:   m.CreatedAt,
-			UpdatedAt:   m.UpdatedAt,
-			Genres:      genreDtos,
-		})
-	}
 	return &pagination.Page[*dto.MovieDto]{
 		PageSize:      pageRequest.PageSize,
 		PageNumber:    pageRequest.PageNumber,
@@ -79,29 +54,7 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 		return nil, errors.New("not found")
 	}
 
-	var genreDtos []*dto.GenreDto
-	if movie.Genres != nil {
-		for _, g := range movie.Genres {
-			genreDtos = append(genreDtos, &dto.GenreDto{
-				ID:    g.ID,
-				Genre: g.Genre,
-			})
-		}
-	}
-
-	movieDto := &dto.MovieDto{
-		ID:          movie.ID,
-		Title:       movie.Title,
-		ReleaseDate: movie.ReleaseDate,
-		Runtime:     movie.Runtime,
-		MpaaRating:  movie.MpaaRating,
-		Description: movie.Description,
-		ImagePath:   movie.ImagePath.String,
-		VideoPath:   movie.VideoPath.String,
-		CreatedAt:   movie.CreatedAt,
-		UpdatedAt:   movie.UpdatedAt,
-		Genres:      genreDtos,
-	}
+	movieDto := mapper.MapToMovieDto(movie)
 	return movieDto, nil
 }
 
@@ -114,32 +67,8 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 		return nil, errors.New("not found")
 	}
 
-	var movieDtos []*dto.MovieDto
-	for _, m := range movieResults.Content {
-		var genreDtos []*dto.GenreDto
-		if m.Genres != nil {
-			for _, g := range m.Genres {
-				genreDtos = append(genreDtos, &dto.GenreDto{
-					ID:    g.ID,
-					Genre: g.Genre,
-				})
-			}
-		}
+	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
 
-		movieDtos = append(movieDtos, &dto.MovieDto{
-			ID:          m.ID,
-			Title:       m.Title,
-			ReleaseDate: m.ReleaseDate,
-			Runtime:     m.Runtime,
-			MpaaRating:  m.MpaaRating,
-			Description: m.Description,
-			ImagePath:   m.ImagePath.String,
-			VideoPath:   m.VideoPath.String,
-			CreatedAt:   m.CreatedAt,
-			UpdatedAt:   m.UpdatedAt,
-			Genres:      genreDtos,
-		})
-	}
 	return &pagination.Page[*dto.MovieDto]{
 		PageSize:      pageRequest.PageSize,
 		PageNumber:    pageRequest.PageNumber,
@@ -171,29 +100,12 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 
 	for _, genre := range movie.Genres {
 		if genre.Checked {
-			genreObjects = append(genreObjects, &models.Genre{
-				ID:        genre.ID,
-				Genre:     genre.Genre,
-				CreatedBy: author,
-				UpdatedBy: author,
-			})
+			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
 		}
 	}
 
-	movieObject := &models.Movie{
-		Title:       movie.Title,
-		ReleaseDate: movie.ReleaseDate,
-		Runtime:     movie.Runtime,
-		MpaaRating:  movie.MpaaRating,
-		Description: movie.Description,
-		ImagePath:   utils.StringToSQLNullString(movie.ImagePath),
-		VideoPath:   utils.StringToSQLNullString(movie.VideoPath),
-		CreatedAt:   time.Now(),
-		CreatedBy:   author,
-		UpdatedAt:   time.Now(),
-		UpdatedBy:   author,
-		Genres:      genreObjects,
-	}
+	movieObject := mapper.MapToMovie(movie, author)
+	movieObject.Genres = genreObjects
 
 	err := ms.movieRepository.InsertMovie(ctx, movieObject)
 	if err != nil {
@@ -223,18 +135,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		return errors.New("cannot find object")
 	}
 
-	movieObj = &models.Movie{
-		ID:          movie.ID,
-		Title:       movie.Title,
-		ReleaseDate: movie.ReleaseDate,
-		Runtime:     movie.Runtime,
-		MpaaRating:  movie.MpaaRating,
-		Description: movie.Description,
-		ImagePath:   utils.StringToSQLNullString(movie.ImagePath),
-		VideoPath:   utils.StringToSQLNullString(movie.VideoPath),
-		UpdatedAt:   time.Now(),
-		UpdatedBy:   author,
-	}
+	movieObj = mapper.MapToMovieUpdate(movie, author)
 
 	err = ms.movieRepository.UpdateMovie(ctx, movieObj)
 	if err != nil {
@@ -244,11 +145,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	var genreObjects []*models.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
-			genreObjects = append(genreObjects, &models.Genre{
-				ID:        genre.ID,
-				CreatedBy: author,
-				UpdatedBy: author,
-			})
+			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
 		}
 	}
 	err = ms.movieRepository.UpdateMovieGenres(ctx, movieObj, genreObjects)

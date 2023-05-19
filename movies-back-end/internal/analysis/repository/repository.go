@@ -25,11 +25,11 @@ func (ar *analysisRepository) CountMoviesByGenre(ctx context.Context) ([]*models
 	if ar.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Raw("SELECT g.genre, COUNT(mg.movie_id) AS num_movies " +
+	err := tx.Raw("SELECT g.name, COUNT(mg.movie_id) AS num_movies " +
 		"FROM genres g " +
 		"INNER JOIN movies_genres mg on g.id = mg.genre_id " +
-		"GROUP BY g.genre " +
-		"ORDER BY g.genre;").
+		"GROUP BY g.name " +
+		"ORDER BY g.name;").
 		Scan(&result).Error
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context
 		InnerJoins("INNER JOIN movies on movies.id = views.movie_id").
 		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
 		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
-		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+		Where("LOWER(genres.name) = LOWER(?)", request.Genre)
 
 	orBuild := ar.db
 	for _, a := range request.Analysis {
@@ -125,7 +125,7 @@ func (ar *analysisRepository) CountCumulativeViewsByGenreAndViewedDate(ctx conte
 		InnerJoins("INNER JOIN movies on movies.id = views.movie_id").
 		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
 		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
-		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+		Where("LOWER(genres.name) = LOWER(?)", request.Genre)
 
 	orBuild := ar.db
 	for _, a := range request.Analysis {
@@ -179,7 +179,7 @@ func (ar *analysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.Cont
 			"SUM(COUNT(movies.id)) OVER (ORDER BY EXTRACT(YEAR FROM movies.release_date), EXTRACT(MONTH FROM movies.release_date)) AS cumulative").
 		InnerJoins("INNER JOIN movies_genres on movies.id = movies_genres.movie_id").
 		InnerJoins("INNER JOIN genres on genres.id = movies_genres.genre_id").
-		Where("LOWER(genres.genre) = LOWER(?)", request.Genre)
+		Where("LOWER(genres.name) = LOWER(?)", request.Genre)
 
 	orBuild := ar.db
 	for _, a := range request.Analysis {

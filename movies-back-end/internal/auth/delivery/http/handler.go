@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/gin-gonic/gin"
+	"log"
 	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/dto"
@@ -53,5 +54,30 @@ func (h *authHandler) Login() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, userDto)
+	}
+}
+
+func (h *authHandler) SignUp() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := &dto.UserDto{}
+		if err := utils.ReadRequest(c, user); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		user, err := h.authService.SignUp(c, user)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "cannot create user",
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, user)
 	}
 }

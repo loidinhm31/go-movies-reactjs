@@ -5,6 +5,7 @@ import "time"
 type MovieDto struct {
 	ID          int         `json:"id,omitempty"`
 	Title       string      `json:"title,omitempty"`
+	TypeCode    string      `json:"type"`
 	ReleaseDate time.Time   `json:"release_date,omitempty"`
 	Runtime     int         `json:"runtime,omitempty"`
 	MpaaRating  string      `json:"mpaa_rating,omitempty"`
@@ -21,7 +22,8 @@ type MovieDto struct {
 
 type GenreDto struct {
 	ID        int       `json:"id"`
-	Genre     string    `json:"genre"`
+	Name      string    `json:"name"`
+	TypeCode  string    `json:"type_code"`
 	Checked   bool      `json:"checked,omitempty"`
 	CreatedAt time.Time `json:"-"`
 	UpdatedAt time.Time `json:"-"`

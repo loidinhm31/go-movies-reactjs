@@ -102,7 +102,7 @@ func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.Mo
 	client := &http.Client{}
 
 	var theUrl string
-	if movie.Type == "tv" {
+	if movie.TypeCode == "TV" {
 		theUrl = fmt.Sprintf("%s/search/tv?api_key=%s", is.cfg.Tmdb.Url, is.cfg.Tmdb.ApiKey)
 	} else {
 		theUrl = fmt.Sprintf("%s/search/movie?api_key=%s", is.cfg.Tmdb.Url, is.cfg.Tmdb.ApiKey)

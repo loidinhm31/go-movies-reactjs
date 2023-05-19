@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	authHttp "movies-service/internal/auth/delivery/http"
-	userRepository "movies-service/internal/auth/repository"
 	authService "movies-service/internal/auth/service"
 	managementService "movies-service/internal/control/service"
 	"movies-service/internal/middlewares"
@@ -29,6 +28,14 @@ import (
 	viewRepository "movies-service/internal/views/repository"
 	viewService "movies-service/internal/views/service"
 
+	roleHttp "movies-service/internal/roles/delivery/http"
+	roleRepository "movies-service/internal/roles/repository"
+	roleService "movies-service/internal/roles/service"
+
+	userHttp "movies-service/internal/users/delivery/http"
+	userRepository "movies-service/internal/users/repository"
+	userService "movies-service/internal/users/service"
+
 	integrationHttp "movies-service/internal/integration/delivery/http"
 	integrationService "movies-service/internal/integration/service"
 
@@ -37,7 +44,10 @@ import (
 )
 
 func (s *Server) MapHandlers(g *gin.Engine) error {
+	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
+
 	// Init repositories
+	rRepo := roleRepository.NewRoleRepository(s.cfg, s.db)
 	uRepo := userRepository.NewUserRepository(s.cfg, s.db)
 	mRepo := movieRepository.NewMovieRepository(s.cfg, s.db)
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
@@ -47,23 +57,26 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(uRepo)
-	aService := authService.NewAuthService(uRepo)
+	aService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, rRepo, uRepo)
+	rService := roleService.NewRoleService(rRepo)
 	mService := movieService.NewMovieService(managementCtrl, mRepo)
-	gService := genreService.NewGenreService(gRepo)
+	gService := genreService.NewGenreService(managementCtrl, gRepo)
 	sService := searchService.NewSearchService(sRepo)
 	anService := analysisService.NewAnalysisService(managementCtrl, anRepo)
 	vService := viewService.NewViewService(managementCtrl, vRepo)
 	iService := integrationService.NewIntegrationService(s.cfg, managementCtrl, mRepo)
+	uService := userService.NewUserService(managementCtrl, rRepo, uRepo)
 
 	// Init handler
-	s.cloak = gocloak.NewClient(s.cfg.Keycloak.EndPoint)
 	aHandler := authHttp.NewAuthHandler(aService, s.cfg.Keycloak, s.cloak)
+	rHandler := roleHttp.NewRoleHandler(rService)
 	mHandler := movieHttp.NewMovieHandler(mService)
 	gHandler := genreHttp.NewGenreHandler(gService)
 	sHandler := searchHttp.NewGraphHandler(sService)
 	anHandler := analysisHttp.NewAnalysisHandler(anService)
 	vHandler := viewHttp.NewViewHandler(vService)
 	iHandler := integrationHttp.NewIntegrationHandler(iService)
+	uHandler := userHttp.NewUserHandler(uService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, aService)
@@ -72,11 +85,33 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	apiV1 := g.Group("/api/v1")
 	health := apiV1.Group("/health")
 
-	privateMovieGroup := apiV1.Group("/private/movies")
-	privateMovieGroup.Use(mw.JWTValidation())
-	movieHttp.MapRoleMovieRoutes(privateMovieGroup, mHandler)
+	authGroup := apiV1.Group("/auth")
+	authGroup.Use(mw.JWTValidation())
+	authHttp.MapAuthRoutes(authGroup, aHandler)
 
-	authGroupPublic := apiV1.Group("/auth")
+	movieAuthGroup := authGroup.Group("/movies")
+	movieAuthGroup.Use(mw.JWTValidation())
+	movieHttp.MapAuthMovieRoutes(movieAuthGroup, mHandler)
+
+	genreAuthGroup := authGroup.Group("/genres")
+	genreAuthGroup.Use(mw.JWTValidation())
+	genreHttp.MapAuthGenreRoutes(genreAuthGroup, gHandler)
+
+	authRoleGroup := authGroup.Group("/roles")
+	authRoleGroup.Use(mw.JWTValidation())
+	roleHttp.MapRoleRoutes(authRoleGroup, rHandler)
+
+	authUserGroup := authGroup.Group("/users")
+	authUserGroup.Use(mw.JWTValidation())
+	userHttp.MapUserRoutes(authUserGroup, uHandler)
+
+	authAnalysisGroup := authGroup.Group("/analysis")
+	authAnalysisGroup.Use(mw.JWTValidation())
+	analysisHttp.MapAnalysisRoutes(authAnalysisGroup, anHandler)
+
+	authIntegrationGroup := authGroup.Group("/integration")
+	authIntegrationGroup.Use(mw.JWTValidation())
+	integrationHttp.MapIntegrationRoutes(authIntegrationGroup, iHandler)
 
 	movieGroup := apiV1.Group("/movies")
 
@@ -84,21 +119,13 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	searchGroup := apiV1.Group("/search")
 
-	analysisGroup := apiV1.Group("/analysis")
-
 	viewGroup := apiV1.Group("/views")
 
-	integrationGroup := apiV1.Group("/integration")
-	integrationGroup.Use(mw.JWTValidation())
-
 	// Map routes
-	authHttp.MapAuthRoutes(authGroupPublic, aHandler)
 	movieHttp.MapMovieRoutes(movieGroup, mHandler)
 	genreHttp.MapGenreRoutes(genreGroup, gHandler)
 	searchHttp.MapGraphRoutes(searchGroup, sHandler)
-	analysisHttp.MapAnalysisRoutes(analysisGroup, anHandler)
 	viewHttp.MapViewRoutes(viewGroup, vHandler)
-	integrationHttp.MapIntegrationRoutes(integrationGroup, iHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())

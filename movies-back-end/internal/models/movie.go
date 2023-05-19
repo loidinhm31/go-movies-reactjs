@@ -9,6 +9,7 @@ import (
 type Movie struct {
 	ID          int `gorm:"primary_key"`
 	Title       string
+	TypeCode    string
 	ReleaseDate time.Time
 	Runtime     int
 	MpaaRating  string
@@ -29,7 +30,8 @@ func (m Movie) BeforeDelete(tx *gorm.DB) (err error) {
 
 type Genre struct {
 	ID        int `gorm:"primary_key"`
-	Genre     string
+	Name      string
+	TypeCode  string
 	CreatedAt time.Time
 	CreatedBy string
 	UpdatedAt time.Time
