@@ -125,7 +125,7 @@ export default function AreaChart() {
             .catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: error.message,
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
                     severity: "error"

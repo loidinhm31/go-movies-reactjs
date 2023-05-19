@@ -78,7 +78,7 @@ export default function DoughnutChart() {
                         label: "# of Movies By Genre",
                         data: numberData,
                         backgroundColor: backgroundColors,
-                        borderColor: backgroundColors,
+                        borderColor: borderColors,
                         borderWidth: 1,
                     },
                 ],
@@ -87,7 +87,7 @@ export default function DoughnutChart() {
         onError: (error) => {
             setNotifyState({
                 open: true,
-                message: error.message,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"

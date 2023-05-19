@@ -66,7 +66,7 @@ export default function LineChart() {
                 .then((data: GenreType[]) => {
                     setGenreOptions(data);
                     if (data.length > 0) {
-                        setSelectedGenre(data[0].genre);
+                        setSelectedGenre(data[0].name);
                     }
                 })
                 .catch((error) => console.log(error));
@@ -153,6 +153,15 @@ export default function LineChart() {
                         }
                     }
                 })
+            })
+            .catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
             });
 
         request.isCumulative = true;
@@ -184,6 +193,15 @@ export default function LineChart() {
                         cumulativeViewersData.push(0);
                     })
                 }
+            })
+            .catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
             });
 
         setDataChart({
@@ -225,7 +243,7 @@ export default function LineChart() {
                     {genreOptions &&
                         genreOptions.map((g) => {
                             return (
-                                <MenuItem key={g.id} value={g.genre}>{g.genre}</MenuItem>
+                                <MenuItem key={g.id} value={g.name}>{g.name}</MenuItem>
                             );
                         })
                     }
