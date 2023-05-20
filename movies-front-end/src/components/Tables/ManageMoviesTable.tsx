@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from "react";
 import {
     Box,
     Button,
-    Chip,
+    Chip, IconButton,
     Paper,
     Table,
     TableBody,
@@ -18,9 +18,12 @@ import {MovieType} from "../../types/movies";
 import AlertDialog from "../shared/alert";
 import {Direction, PageType} from "../../types/page";
 import {format} from "date-fns";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export interface Data {
     title: string;
+    type_code: string;
     release_date: Date;
     rating: number;
 }
@@ -38,6 +41,12 @@ const headCells: readonly HeadCell[] = [
         numeric: false,
         disablePadding: false,
         label: "Movie",
+    },
+    {
+        id: "type_code",
+        numeric: false,
+        disablePadding: false,
+        label: "Type",
     },
     {
         id: "release_date",
@@ -115,19 +124,19 @@ interface EnhancedTableProps {
 }
 
 export default function ManageMoviesTable({
-                                          confirmDelete,
-                                          order,
-                                          orderBy,
-                                          page,
-                                          pageIndex,
-                                          rowsPerPage,
-                                          setConfirmDelete,
-                                          setDeleteId,
-                                          setOrder,
-                                          setOrderBy,
-                                          setPageIndex,
-                                          setRowsPerPage
-                                      }: EnhancedTableProps) {
+                                              confirmDelete,
+                                              order,
+                                              orderBy,
+                                              page,
+                                              pageIndex,
+                                              rowsPerPage,
+                                              setConfirmDelete,
+                                              setDeleteId,
+                                              setOrder,
+                                              setOrderBy,
+                                              setPageIndex,
+                                              setRowsPerPage
+                                          }: EnhancedTableProps) {
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
     const [selectedTitle, setSelectedTitle] = useState("");
     const [selectedId, setSelectedId] = useState<number | null>();
@@ -199,8 +208,6 @@ export default function ManageMoviesTable({
                             <TableBody>
                                 {page
                                     ? page.content?.map((row, index) => {
-                                        const labelId = `enhanced-table-checkbox-${index}`;
-
                                         return (
                                             <TableRow
                                                 hover
@@ -209,34 +216,33 @@ export default function ManageMoviesTable({
                                                 key={row.id}
                                                 sx={{cursor: "pointer"}}
                                             >
-
-                                                <TableCell
-                                                    id={labelId}
-
-                                                >
+                                                <TableCell>
                                                     <Chip label={row.title} color="info" component="a"
                                                           href={`/movies/${row.id}`} clickable/>
                                                 </TableCell>
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
+                                                    {row.type_code}
+                                                </TableCell>
+                                                <TableCell>
                                                     {format(new Date(row.release_date!), "yyyy-MM-dd")}
                                                 </TableCell>
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
                                                     {row.mpaa_rating}
                                                 </TableCell>
                                                 <TableCell>
                                                     <Box sx={{display: "flex", gap: 1}}>
-                                                        <Button variant="contained" color="inherit"
-                                                                href={`/admin/movies?id=${row.id}`}>
-                                                            Edit
-                                                        </Button>
-                                                        <Button variant="contained" color="error"
-                                                                onClick={() => handleDeleteRow(row)}>
-                                                            Delete
-                                                        </Button>
+                                                        <IconButton
+                                                            color="inherit"
+                                                            href={`/admin/movies?id=${row.id}`}
+                                                        >
+                                                            <EditIcon/>
+                                                        </IconButton>
+                                                        <IconButton
+                                                            color="error"
+                                                            onClick={() => handleDeleteRow(row)}
+                                                        >
+                                                            <DeleteIcon/>
+                                                        </IconButton>
                                                     </Box>
                                                 </TableCell>
                                             </TableRow>
