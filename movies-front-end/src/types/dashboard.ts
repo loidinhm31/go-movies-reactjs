@@ -7,12 +7,14 @@ export interface Data {
     month?: string;
     count: number;
     cumulative?: number;
-    genre?: string;
+    name?: string;
+    type_code?: string;
 }
 
 export interface AnalysisRequest {
     analysis: Analysis[];
-    genre?: string;
+    name?: string;
+    type_code?: string;
     isCumulative?: boolean
 }
 

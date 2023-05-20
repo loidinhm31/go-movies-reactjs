@@ -4,12 +4,14 @@ import useSWR from "swr";
 import {Result} from "../../types/dashboard";
 import {get} from "../../libs/api";
 import Skeleton from "@mui/material/Skeleton";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import NotifySnackbar, {NotifyState} from "../shared/snackbar";
 import {CircularProgress} from "@mui/material";
+import useSWRMutation from "swr/mutation";
+import {useMovieType} from "../../hooks/useMovieType";
 
 
-export default function DoughnutChart() {
+export default function DoughnutChart({movieType}) {
     ChartJS.register(ArcElement, Tooltip, Legend);
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
@@ -43,6 +45,10 @@ export default function DoughnutChart() {
         "rgba(50, 25, 200, 0.2)",
         "rgba(250, 25, 200, 0.2)",
         "rgba(50, 250, 200, 0.2)",
+        "rgba(50, 206, 50, 0.2)",
+        "rgba(50, 130, 111, 0.2)",
+        "rgba(80, 10, 100, 0.2)",
+        "rgba(255, 122, 180, 0.2)",
     ];
 
     const borderColors = [
@@ -59,41 +65,57 @@ export default function DoughnutChart() {
         "rgba(50, 25, 200, 1)",
         "rgba(250, 25, 200, 1)",
         "rgba(50, 250, 200, 1)",
+        "rgba(50, 206, 50, 1)",
+        "rgba(50, 130, 111, 1)",
+        "rgba(80, 10, 100, 1)",
+        "rgba(255, 122, 180, 1)",
     ]
 
-    const {isLoading, data: result, error} = useSWR<Result>("../../api/v1/admin/dashboard/movies/genres", get, {
-        onSuccess: (result) => {
-            const labels = result.data.map((d) => {
-                return d.genre!;
-            });
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-            const numberData = result.data.map((d) => {
-                return d.count;
-            });
+    const selectedType = useMovieType(movieType);
 
-            setDataChart({
-                labels: labels,
-                datasets: [
-                    {
-                        label: "# of Movies By Genre",
-                        data: numberData,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1,
-                    },
-                ],
-            });
-        },
-        onError: (error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
-            });
+    const {trigger: fetchData, error} = useSWRMutation<Result>(`../../api/v1/admin/dashboard/movies/genres?type=${selectedType}`, get);
+
+
+    useEffect(() => {
+        console.log("trigger")
+        console.log(selectedType)
+        if (selectedType !== undefined) {
+            setIsLoading(true);
+            fetchData().then((result) => {
+                console.log(result)
+                const labels = result!.data.map((d) => {
+                    return `${d.name!} - ${d.type_code!}`;
+                });
+
+                const numberData = result!.data.map((d) => {
+                    return d.count;
+                });
+
+                setDataChart({
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: "# of Movies By Genre",
+                            data: numberData,
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 1,
+                        },
+                    ],
+                });
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
+            }).finally(() => setIsLoading(false));
         }
-    });
+    }, [selectedType]);
 
     return (
         <>

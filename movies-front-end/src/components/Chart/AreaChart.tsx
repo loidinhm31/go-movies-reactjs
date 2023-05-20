@@ -18,8 +18,9 @@ import NotifySnackbar, {NotifyState} from "../shared/snackbar";
 import {CircularProgress} from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
 import {format} from "date-fns";
+import {useMovieType} from "../../hooks/useMovieType";
 
-export default function AreaChart() {
+export default function AreaChart({movieType}) {
     ChartJS.register(
         CategoryScale,
         LinearScale,
@@ -30,6 +31,8 @@ export default function AreaChart() {
         Filler,
         Legend
     );
+
+    const selectedType = useMovieType(movieType);
 
     const [dataChart, setDataChart] = useState<any>(null);
 
@@ -72,7 +75,6 @@ export default function AreaChart() {
             timeArr.push(t1);
             labels.push(t2);
         }
-        console.log(timeArr)
 
         labels.reverse();
         timeArr.reverse();
@@ -94,6 +96,7 @@ export default function AreaChart() {
 
         const request: AnalysisRequest = {
             analysis: analysis,
+            type_code: selectedType,
         }
 
         trigger(request)
@@ -134,7 +137,7 @@ export default function AreaChart() {
             .finally(() => {
                 setIsLoading(false);
             })
-    }, [])
+    }, [selectedType])
 
     return (
         <>

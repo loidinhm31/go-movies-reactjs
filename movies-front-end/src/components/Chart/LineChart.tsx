@@ -10,16 +10,17 @@ import {
     Tooltip,
 } from "chart.js";
 import useSWRMutation from "swr/mutation";
-import {post} from "src/libs/api";
+import {get, post} from "src/libs/api";
 import {GenreType} from "src/types/movies";
-import {Box, CircularProgress, MenuItem, TextField} from "@mui/material";
+import {Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import {useEffect, useState} from "react";
-import {Analysis, AnalysisRequest, Data, Result} from "src/types/dashboard";
+import {Analysis, AnalysisRequest, Result} from "src/types/dashboard";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import Skeleton from "@mui/material/Skeleton";
 import {format} from "date-fns";
+import {useMovieType} from "../../hooks/useMovieType";
 
-export default function LineChart() {
+export default function LineChart({movieType}) {
     ChartJS.register(
         CategoryScale,
         LinearScale,
@@ -29,6 +30,8 @@ export default function LineChart() {
         Tooltip,
         Legend
     );
+
+    const selectedType = useMovieType(movieType);
 
     const [genreOptions, setGenreOptions] = useState<readonly GenreType[]>([]);
 
@@ -53,7 +56,7 @@ export default function LineChart() {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const {trigger: triggerGenres} = useSWRMutation<GenreType[]>(`../../api/v1/genres`, post);
+    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`../../api/v1/genres?type=${selectedType}`, get);
     const {trigger: triggerViews, error: viewErr} = useSWRMutation(`../../api/v1/admin/dashboard/views/genres`, post);
     const {
         trigger: triggerMovies,
@@ -61,33 +64,37 @@ export default function LineChart() {
     } = useSWRMutation(`../../api/v1/admin/dashboard/movies/genres/release-date`, post);
 
     useEffect(() => {
-        if (genreOptions.length == 0) {
-            triggerGenres()
-                .then((data: GenreType[]) => {
-                    setGenreOptions(data);
-                    if (data.length > 0) {
-                        setSelectedGenre(data[0].name);
-                    }
-                })
-                .catch((error) => console.log(error));
-        } else {
-            setUpChart(selectedGenre);
-        }
-    }, [selectedGenre]);
+        // Reset value
+        setDataChart(null);
+        setSelectedGenre("");
 
-    const handleSelectedGenre = (value: string) => {
-        setSelectedGenre(value);
+        if (selectedType === "") {
+            setGenreOptions([]);
+        } else {
+            fetchGenres().then((data: GenreType[]) => {
+                    setGenreOptions(data);
+                }).catch((error) => console.log(error));
+        }
+    }, [selectedType]);
+
+    useEffect(() => {
+        if (genreOptions.length > 0) {
+            setUpChart();
+        }
+    }, [selectedGenre])
+
+    const handleSelectedGenre = (event: SelectChangeEvent) => {
+        setSelectedGenre(event.target.value as string);
 
         setIsLoading(true);
 
-        setUpChart(value);
+        // Set up chart
+        setUpChart();
 
         setIsLoading(false);
-
     }
 
-    const setUpChart = (genre: string) => {
-
+    const setUpChart = () => {
         const labels: string[] = [];
         const moviesData: number[] = [];
         const viewersData: number[] = [];
@@ -98,14 +105,14 @@ export default function LineChart() {
 
         let currMoment = new Date().getTime();
         let t1 = format(currMoment, "yyyy-M");
-        let t2 = format(currMoment,"yyyy-MMMM");
+        let t2 = format(currMoment, "yyyy-MMMM");
         timeArr.push(t1);
         labels.push(t2);
 
         for (let i = 0; i < 11; i++) {
-            currMoment = currMoment - 30*24*60*60*1000 // subtract 1 month
+            currMoment = currMoment - 30 * 24 * 60 * 60 * 1000 // subtract 1 month
             t1 = format(currMoment, "yyyy-M");
-            t2 = format(currMoment,"MMM-yyyy");
+            t2 = format(currMoment, "MMM-yyyy");
             timeArr.push(t1);
             labels.push(t2);
         }
@@ -129,9 +136,11 @@ export default function LineChart() {
             })
         });
 
+        const currGenre = genreOptions.find((g) => g.id === parseInt(selectedGenre));
         const request: AnalysisRequest = {
             analysis: analysis,
-            genre: selectedGenre,
+            name: currGenre?.name,
+            type_code: currGenre?.type_code,
         };
 
         triggerMovies(request)
@@ -231,35 +240,41 @@ export default function LineChart() {
             <NotifySnackbar state={notifyState} setState={setNotifyState}/>
 
             <Box sx={{m: 1, p: 1}}>
-                <TextField
-                    select
-                    variant="outlined"
-                    sx={{minWidth: 100}}
-                    label="Select Genre"
-                    value={selectedGenre}
-                    onChange={(event) =>
-                        handleSelectedGenre(event.target.value)}
-                >
-                    {genreOptions &&
-                        genreOptions.map((g) => {
-                            return (
-                                <MenuItem key={g.id} value={g.name}>{g.name}</MenuItem>
-                            );
-                        })
+                <FormControl fullWidth>
+                    <InputLabel id="demo-simple-select-label">Select Genre</InputLabel>
+                    <Select
+                        variant="outlined"
+                        sx={{minWidth: 100}}
+                        label="Select Genre"
+                        value={selectedGenre}
+                        onChange={handleSelectedGenre}
+                    >
+                        {genreOptions &&
+                            genreOptions.map((g, index) => {
+                                return (
+                                    <MenuItem
+                                        key={`${g.id}-${index}`}
+                                        value={g.id}
+                                    >
+                                        {g.name} - {g.type_code}
+                                    </MenuItem>
+                                );
+                            })
+                        }
+                    </Select>
+
+                    {isLoading &&
+                        <CircularProgress/>
                     }
-                </TextField>
 
-                {isLoading &&
-                    <CircularProgress/>
-                }
+                    {(viewErr || movieErr) &&
+                        <Skeleton variant="rectangular" width={100} height={50}/>
+                    }
 
-                {(viewErr || movieErr) &&
-                    <Skeleton variant="rectangular" width={100} height={50}/>
-                }
-
-                {dataChart !== null && !isLoading &&
-                    <Line options={options} data={dataChart}/>
-                }
+                    {dataChart !== null && !isLoading &&
+                        <Line options={options} data={dataChart}/>
+                    }
+                </FormControl>
             </Box>
         </>
 
