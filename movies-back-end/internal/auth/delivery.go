@@ -6,4 +6,5 @@ type Handler interface {
 	Ping() gin.HandlerFunc
 	Login() gin.HandlerFunc
 	SignUp() gin.HandlerFunc
+	FetchUserFromOIDC() gin.HandlerFunc
 }

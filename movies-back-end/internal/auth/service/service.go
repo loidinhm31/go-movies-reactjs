@@ -2,12 +2,16 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/golang-jwt/jwt"
+	"log"
 	"movies-service/config"
 	"movies-service/internal/auth"
+	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
 	"movies-service/internal/roles"
 	"movies-service/internal/users"
@@ -24,14 +28,16 @@ type AuthClaims struct {
 type authService struct {
 	keycloak       config.KeycloakConfig
 	cloak          *gocloak.GoCloak
+	mgmtCtrl       control.Service
 	roleRepository roles.Repository
 	userRepository users.UserRepository
 }
 
-func NewAuthService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, roleRepository roles.Repository, userRepository users.UserRepository) auth.Service {
+func NewAuthService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, mgmtCtrl control.Service, roleRepository roles.Repository, userRepository users.UserRepository) auth.Service {
 	return &authService{
 		keycloak:       keycloak,
 		cloak:          cloak,
+		mgmtCtrl:       mgmtCtrl,
 		roleRepository: roleRepository,
 		userRepository: userRepository,
 	}
@@ -97,4 +103,35 @@ func (a *authService) SignIn(ctx context.Context, username string) (*dto.UserDto
 		UpdatedAt: user.UpdatedAt,
 	}
 	return userDto, nil
+}
+
+func (a *authService) FindUserFromODIC(ctx context.Context, username *string) (*dto.UserDto, error) {
+	log.Println("checking admin privilege...")
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !a.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrNotFound
+	}
+
+	accessToken := fmt.Sprintf("%s", ctx.Value(middlewares.CtxAccessToken))
+	getUsers, err := a.cloak.GetUsers(ctx, accessToken, a.keycloak.Realm, gocloak.GetUsersParams{
+		Username: username,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(getUsers) == 0 {
+		return nil, nil
+	}
+
+	oidcUser := getUsers[0]
+	if !*oidcUser.Enabled {
+		return nil, errors.ErrInvalidClient
+	}
+
+	return &dto.UserDto{
+		Username:  *oidcUser.Username,
+		Email:     *oidcUser.Email,
+		FirstName: *oidcUser.FirstName,
+		LastName:  *oidcUser.LastName,
+	}, nil
 }

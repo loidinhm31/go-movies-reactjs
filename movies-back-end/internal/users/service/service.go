@@ -2,17 +2,19 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
 	"movies-service/internal/roles"
 	"movies-service/internal/users"
 	"movies-service/pkg/pagination"
 	"strconv"
+	"strings"
+	"time"
 )
 
 type userService struct {
@@ -33,7 +35,7 @@ func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.Page
 	log.Println("checking admin privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
-		return nil, errors.New("unauthorized")
+		return nil, errors.ErrUnAuthorized
 	}
 
 	isNewBool, _ := strconv.ParseBool(isNew)
@@ -43,7 +45,7 @@ func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.Page
 	userResults, err := u.userRepository.FindAllUsers(ctx, pageRequest, page, key, isNewBool)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("not found")
+		return nil, errors.ErrNotFound
 	}
 
 	var userDtos []*dto.UserDto
@@ -78,7 +80,7 @@ func (u *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) 
 	log.Println("checking admin privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
-		return errors.New("unauthorized")
+		return errors.ErrUnAuthorized
 	}
 
 	user, err := u.userRepository.FindUserById(ctx, userDto.ID)
@@ -96,4 +98,41 @@ func (u *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) 
 		return err
 	}
 	return nil
+}
+
+func (u *userService) AddOidcUser(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
+	log.Println("Checking user...")
+	fmtUsername := strings.ToLower(userDto.Username)
+	euser, _ := u.userRepository.FindUserByUsername(ctx, &models.User{
+		Username: fmtUsername,
+		IsNew:    false,
+	})
+	if euser != nil && !userDto.IsNew {
+		return nil, errors.ErrUserExisted
+	}
+
+	log.Println("checking admin privilege...")
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !u.mgmtCtrl.CheckAdminPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
+	getRole, err := u.roleRepository.FindRoleByRoleCode(ctx, userDto.Role.RoleCode)
+
+	err = u.userRepository.InsertUser(ctx, &models.User{
+		Username:  userDto.Username,
+		Email:     userDto.Email,
+		FirstName: userDto.FirstName,
+		LastName:  userDto.LastName,
+		Role:      getRole,
+		IsNew:     false,
+		CreatedAt: time.Now(),
+		CreatedBy: author,
+		UpdatedAt: time.Now(),
+		UpdatedBy: author,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return userDto, nil
 }

@@ -57,7 +57,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(uRepo)
-	aService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, rRepo, uRepo)
+	aService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, managementCtrl, rRepo, uRepo)
 	rService := roleService.NewRoleService(rRepo)
 	mService := movieService.NewMovieService(managementCtrl, mRepo)
 	gService := genreService.NewGenreService(managementCtrl, gRepo)

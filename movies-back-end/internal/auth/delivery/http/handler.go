@@ -81,3 +81,20 @@ func (h *authHandler) SignUp() gin.HandlerFunc {
 		c.JSON(http.StatusOK, user)
 	}
 }
+
+func (h *authHandler) FetchUserFromOIDC() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username := c.Query("username")
+
+		user, err := h.authService.FindUserFromODIC(c, &username)
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err,
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, user)
+	}
+}

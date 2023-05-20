@@ -72,3 +72,29 @@ func (u userHandler) PatchUserRole() gin.HandlerFunc {
 		})
 	}
 }
+
+func (u userHandler) PutOidcUSer() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := &dto.UserDto{}
+		if err := utils.ReadRequest(c, user); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		_, err := u.userService.AddOidcUser(c, user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+		})
+	}
+}
