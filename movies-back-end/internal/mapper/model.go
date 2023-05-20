@@ -26,6 +26,7 @@ func MapToMovie(movieDto *dto.MovieDto, author string) *models.Movie {
 
 func MapToMovieUpdate(movieDto *dto.MovieDto, author string) *models.Movie {
 	return &models.Movie{
+		ID:          movieDto.ID,
 		Title:       movieDto.Title,
 		TypeCode:    movieDto.TypeCode,
 		ReleaseDate: movieDto.ReleaseDate,

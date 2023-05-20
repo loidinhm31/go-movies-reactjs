@@ -7,7 +7,7 @@ import (
 )
 
 type Repository interface {
-	CountMoviesByGenre(ctx context.Context) ([]*models.GenreCount, error)
+	CountMoviesByGenre(ctx context.Context, movieType string) ([]*models.GenreCount, error)
 	CountMoviesByReleaseDate(ctx context.Context, year string, months []string) ([]*models.MovieCount, error)
 	CountMoviesByCreatedDate(ctx context.Context, year string, months []string) ([]*models.MovieCount, error)
 	CountViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error)

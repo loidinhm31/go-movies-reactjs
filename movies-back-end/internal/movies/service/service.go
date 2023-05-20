@@ -26,13 +26,23 @@ func NewMovieService(mgmtCtrl control.Service, movieRepository movies.MovieRepos
 	}
 }
 
-func (ms *movieService) GetAllMovies(ctx context.Context, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
+func (ms *movieService) GetAllMoviesByType(ctx context.Context, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
 	page := &pagination.Page[*models.Movie]{}
 
-	movieResults, err := ms.movieRepository.FindAllMovies(ctx, pageRequest, page)
-	if err != nil {
-		log.Println(err)
-		return nil, errors.New("not found")
+	var err error
+	var movieResults *pagination.Page[*models.Movie]
+	if movieType != "" {
+		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, movieType, pageRequest, page)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("not found")
+		}
+	} else {
+		movieResults, err = ms.movieRepository.FindAllMovies(ctx, pageRequest, page)
+		if err != nil {
+			log.Println(err)
+			return nil, errors.New("not found")
+		}
 	}
 
 	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
@@ -90,6 +100,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 
 	if movie.ID > 0 ||
 		movie.Title == "" ||
+		movie.TypeCode == "" ||
 		movie.Runtime == 0 ||
 		movie.Description == "" ||
 		movie.ReleaseDate.IsZero() ||
@@ -130,11 +141,13 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		return errors.New("invalid input")
 	}
 
+	// Check movie exists
 	movieObj, err := ms.movieRepository.FindMovieById(ctx, movie.ID)
 	if err != nil {
 		return errors.New("cannot find object")
 	}
 
+	// After check object exists, write updating value
 	movieObj = mapper.MapToMovieUpdate(movie, author)
 
 	err = ms.movieRepository.UpdateMovie(ctx, movieObj)

@@ -7,7 +7,7 @@ import (
 
 // MapMovieRoutes Map auth routes
 func MapMovieRoutes(movieGroup *gin.RouterGroup, h movies.MovieHandler) {
-	movieGroup.POST("/", h.FetchMovies())
+	movieGroup.POST("/", h.FetchMoviesByType())
 	movieGroup.GET("/:id", h.FetchMovieById())
 	movieGroup.POST("/genres/:id", h.FetchMovieByGenre())
 }

@@ -19,8 +19,8 @@ func NewAnalysisService(mgmtCtrl control.Service, analysisRepository analysis.Re
 	}
 }
 
-func (as *analysisService) GetNumberOfMoviesByGenre(ctx context.Context) (*dto.ResultDto, error) {
-	result, err := as.analysisRepository.CountMoviesByGenre(ctx)
+func (as *analysisService) GetNumberOfMoviesByGenre(ctx context.Context, movieType string) (*dto.ResultDto, error) {
+	result, err := as.analysisRepository.CountMoviesByGenre(ctx, movieType)
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +28,9 @@ func (as *analysisService) GetNumberOfMoviesByGenre(ctx context.Context) (*dto.R
 	var dataSlice []*dto.DataDto
 	for _, r := range result {
 		dataSlice = append(dataSlice, &dto.DataDto{
-			Genre: r.Genre,
-			Count: r.NumMovies,
+			Name:     r.Name,
+			TypeCode: r.TypeCode,
+			Count:    r.NumMovies,
 		})
 	}
 
@@ -71,6 +72,10 @@ func (as *analysisService) GetNumberOfMoviesByCreatedDate(ctx context.Context, y
 }
 
 func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	if request.TypeCode == "" {
+		return &dto.ResultDto{Data: nil}, nil
+	}
+
 	result, err := as.analysisRepository.CountViewsByGenreAndViewedDate(ctx, request)
 	if err != nil {
 		return nil, err
@@ -79,7 +84,7 @@ func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Cont
 	var dataSlice []*dto.DataDto
 	for _, r := range result {
 		dataSlice = append(dataSlice, &dto.DataDto{
-			Genre: request.Genre,
+			Name:  request.Name,
 			Year:  r.Year,
 			Month: r.Month,
 			Count: r.NumViewers,
@@ -89,6 +94,10 @@ func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Cont
 }
 
 func (as *analysisService) GetCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	if request.TypeCode == "" {
+		return &dto.ResultDto{Data: nil}, nil
+	}
+
 	result, err := as.analysisRepository.CountCumulativeViewsByGenreAndViewedDate(ctx, request)
 	if err != nil {
 		return nil, err
@@ -97,7 +106,7 @@ func (as *analysisService) GetCumulativeViewsByGenreAndViewedDate(ctx context.Co
 	var dataSlice []*dto.DataDto
 	for _, r := range result {
 		dataSlice = append(dataSlice, &dto.DataDto{
-			Genre:      request.Genre,
+			Name:       request.Name,
 			Year:       r.Year,
 			Month:      r.Month,
 			Count:      r.NumViewers,
@@ -125,6 +134,10 @@ func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, req
 }
 
 func (as *analysisService) GetNumberOfMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	if request.TypeCode == "" {
+		return &dto.ResultDto{Data: nil}, nil
+	}
+
 	result, err := as.analysisRepository.CountMoviesByGenreAndReleasedDate(ctx, request)
 	if err != nil {
 		return nil, err
@@ -133,7 +146,7 @@ func (as *analysisService) GetNumberOfMoviesByGenreAndReleasedDate(ctx context.C
 	var dataSlice []*dto.DataDto
 	for _, r := range result {
 		dataSlice = append(dataSlice, &dto.DataDto{
-			Genre:      request.Genre,
+			Name:       request.Name,
 			Year:       r.Year,
 			Month:      r.Month,
 			Count:      r.NumMovies,

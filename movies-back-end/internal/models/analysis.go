@@ -1,7 +1,8 @@
 package models
 
 type GenreCount struct {
-	Genre     string
+	Name      string
+	TypeCode  string
 	NumMovies int
 }
 

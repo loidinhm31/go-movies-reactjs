@@ -21,8 +21,10 @@ func NewMovieHandler(movieService movies.Service) movies.MovieHandler {
 	}
 }
 
-func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
+func (mh *movieHandler) FetchMoviesByType() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		movieType := c.Query("type")
+
 		pageable, _ := pagination.ReadPageRequest(c)
 
 		if err := utils.ReadRequest(c, pageable); err != nil {
@@ -34,7 +36,7 @@ func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
 			return
 		}
 
-		allMovies, err := mh.movieService.GetAllMovies(c, pageable)
+		allMovies, err := mh.movieService.GetAllMoviesByType(c, movieType, pageable)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

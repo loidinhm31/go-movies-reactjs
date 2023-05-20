@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	GetAllMovies(ctx context.Context, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error)
+	GetAllMoviesByType(ctx context.Context, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error)
 	GetMovieById(ctx context.Context, id int) (*dto.MovieDto, error)
 	GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId int) (*pagination.Page[*dto.MovieDto], error)
 	AddMovie(ctx context.Context, movie *dto.MovieDto) error

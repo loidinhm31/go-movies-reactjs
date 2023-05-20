@@ -93,9 +93,11 @@ func (ih *integrationHandler) FindMovies() gin.HandlerFunc {
 func (ih *integrationHandler) FindMovieById() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ID := c.Param("id")
+		movieType := c.Query("type")
+
 		movieId, _ := strconv.ParseInt(ID, 10, 64)
 
-		result, err := ih.integrationService.GetMovieById(c, movieId)
+		result, err := ih.integrationService.GetMovieById(c, movieId, movieType)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "cannot access resource",

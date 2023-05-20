@@ -161,7 +161,7 @@ func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.Mo
 	return movieDtos, nil
 }
 
-func (is *integrationService) GetMovieById(ctx context.Context, movieId int64) (*dto.MovieDto, error) {
+func (is *integrationService) GetMovieById(ctx context.Context, movieId int64, movieType string) (*dto.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
@@ -169,7 +169,13 @@ func (is *integrationService) GetMovieById(ctx context.Context, movieId int64) (
 	}
 
 	client := &http.Client{}
-	theUrl := fmt.Sprintf("%s/movie/%d?api_key=%s", is.cfg.Tmdb.Url, movieId, is.cfg.Tmdb.ApiKey)
+
+	var theUrl string
+	if movieType == "MOVIE" {
+		theUrl = fmt.Sprintf("%s/movie/%d?api_key=%s", is.cfg.Tmdb.Url, movieId, is.cfg.Tmdb.ApiKey)
+	} else if movieType == "TV" {
+		theUrl = fmt.Sprintf("%s/tv/%d?api_key=%s", is.cfg.Tmdb.Url, movieId, is.cfg.Tmdb.ApiKey)
+	}
 
 	req, err := http.NewRequest("GET", theUrl, nil)
 	if err != nil {
@@ -218,6 +224,7 @@ func (is *integrationService) GetMovieById(ctx context.Context, movieId int64) (
 	releaseDate, err := time.Parse("2006-01-02", responseObject.ReleaseDae)
 	return &dto.MovieDto{
 		ID:          int(responseObject.ID),
+		TypeCode:    movieType,
 		Title:       responseObject.Title,
 		ReleaseDate: releaseDate,
 		Description: responseObject.Overview,

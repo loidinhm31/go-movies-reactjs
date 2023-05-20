@@ -50,6 +50,30 @@ func (mr *movieRepository) FindAllMovies(ctx context.Context,
 	return page, nil
 }
 
+func (mr *movieRepository) FindAllMoviesByType(ctx context.Context,
+	movieType string,
+	pageRequest *pagination.PageRequest,
+	page *pagination.Page[*models.Movie]) (*pagination.Page[*models.Movie], error) {
+	var allMovies []*models.Movie
+	var totalRows int64
+
+	tx := mr.db.WithContext(ctx)
+	if mr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Model(allMovies).
+		Where("type_code = ?", movieType).
+		Count(&totalRows).
+		Preload("Genres").
+		Scopes(pagination.PageImplCountCriteria[*models.Movie](totalRows, pageRequest, page)).
+		Find(&allMovies).Error
+	if err != nil {
+		return nil, err
+	}
+	page.Content = allMovies
+	return page, nil
+}
+
 func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*models.Movie, error) {
 	var movie models.Movie
 

@@ -189,4 +189,5 @@ VALUES ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'T
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
-       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander'));
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'));

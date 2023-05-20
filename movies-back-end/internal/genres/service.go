@@ -7,6 +7,6 @@ import (
 )
 
 type Service interface {
-	GetAllGenres(ctx context.Context) ([]*dto.GenreDto, error)
-	AddGenres(ctx *gin.Context, genreNames []string) error
+	GetAllGenresByTypeCode(ctx context.Context, movieType string) ([]*dto.GenreDto, error)
+	AddGenres(ctx *gin.Context, genreNames []dto.Genres) error
 }

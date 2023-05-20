@@ -12,13 +12,15 @@ type ResultDto struct {
 type DataDto struct {
 	Year       string `json:"year,omitempty"`
 	Month      string `json:"month,omitempty"`
-	Genre      string `json:"genre,omitempty"`
+	Name       string `json:"name,omitempty"`
+	TypeCode   string `json:"type_code,omitempty"`
 	Count      int    `json:"count,omitempty"`
 	Cumulative int    `json:"cumulative,omitempty"`
 }
 
 type RequestData struct {
 	Analysis     []*AnalysisDto `json:"analysis"`
-	Genre        string         `json:"genre,omitempty"`
+	Name         string         `json:"name,omitempty"`
+	TypeCode     string         `json:"type_code,omitempty"`
 	IsCumulative bool           `json:"isCumulative,omitempty"`
 }

@@ -35,7 +35,25 @@ func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, 
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindGenreByName(ctx *gin.Context, genre *models.Genre) (*models.Genre, error) {
+func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*models.Genre, error) {
+	var allGenres []*models.Genre
+
+	tx := gr.db.WithContext(ctx)
+	if gr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Order("name").
+		Where("type_code = ?", movieType).
+		Find(&allGenres).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	return allGenres, nil
+}
+
+func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx *gin.Context, genre *models.Genre) (*models.Genre, error) {
 	var result models.Genre
 
 	tx := gr.db.WithContext(ctx)

@@ -21,7 +21,9 @@ func NewAnalysisHandler(researchService analysis.Service) analysis.Handler {
 
 func (rh *researchHandler) FetchNumberOfMoviesByGenre() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		result, err := rh.researchService.GetNumberOfMoviesByGenre(c)
+		movieType := c.Query("type")
+
+		result, err := rh.researchService.GetNumberOfMoviesByGenre(c, movieType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -117,7 +119,6 @@ func (rh *researchHandler) FetchViewsByGenreAndViewedDate() gin.HandlerFunc {
 func (rh *researchHandler) FetchNumberOfViewsByViewedDate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		request := &dto.RequestData{}
-
 		if err := utils.ReadRequest(c, request); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
