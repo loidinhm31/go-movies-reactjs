@@ -2,8 +2,7 @@ import {Direction, PageType} from "../../../../types/page";
 import {MovieType} from "../../../../types/movies";
 
 const handler = async (req, res) => {
-    let {pageIndex} = req.query;
-    let {pageSize} = req.query;
+    let {pageIndex, pageSize, type} = req.query;
 
     let page: PageType<any> = {
         sort: {
@@ -30,9 +29,17 @@ const handler = async (req, res) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
-            requestOptions
-        );
+        let response;
+        if (type) {
+            response = await fetch(`${process.env.API_BASE_URL}/movies?type=${type}&page=${pageIndex}&size=${pageSize}`,
+                requestOptions
+            );
+        } else {
+            response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
+                requestOptions
+            );
+        }
+
         res.status(response.status).json(await response.json());
     } catch (error) {
         res.status(500).json({message: "server error"});

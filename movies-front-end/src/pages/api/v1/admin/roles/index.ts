@@ -10,15 +10,15 @@ const handler = withRole("admin", async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/roles`,
-        requestOptions
-    );
-    if (response.ok) {
-        const pageResult = await response.json();
-        res.status(200).json(pageResult);
-    } else {
-        res.status(response.status).json(await response.json())
-    }
+   try {
+       const response = await fetch(`${process.env.API_BASE_URL}/auth/roles`,
+           requestOptions
+       );
+       res.status(response.status).json(await response.json());
+
+   } catch (error) {
+       res.status(500).json({message: "server error"});
+   }
 });
 
 export default handler;

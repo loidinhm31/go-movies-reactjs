@@ -1,7 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
-import useSWR from "swr";
 import {GenreType, MovieType} from "src/types/movies";
 import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
@@ -10,13 +9,17 @@ import {
     Button,
     Checkbox,
     Divider,
+    FormControl,
     FormControlLabel,
     FormGroup,
+    FormLabel,
     Grid,
     IconButton,
     InputAdornment,
     Link,
     MenuItem,
+    Radio,
+    RadioGroup,
     Stack,
     TextField,
     Typography
@@ -25,6 +28,7 @@ import AlertDialog from "../../../components/shared/alert";
 import NotifySnackbar, {NotifyState, sleep} from "../../../components/shared/snackbar";
 import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
+import {movieTypes} from "src/components/MovieTypeSelect";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -39,6 +43,7 @@ const EditMovie = () => {
 
     const [movie, setMovie] = useState<MovieType>({
         title: "",
+        type_code: "",
         description: "",
         release_date: null,
         runtime: 0,
@@ -54,7 +59,7 @@ const EditMovie = () => {
     const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
     const [videoPath, setVideoPath] = useState<string>("");
 
-    const {data: genres, isLoading} = useSWR<GenreType[]>(`../api/v1/genres`, get);
+    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`../api/v1/genres?type=${movie.type_code}`, get);
     const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../api/v1/movies/${id}`, get);
     const {trigger: triggerMovie} = useSWRMutation(`../api/v1/admin/movies/save`, post);
     const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${id}`, del);
@@ -83,61 +88,71 @@ const EditMovie = () => {
     }, [router, session, status])
 
     useEffect(() => {
-        if (!isLoading) {
-            if (id === undefined) {
-                setMovie({
-                    title: "",
-                    description: "",
-                    release_date: format(new Date(), "yyyy-MM-dd"),
-                    runtime: 0,
-                    mpaa_rating: "",
-                    genres: [],
-                });
+        if (id === undefined) {
+            setMovie({
+                title: "",
+                type_code: "",
+                description: "",
+                release_date: format(new Date(), "yyyy-MM-dd"),
+                runtime: 0,
+                mpaa_rating: "",
+                genres: [],
+            });
 
-                const checks: GenreType[] = [];
-                genres?.forEach((g) => {
-                    checks.push({id: g.id, checked: false, name: g.name});
-                });
+            const checks: GenreType[] = [];
 
-                setMovie((m) => ({
-                    ...m,
-                    genres: checks,
-                }));
-
-            } else {
-                fetchMovie().then((movie) => {
-                    const checks: GenreType[] = [];
-
-                    genres?.forEach((g) => {
-                        if (movie?.genres.some(mg => mg.id === g.id)) {
-                            checks.push({id: g.id, name: g.name, checked: true});
-                        } else {
-                            checks.push({id: g.id, name: g.name, checked: false});
-                        }
+            fetchGenres()
+                .then((result) => {
+                    result?.forEach((g) => {
+                        checks.push({id: g.id, checked: false, name: g.name, type_code: g.type_code});
                     });
+                })
 
-                    setMovie({
-                        ...movie,
-                        genres: checks,
-                    } as MovieType);
+            setMovie((m) => ({
+                ...m,
+                genres: checks,
+            }));
 
-                    // Set file video
-                    if (movie?.video_path) {
-                        setVideoPath(movie?.video_path!);
-                    }
-                }).catch((error) => {
-                    setNotifyState({
-                        open: true,
-                        message: error.message,
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "error"
-                    });
+        } else {
+            fetchMovie().then((movie) => {
+                setMovie(movie!);
+
+                // Set file video
+                if (movie?.video_path) {
+                    setVideoPath(movie?.video_path!);
+                }
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
                 });
-            }
+            });
         }
+    }, [id, router]);
 
-    }, [id, router, genres]);
+    useEffect(() => {
+        if (movie.type_code !== undefined && movie.type_code !== "") {
+            const checks: GenreType[] = [];
+
+            fetchGenres().then((result) => {
+                result?.forEach((g) => {
+                    if (movie?.genres.some(mg => mg.id === g.id)) {
+                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
+                    } else {
+                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
+                    }
+                });
+            })
+
+            setMovie({
+                ...movie,
+                genres: checks,
+            } as MovieType);
+        }
+    }, [id, movie.type_code]);
 
     useEffect(() => {
         if (isConfirmDelete) {
@@ -161,7 +176,7 @@ const EditMovie = () => {
                 .catch((error) => {
                     setNotifyState({
                         open: true,
-                        message: error.message,
+                        message: error.message.message,
                         vertical: "top",
                         horizontal: "right",
                         severity: "error"
@@ -175,26 +190,34 @@ const EditMovie = () => {
 
         let errors: any = [];
         let required = [
-            {field: movie.title, name: "title"},
-            {field: movie.release_date, name: "release_date"},
-            {field: movie.runtime, name: "runtime"},
-            {field: movie.description, name: "description"},
-            {field: movie.mpaa_rating, name: "mpaa_rating"},
+            {field: movie.title, name: "title", label: "Title"},
+            {field: movie.type_code, name: "type_code", label: "Type Movie"},
+            {field: movie.release_date, name: "release_date", label: "Release Date"},
+            {field: movie.runtime, name: "runtime", label: "Runtime"},
+            {field: movie.description, name: "description", label: "Description"},
+            {field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating"},
         ];
 
-        required.forEach(function ({field, name}: any) {
-            if (field === "") {
-                errors.push(name);
+        required.forEach(function ({field, label}: any) {
+            if (field === "" || field === undefined) {
+                errors.push(label);
             }
         });
 
         // Check genres
         if (!movie.genres.some(g => g.checked)) {
             setIsOpenAlertDialog(true);
-            errors.push("genres");
+            errors.push("Genres");
         }
 
         if (errors.length > 0) {
+            setNotifyState({
+                open: true,
+                message: `Fill value for ${errors.join(", ")}`,
+                vertical: "bottom",
+                horizontal: "center",
+                severity: "warning"
+            });
             return false;
         }
 
@@ -216,7 +239,7 @@ const EditMovie = () => {
         }).catch((error) => {
             setNotifyState({
                 open: true,
-                message: error.message,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"
@@ -289,7 +312,7 @@ const EditMovie = () => {
         }).catch((error) => {
             setNotifyState({
                 open: true,
-                message: error.message,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"
@@ -332,7 +355,7 @@ const EditMovie = () => {
             }).catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: error.message,
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
                     severity: "error"
@@ -344,6 +367,7 @@ const EditMovie = () => {
     return (
         <>
             <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+
 
             {isOpenAlertDialog &&
                 <AlertDialog
@@ -374,7 +398,7 @@ const EditMovie = () => {
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             <input type="hidden" name="id" defaultValue={movie.id} id="id" readOnly={true}></input>
-                            <Grid item xs={12}>
+                            <Grid item xs={8}>
                                 <TextField
                                     fullWidth
                                     label="Title"
@@ -382,6 +406,34 @@ const EditMovie = () => {
                                     value={movie.title}
                                     onChange={e => handleChange(e, "title")}
                                 />
+                            </Grid>
+
+                            <Grid item xs={4}>
+                                <FormControl>
+                                    <FormLabel>Movie Type</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        value={movie.type_code}
+                                        onChange={(e) => handleChange(e, "type_code")}
+                                    >
+                                        {movieTypes.map((t, index) => {
+                                            let label;
+                                            if (t === "MOVIE") {
+                                                label = "Movie";
+                                            } else if (t === "TV") {
+                                                label = "TV Series";
+                                            }
+                                            return (
+                                                <FormControlLabel
+                                                    key={`${t}-${index}`}
+                                                    value={t}
+                                                    control={<Radio/>}
+                                                    label={label}
+                                                />
+                                            );
+                                        })}
+                                    </RadioGroup>
+                                </FormControl>
                             </Grid>
 
                             <Grid item xs={4}>
@@ -476,7 +528,6 @@ const EditMovie = () => {
                                         </>
                                     }
                                 </Stack>
-
                             </Grid>
 
                             <Grid item xs={12}>
@@ -505,8 +556,8 @@ const EditMovie = () => {
                                                     <FormControlLabel
                                                         label={g.name}
                                                         name="genre"
-                                                        key={index}
-                                                        id={"genre-" + index}
+                                                        key={`${g.id}-${index}`}
+                                                        id={`${g.id}-${index}`}
                                                         onChange={(event) => handleCheck(event, index)}
                                                         value={g.id}
                                                         control={<Checkbox checked={movie.genres[index].checked}/>}

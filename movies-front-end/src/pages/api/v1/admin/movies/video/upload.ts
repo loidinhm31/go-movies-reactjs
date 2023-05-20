@@ -27,12 +27,9 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         };
 
         const response = await fetch(`${process.env.API_BASE_URL}/integration/videos`, requestOptions);
-        if (response.ok) {
-            res.status(200).json(await response.json());
-        } else {
-            const message = await response.json()
-            res.status(response.status).json(message.message! || "Failed to save movie");
-        }
+        const message = await response.json();
+        res.status(response.status).json(message.message! || "Failed to save movie");
+
     } catch (err) {
         return res.status(500).json({error: "Internal Server Error"});
     }

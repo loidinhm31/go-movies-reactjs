@@ -4,10 +4,15 @@ import LineChart from "../../../components/Chart/LineChart";
 import DoughnutChart from "../../../components/Chart/DoughnutChart";
 import AreaChart from "../../../components/Chart/AreaChart";
 import {signIn, useSession} from "next-auth/react";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
+import MovieTypeSelect from "../../../components/MovieTypeSelect";
 
 function Dashboard() {
     const {data: session} = useSession();
+
+    const optionalType = ["Both"];
+
+    const [selectedType, setSelectedType] = useState<string>(optionalType[0]);
 
     useEffect(() => {
         if (session?.error === "RefreshAccessTokenError") {
@@ -22,21 +27,35 @@ function Dashboard() {
             </Box>
             <Divider/>
 
+            <Grid container>
+                <Grid item xs="auto">
+                    <Box sx={{m: 1}}>
+                        <MovieTypeSelect
+                            optionalType={optionalType}
+                            selectedType={selectedType}
+                            setSelectedType={setSelectedType}
+                        />
+                    </Box>
+                </Grid>
+            </Grid>
+
             <Grid container spacing={2}>
+
+
                 <Grid item xs={6} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <Container maxWidth="sm">
-                        <DoughnutChart/>
+                        <DoughnutChart movieType={selectedType}/>
                     </Container>
                 </Grid>
                 <Grid item xs={6} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <Container maxWidth="sm" >
-                        <AreaChart/>
+                        <AreaChart movieType={selectedType}/>
                     </Container>
                 </Grid>
 
                 <Grid item xs={12} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <Container maxWidth="sm">
-                        <LineChart/>
+                        <LineChart movieType={selectedType}/>
                     </Container>
                 </Grid>
             </Grid>

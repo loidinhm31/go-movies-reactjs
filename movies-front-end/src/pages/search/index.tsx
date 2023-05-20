@@ -27,10 +27,12 @@ function Search() {
     const {trigger: requestPage} = useSWRMutation(`../api/v1/search`, post);
 
     useEffect(() => {
+        searchRequest.filters = [];
         handleChangeSearchRequest(searchRequest!.filters!);
     }, [pageIndex, pageSize, order, orderBy])
 
     const handleChangeSearchRequest = (fieldData: FieldData[]) => {
+        console.log(fieldData)
         if (fieldData) {
             searchRequest!.page_request = {
                 page: pageIndex,

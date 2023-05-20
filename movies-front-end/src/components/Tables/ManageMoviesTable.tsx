@@ -114,7 +114,7 @@ interface EnhancedTableProps {
     setOrderBy?: (by: keyof Data) => void;
 }
 
-export default function EnhancedTable({
+export default function ManageMoviesTable({
                                           confirmDelete,
                                           order,
                                           orderBy,

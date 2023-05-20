@@ -30,7 +30,6 @@ export function SearchGenre({handleStringField}: SearchGenreProps) {
         if (!loading) {
             return undefined;
         }
-        console.log(options);
 
         if (options.length == 0) {
             trigger()
@@ -83,11 +82,11 @@ export function SearchGenre({handleStringField}: SearchGenreProps) {
                         onClose={() => {
                             setOpen(false);
                         }}
-                        isOptionEqualToValue={(option, value) => option.genre === value.genre}
+                        isOptionEqualToValue={(option, value) => option.name === value.name}
                         options={options}
-                        getOptionLabel={(option) => option.genre}
+                        getOptionLabel={(option) => option.name}
                         loading={loading}
-                        onChange={(_, value) => handleStringField("genres", value.map(v => v.genre), "def", "string")}
+                        onChange={(_, value) => handleStringField("genres", value.map(v => v.name), "def", "string")}
                         multiple
                         id="genre-3"
                         renderInput={(params) => (

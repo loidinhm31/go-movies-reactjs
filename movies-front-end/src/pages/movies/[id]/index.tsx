@@ -87,7 +87,7 @@ function Movie() {
             {movie &&
                 <>
                     <Box sx={{p: 1, m: 1}}>
-                        <Typography variant="h4">Movie: {movie.title}</Typography>
+                        <Typography variant="h4">{movie.type_code === "TV" ? "TV Series" : "Movie"} - {movie.title}</Typography>
                     </Box>
                     <Box sx={{p: 1, m: 1}}>
                         <Typography>
@@ -99,7 +99,7 @@ function Movie() {
                     <Stack direction="row" sx={{p: 1, m: 1}}>
                         {movie.genres && movie.genres.map((g, index) => (
                             <Box key={`${g.id}-${index}`} sx={{p: 1}}>
-                                <Chip key={`${g.id}-${index}`} label={g.genre}/>
+                                <Chip key={`${g.id}-${index}`} label={g.name}/>
                             </Box>
                         ))}
                     </Stack>

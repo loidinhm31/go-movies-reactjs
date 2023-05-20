@@ -1,9 +1,9 @@
 import {
-    Box,
+    Box, Container,
     Divider,
     FormControl,
     FormControlLabel,
-    FormLabel,
+    FormLabel, Grid,
     LinearProgress,
     Radio,
     RadioGroup,
@@ -18,9 +18,7 @@ import {ReferencesTable} from "../../../components/Tables/ReferencesTable";
 import {post} from "../../../libs/api";
 import {MovieType} from "../../../types/movies";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-
-
-const types = ["MOVIE", "TV"] as const;
+import MovieTypeSelect, { movieTypes } from "src/components/MovieTypeSelect";
 
 export default function References() {
     const [searchKey, setSearchKey] = useState<string>("");
@@ -31,7 +29,7 @@ export default function References() {
 
     const [data, setData] = useState<MovieType[] | null>(null);
 
-    const [selectedType, setSelectedType] = useState<string>(types[0]);
+    const [selectedType, setSelectedType] = useState<string>(movieTypes[0]);
 
     // Get Tables
     const {trigger} =
@@ -47,9 +45,9 @@ export default function References() {
                 })
             } else if (progress === 100) {
                 trigger({
-                    type: selectedType,
+                    type_code: selectedType,
                     title: searchKey,
-                })
+                } as MovieType)
                     .then((data) => setData(data))
                     .finally(() => {
                         setIsClickSearch(false);
@@ -90,56 +88,51 @@ export default function References() {
                 </Box>
                 <Divider/>
 
-
-                <FormControl>
-                    <FormLabel>Type</FormLabel>
-                    <RadioGroup
-                        row
-                        value={selectedType}
-                        onChange={(event) => setSelectedType(event.target.value)}
-                    >
-                        {types.map((t) => {
-                            let label;
-                            if (t === "MOVIE") {
-                                label = "Movie";
-                            } else if (t === "TV") {
-                                label = "TV Series";
+                <Grid container spacing={2}>
+                    <Grid item xs="auto">
+                        <Box sx={{m: 1}}>
+                            <MovieTypeSelect
+                                selectedType={selectedType}
+                                setSelectedType={setSelectedType}
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Box sx={{m: 1}}>
+                            <TextField
+                                fullWidth
+                                label="Keyword"
+                                variant="outlined"
+                                value={searchKey}
+                                onChange={e => setSearchKey(e.target.value)}
+                                onKeyDown={handleKeyPressSearch}
+                            />
+                            {progress > 0 &&
+                                <LinearProgress color="success" variant="determinate" value={progress}/>
                             }
-                            return (
-                                <FormControlLabel value={t} control={<Radio/>} label={label}/>
-                            );
-                        })}
-                    </RadioGroup>
-                </FormControl>
+                        </Box>
 
-                <TextField
-                    fullWidth
-                    label="Keyword"
-                    variant="outlined"
-                    value={searchKey}
-                    onChange={e => setSearchKey(e.target.value)}
-                    onKeyDown={handleKeyPressSearch}
-                />
-                {progress > 0 &&
-                    <LinearProgress color="success" variant="determinate" value={progress}/>
-                }
+                        <Box sx={{m: 1}}>
+                            <Button
+                                variant="contained"
+                                onClick={handleSearchClick}
+                            >
+                                Search
+                            </Button>
+                        </Box>
+                    </Grid>
 
-                <Box>
-                    <Button
-                        variant="contained"
-                        onClick={handleSearchClick}
-                    >
-                        Search
-                    </Button>
-                </Box>
-                {data &&
-                    <Box component="span"
-                         sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
-                        <ReferencesTable
-                            data={data}
-                        />
-                    </Box>
-                }
+
+                    {data &&
+                        <Box component="span"
+                             sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
+                            <ReferencesTable
+                                movieType={selectedType}
+                                data={data}
+                            />
+                        </Box>
+                    }
+                </Grid>
             </Stack>
 
         </>

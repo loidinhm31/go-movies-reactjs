@@ -12,16 +12,17 @@ const Img = styled("img")({
 });
 
 interface ReferencesTableProps {
+    movieType: string;
     data: MovieType[];
 }
 
-export function ReferencesTable({data}: ReferencesTableProps) {
+export function ReferencesTable({movieType, data}: ReferencesTableProps) {
 
     return (
         <Grid container spacing={2}>
             {data && data.map((movie) => (
                 <Grid key={movie.id} item xs={6}>
-                    <Link href={`/admin/references/${movie.id}`} style={{textDecoration: "none"}}>
+                    <Link href={`/admin/references/${movie.id}?type=${movieType}`} style={{textDecoration: "none"}}>
                         <Paper
                             sx={{
                                 m: 2,
@@ -30,9 +31,9 @@ export function ReferencesTable({data}: ReferencesTableProps) {
                             }}
                         >
                             <Grid container spacing={2}>
-                                <Grid item direction="column" spacing={3}>
+                                <Stack direction="column" spacing={3}>
                                     <Grid item xs>
-                                        <Box sx={{p: 1}}>
+                                        <Box sx={{p: 2}}>
                                             <CardMedia
                                                 sx={{borderRadius: "16px"}}
                                                 component="img"
@@ -42,7 +43,7 @@ export function ReferencesTable({data}: ReferencesTableProps) {
                                     </Grid>
                                     <Grid item xs>
                                         <Stack direction="row" spacing={2}
-                                               sx={{display: "flex", alignItems: "center    "}}>
+                                               sx={{display: "flex", alignItems: "center", p: 2}}>
                                             <Typography>
                                                 <b>Rate</b>
                                             </Typography>
@@ -52,7 +53,7 @@ export function ReferencesTable({data}: ReferencesTableProps) {
                                             </Typography>
                                         </Stack>
                                     </Grid>
-                                </Grid>
+                                </Stack>
                                 <Grid item xs container direction="column" spacing={2}>
                                     <Grid item xs>
                                         <Typography gutterBottom variant="subtitle1" component="div">

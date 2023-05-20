@@ -34,7 +34,7 @@ const handler = withRole("admin", async (req, res, token) => {
             const response = await fetch(`${process.env.API_BASE_URL}/auth/users?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
                 requestOptions
             );
-            res.status(response.status).json(await response.json())
+            res.status(response.status).json(await response.json());
         } catch (error) {
             res.status(500).json({message: "server error"});
         }
@@ -50,7 +50,8 @@ const handler = withRole("admin", async (req, res, token) => {
         try {
             const response = await fetch(`${process.env.API_BASE_URL}/auth/users/role`,
                 requestOptions
-            );            res.status(response.status).json(await response.json());
+            );
+            res.status(response.status).json(await response.json());
         } catch (error) {
             res.status(500).json({message: "server error"});
         }

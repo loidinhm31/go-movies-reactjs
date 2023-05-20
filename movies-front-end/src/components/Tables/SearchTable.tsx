@@ -19,6 +19,7 @@ import format from "date-fns/format";
 
 export interface Data {
     title: string;
+    type_code: string;
     release_date: Date;
     runtime: number
     description: string;
@@ -38,6 +39,12 @@ const headCells: readonly HeadCell[] = [
         numeric: false,
         disablePadding: false,
         label: "Movie",
+    },
+    {
+        id: "type_code",
+        numeric: false,
+        disablePadding: false,
+        label: "Type",
     },
     {
         id: "release_date",
@@ -176,8 +183,6 @@ export default function SearchTable({
                             <TableBody>
                                 {page
                                     ? page.content?.map((row, index) => {
-                                        const labelId = `search-table-checkbox-${index}`;
-
                                         return (
                                             <TableRow
                                                 hover
@@ -187,32 +192,24 @@ export default function SearchTable({
                                                 sx={{cursor: "pointer"}}
                                             >
 
-                                                <TableCell
-                                                    id={labelId}
-
-                                                >
+                                                <TableCell>
                                                     <Chip label={row.title} color="info" component="a"
                                                           href={`/movies/${row.id}`} clickable/>
                                                 </TableCell>
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
+                                                    {row.type_code}
+                                                </TableCell>
+                                                <TableCell>
                                                     {format(new Date(row.release_date!), "yyyy-MM-dd")}
                                                 </TableCell>
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
                                                     {row.runtime}
                                                 </TableCell>
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
                                                     {row.description}
                                                 </TableCell>
 
-                                                <TableCell
-                                                    id={labelId}
-                                                >
+                                                <TableCell>
                                                     {row.mpaa_rating}
                                                 </TableCell>
                                             </TableRow>

@@ -1,7 +1,7 @@
 import {withAnyRole} from "src/libs/auth";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
-    const {id} = req.query;    
+    const {id, type} = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -12,11 +12,11 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     };
 
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/tmdb/${id}`, requestOptions);
-    if (response.ok) {
-        res.status(200).json(await response.json());
-    } else {
-        res.status(response.status).json(await response.json())
+    try {
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/tmdb/${id}?type=${type}`, requestOptions);
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
     }
 });
 

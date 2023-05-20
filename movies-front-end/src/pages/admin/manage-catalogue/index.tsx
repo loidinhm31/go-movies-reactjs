@@ -3,7 +3,7 @@ import {useRouter} from "next/router";
 import {del, post} from "src/libs/api";
 import {Box, Button, Divider, Skeleton, Stack, Typography} from "@mui/material";
 import {useSession} from "next-auth/react";
-import EnhancedTable, {Data} from "../../../components/Tables/EnhancedMoviesTable";
+import ManageMoviesTable, {Data} from "../../../components/Tables/ManageMoviesTable";
 import useSWRMutation from "swr/mutation";
 import {Direction, PageType} from "../../../types/page";
 import {MovieType} from "../../../types/movies";
@@ -126,7 +126,7 @@ const ManageCatalogue = () => {
                 }
 
                 {page && page.content &&
-                    <EnhancedTable
+                    <ManageMoviesTable
                         page={page}
                         setDeleteId={setDeleteId}
                         confirmDelete={isConfirmDelete}

@@ -1,7 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
-import useSWR from "swr";
 import {GenreType, MovieType} from "src/types/movies";
 import {get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
@@ -11,13 +10,17 @@ import {
     Checkbox,
     Chip,
     Divider,
+    FormControl,
     FormControlLabel,
     FormGroup,
+    FormLabel,
     Grid,
     IconButton,
     InputAdornment,
     Link,
     MenuItem,
+    Radio,
+    RadioGroup,
     Stack,
     TextField,
     Typography
@@ -27,6 +30,7 @@ import NotifySnackbar, {NotifyState, sleep} from "src/components/shared/snackbar
 import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
 import {ClientError} from "../../../../libs/api_client";
+import {movieTypes} from "../../../../components/MovieTypeSelect";
 
 const ReferenceMovie = () => {
     const router = useRouter();
@@ -37,6 +41,9 @@ const ReferenceMovie = () => {
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     const {data: session, status} = useSession();
+
+    // Get id from the URL
+    let {id, type} = router.query;
 
     const [movie, setMovie] = useState<MovieType>({
         title: "",
@@ -49,17 +56,14 @@ const ReferenceMovie = () => {
         image_path: "",
     });
 
-    // Get id from the URL
-    let {id} = router.query;
-
     const videoFileRef = useRef<any>(null);
     const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
     const [videoPath, setVideoPath] = useState<string>("");
 
     const [newGenres, setNewGenres] = useState<string[]>([]);
 
-    const {data: genres, isLoading, mutate: mutateGenres} = useSWR<GenreType[]>(`../../../api/v1/genres`, get);
-    const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../../api/v1/admin/movies/references/${id}`, get);
+    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`../../../api/v1/genres?type=${type}`, get);
+    const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../../api/v1/admin/movies/references/${id}?type=${type}`, get);
     const {trigger: triggerMovie} = useSWRMutation(`../../api/v1/admin/movies/save`, post);
     const {trigger: uploadVideo} = useSWRMutation(`../../api/v1/admin/movies/video/upload`, postForm);
     const {trigger: removeVideo} = useSWRMutation(`../../api/v1/admin/movies/video/remove`, post);
@@ -87,77 +91,94 @@ const ReferenceMovie = () => {
     }, [router, session, status])
 
     useEffect(() => {
-        if (!isLoading) {
-            if (id) {
-                fetchMovie().then((movie) => {
-                    const checks: GenreType[] = [];
+        if (id) {
+            fetchMovie().then((movie) => {
+                setMovie(movie!);
 
-                    // Check genre from TMDB, use genre name to compare instead of id
-                    genres?.forEach((g) => {
-                        if (movie?.genres.some(mg => mg.name === g.name)) {
-                            checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
-                        } else {
-                            checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
-                        }
-                    });
-
-                    const nGenres: string[] = [];
-                    const checked = checks?.filter(g => g.checked);
-                    movie?.genres.forEach((mg) => {
-                        if (!checked!.some(g => g.name === mg.name)) {
-                            nGenres.push(mg.name);
-                        }
-                    })
-                    setNewGenres(nGenres);
-
-                    setMovie({
-                        ...movie,
-                        genres: checks,
-                    } as MovieType);
-
-                    // Set file video
-                    if (movie?.video_path) {
-                        setVideoPath(movie?.video_path!);
-                    }
-                }).catch((error) => {
-                    setNotifyState({
-                        open: true,
-                        message: error.message,
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "error"
-                    });
+                // Set file video
+                if (movie?.video_path) {
+                    setVideoPath(movie?.video_path!);
+                }
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
                 });
-            }
+            });
         }
 
-    }, [id, router, genres]);
+    }, [id, router]);
+
+    useEffect(() => {
+        if (movie.type_code !== undefined && movie.type_code !== "") {
+            const checks: GenreType[] = [];
+
+            // Check genre from TMDB, use genre name to compare instead of id
+            fetchGenres().then((results) => {
+                results?.forEach((g) => {
+                if (movie?.genres.some(mg => mg.name === g.name)) {
+                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
+                    } else {
+
+                    checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
+                    }
+                });
+            }).finally(() => {
+                // Check new genres
+                const nGenres: string[] = [];
+                const checked = checks?.filter(g => g.checked);
+
+                movie?.genres.forEach((mg) => {
+                    if (!checked!.some(g => g.name === mg.name)) {
+                        nGenres.push(mg.name);
+                    }
+                });
+                setNewGenres(nGenres);
+            });
+
+            setMovie({
+                ...movie,
+                genres: checks,
+            } as MovieType);
+
+        }
+    }, [id, movie.type_code]);
 
     const handleSubmit = (event) => {
         event.preventDefault();
 
         let errors: any = [];
         let required = [
-            {field: movie.title, name: "title"},
-            {field: movie.release_date, name: "release_date"},
-            {field: movie.runtime, name: "runtime"},
-            {field: movie.description, name: "description"},
-            {field: movie.mpaa_rating, name: "mpaa_rating"},
+            {field: movie.title, name: "title", label: "Title"},
+            {field: movie.type_code, name: "type_code", label: "Type Movie"},
+            {field: movie.release_date, name: "release_date", label: "Release Date"},
+            {field: movie.runtime, name: "runtime", label: "Runtime"},
+            {field: movie.description, name: "description", label: "Description"},
+            {field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating"},
         ];
-
-        required.forEach(function ({field, name}: any) {
-            if (field === "") {
-                errors.push(name);
+        required.forEach(function ({field, label}: any) {
+            if (field === "" || field === undefined) {
+                errors.push(label);
             }
         });
 
         // Check genres
         if (!movie.genres.some(g => g.checked)) {
             setIsOpenAlertDialog(true);
-            errors.push("genres");
+            errors.push("Genres");
         }
 
         if (errors.length > 0) {
+            setNotifyState({
+                open: true,
+                message: `Fill value for ${errors.join(", ")}`,
+                vertical: "bottom",
+                horizontal: "center",
+                severity: "warning"
+            });
             return false;
         }
 
@@ -254,7 +275,7 @@ const ReferenceMovie = () => {
         }).catch((error) => {
             setNotifyState({
                 open: true,
-                message: error.message,
+                message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
                 severity: "error"
@@ -297,7 +318,7 @@ const ReferenceMovie = () => {
             }).catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: error.message,
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
                     severity: "error"
@@ -321,8 +342,10 @@ const ReferenceMovie = () => {
                     severity: "info"
                 });
 
-                mutateGenres();
-            }  else {
+                fetchGenres().then((result) => {
+
+                });
+            } else {
                 setNotifyState({
                     open: true,
                     message: `Cannot add new genres, ${result.message}`,
@@ -374,7 +397,7 @@ const ReferenceMovie = () => {
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             <input type="hidden" name="id" defaultValue={movie.id} id="id" readOnly={true}></input>
-                            <Grid item xs={12}>
+                            <Grid item xs={8}>
                                 <TextField
                                     fullWidth
                                     label="Title"
@@ -383,6 +406,37 @@ const ReferenceMovie = () => {
                                     onChange={e => handleChange(e, "title")}
                                 />
                             </Grid>
+
+                            <Grid item xs={4}>
+                                <FormControl>
+                                    <FormLabel>Movie Type</FormLabel>
+                                    <RadioGroup
+                                        row
+                                        value={movie.type_code}
+                                        onChange={(e) => handleChange(e, "type_code")}
+                                    >
+                                        {movieTypes.map((t, index) => {
+                                            let label;
+                                            if (t === "MOVIE") {
+                                                label = "Movie";
+                                            } else if (t === "TV") {
+                                                label = "TV Series";
+                                            }
+                                            return (
+                                                <FormControlLabel
+                                                    disabled
+                                                    key={`${t}-${index}`}
+                                                    value={t}
+                                                    control={<Radio/>}
+                                                    label={label}
+                                                />
+                                            );
+                                        })}
+                                    </RadioGroup>
+                                </FormControl>
+
+                            </Grid>
+
 
                             <Grid item xs={4}>
                                 <TextField
@@ -499,7 +553,7 @@ const ReferenceMovie = () => {
                             <Stack direction="row" spacing={3} sx={{display: "flex", alignItems: "center"}}>
 
                                 <Typography>New Genres for Reference Movie</Typography>
-                                <Box sx={{ p: 1, border: 1, borderRadius: 1, borderWidth: 1}}>
+                                <Box sx={{p: 1, border: 1, borderRadius: 1, borderWidth: 1}}>
                                     {newGenres.map((g) => {
                                         return (
                                             <Chip label={g} color="warning" sx={{p: 1, m: 1}}/>
@@ -507,7 +561,7 @@ const ReferenceMovie = () => {
                                     })}
                                 </Box>
                                 <Button variant="contained"
-                                    onClick={handleAddNewGenresClick}>
+                                        onClick={handleAddNewGenresClick}>
                                     Add New Genres
                                 </Button>
                             </Stack>

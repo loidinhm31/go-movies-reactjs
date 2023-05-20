@@ -50,8 +50,6 @@ export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMa
 
         fieldDataMap.set(label, data);
         setFieldData(new Map(fieldDataMap));
-        console.log();
-
     }
 
     const handleDateField = (label: string, value: string, forField: string, defType: string, dateType: string) => {
