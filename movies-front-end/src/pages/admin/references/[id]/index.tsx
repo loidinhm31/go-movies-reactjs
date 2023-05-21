@@ -119,14 +119,18 @@ const ReferenceMovie = () => {
             // Check genre from TMDB, use genre name to compare instead of id
             fetchGenres().then((results) => {
                 results?.forEach((g) => {
-                if (movie?.genres.some(mg => mg.name === g.name)) {
+                    if (movie?.genres.some(mg => mg.name === g.name)) {
                         checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
                     } else {
-
-                    checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
+                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
                     }
                 });
-            }).finally(() => {
+
+                setMovie({
+                    ...movie,
+                    genres: checks,
+                } as MovieType);
+
                 // Check new genres
                 const nGenres: string[] = [];
                 const checked = checks?.filter(g => g.checked);
@@ -138,12 +142,6 @@ const ReferenceMovie = () => {
                 });
                 setNewGenres(nGenres);
             });
-
-            setMovie({
-                ...movie,
-                genres: checks,
-            } as MovieType);
-
         }
     }, [id, movie.type_code]);
 
