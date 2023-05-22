@@ -83,7 +83,7 @@ func (a *authService) SignIn(ctx context.Context, username string) (*dto.UserDto
 		IsNew:    false,
 	})
 	if user == nil {
-		return nil, errors.ErrNotFound
+		return nil, errors.ErrResourceNotFound
 	}
 
 	userDto := &dto.UserDto{
@@ -109,7 +109,7 @@ func (a *authService) FindUserFromODIC(ctx context.Context, username *string) (*
 	log.Println("checking admin privilege...")
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !a.mgmtCtrl.CheckPrivilege(author) {
-		return nil, errors.ErrNotFound
+		return nil, errors.ErrResourceNotFound
 	}
 
 	accessToken := fmt.Sprintf("%s", ctx.Value(middlewares.CtxAccessToken))

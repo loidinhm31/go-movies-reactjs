@@ -46,7 +46,7 @@ func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType st
 		}
 	}
 
-	genreDtos := mapper.MaptoGenreDtoSlice(allGenres)
+	genreDtos := mapper.MapToGenreDtoSlice(allGenres)
 	return genreDtos, nil
 }
 

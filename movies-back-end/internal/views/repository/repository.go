@@ -7,7 +7,6 @@ import (
 	"movies-service/internal/dto"
 	"movies-service/internal/models"
 	"movies-service/internal/views"
-	"strconv"
 	"time"
 )
 
@@ -21,11 +20,6 @@ func NewViewRepository(cfg *config.Config, db *gorm.DB) views.Repository {
 }
 
 func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) error {
-	movieId, err := strconv.Atoi(viewer.MovieId)
-	if err != nil {
-		return err
-	}
-
 	tx := vr.db.WithContext(ctx)
 	if vr.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -33,7 +27,7 @@ func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) er
 	result := tx.Create(&models.View{
 		ViewedBy: viewer.Viewer,
 		ViewedAt: time.Now(),
-		MovieId:  movieId,
+		MovieId:  viewer.MovieId,
 	})
 
 	if result.Error != nil {

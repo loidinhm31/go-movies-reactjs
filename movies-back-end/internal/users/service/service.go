@@ -45,7 +45,7 @@ func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.Page
 	userResults, err := u.userRepository.FindAllUsers(ctx, pageRequest, page, key, isNewBool)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.ErrNotFound
+		return nil, errors.ErrResourceNotFound
 	}
 
 	var userDtos []*dto.UserDto

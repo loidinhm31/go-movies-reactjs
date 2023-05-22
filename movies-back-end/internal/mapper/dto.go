@@ -6,7 +6,7 @@ import (
 )
 
 func MapToMovieDto(movie *models.Movie) *dto.MovieDto {
-	genreDtos := MaptoGenreDtoSlice(movie.Genres)
+	genreDtos := MapToGenreDtoSlice(movie.Genres)
 	return &dto.MovieDto{
 		ID:          movie.ID,
 		Title:       movie.Title,
@@ -39,10 +39,48 @@ func MapToGenreDto(genre *models.Genre) *dto.GenreDto {
 	}
 }
 
-func MaptoGenreDtoSlice(genreSlice []*models.Genre) []*dto.GenreDto {
+func MapToGenreDtoSlice(genreSlice []*models.Genre) []*dto.GenreDto {
 	var genreDtos []*dto.GenreDto
 	for _, g := range genreSlice {
 		genreDtos = append(genreDtos, MapToGenreDto(g))
 	}
 	return genreDtos
+}
+
+func MapToSeasonDto(season *models.Season) *dto.SeasonDto {
+	return &dto.SeasonDto{
+		ID:          season.ID,
+		Name:        season.Name,
+		AirDate:     season.AirDate,
+		Description: season.Description,
+		MovieID:     season.MovieID,
+		EpisodeDtos: nil,
+	}
+}
+
+func MapToSeasonDtoSlice(seasonSlice []*models.Season) []*dto.SeasonDto {
+	var seasonDtos []*dto.SeasonDto
+	for _, s := range seasonSlice {
+		seasonDtos = append(seasonDtos, MapToSeasonDto(s))
+	}
+	return seasonDtos
+}
+
+func MapToEpisodeDto(episode *models.Episode) *dto.EpisodeDto {
+	return &dto.EpisodeDto{
+		ID:        episode.ID,
+		Name:      episode.Name,
+		AirDate:   episode.AirDate,
+		Runtime:   episode.Runtime,
+		VideoPath: episode.VideoPath,
+		SeasonID:  episode.SeasonID,
+	}
+}
+
+func MapToEpisodeDtoSlice(seasonSlice []*models.Episode) []*dto.EpisodeDto {
+	var episodeDtos []*dto.EpisodeDto
+	for _, e := range seasonSlice {
+		episodeDtos = append(episodeDtos, MapToEpisodeDto(e))
+	}
+	return episodeDtos
 }

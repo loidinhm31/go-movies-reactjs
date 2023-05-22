@@ -7,10 +7,20 @@ import (
 	authHttp "movies-service/internal/auth/delivery/http"
 	authService "movies-service/internal/auth/service"
 	managementService "movies-service/internal/control/service"
+
 	"movies-service/internal/middlewares"
+
 	movieHttp "movies-service/internal/movies/delivery/http"
 	movieRepository "movies-service/internal/movies/repository"
 	movieService "movies-service/internal/movies/service"
+
+	seasonHttp "movies-service/internal/seasons/delivery/http"
+	seasonRepository "movies-service/internal/seasons/repository"
+	seasonService "movies-service/internal/seasons/service"
+
+	episodeHttp "movies-service/internal/episodes/delivery/http"
+	episodeRepository "movies-service/internal/episodes/repository"
+	episodeService "movies-service/internal/episodes/service"
 
 	genreHttp "movies-service/internal/genres/delivery/http"
 	genreRepository "movies-service/internal/genres/repository"
@@ -50,6 +60,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	rRepo := roleRepository.NewRoleRepository(s.cfg, s.db)
 	uRepo := userRepository.NewUserRepository(s.cfg, s.db)
 	mRepo := movieRepository.NewMovieRepository(s.cfg, s.db)
+	iSeasonRepo := seasonRepository.NewSeasonRepository(s.cfg, s.db)
+	iEpisodeRepo := episodeRepository.NewEpisodeRepository(s.cfg, s.db)
 	gRepo := genreRepository.NewGenreRepository(s.cfg, s.db)
 	sRepo := searchRepository.NewSearchRepository(s.cfg, s.db)
 	anRepo := analysisRepository.NewAnalysisRepository(s.cfg, s.db)
@@ -60,6 +72,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	aService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, managementCtrl, rRepo, uRepo)
 	rService := roleService.NewRoleService(rRepo)
 	mService := movieService.NewMovieService(managementCtrl, mRepo)
+	iSeasonService := seasonService.NewSeasonService(managementCtrl, mRepo, iSeasonRepo, iEpisodeRepo)
+	iEpisodeService := episodeService.NewSeasonService(managementCtrl, iSeasonRepo, iEpisodeRepo)
 	gService := genreService.NewGenreService(managementCtrl, gRepo)
 	sService := searchService.NewSearchService(sRepo)
 	anService := analysisService.NewAnalysisService(managementCtrl, anRepo)
@@ -71,6 +85,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	aHandler := authHttp.NewAuthHandler(aService, s.cfg.Keycloak, s.cloak)
 	rHandler := roleHttp.NewRoleHandler(rService)
 	mHandler := movieHttp.NewMovieHandler(mService)
+	iSeasonHandler := seasonHttp.NewSeasonHandler(iSeasonService)
+	iEpisodeHandler := episodeHttp.NewEpisodeHandler(iEpisodeService)
 	gHandler := genreHttp.NewGenreHandler(gService)
 	sHandler := searchHttp.NewGraphHandler(sService)
 	anHandler := analysisHttp.NewAnalysisHandler(anService)
@@ -92,6 +108,14 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	movieAuthGroup := authGroup.Group("/movies")
 	movieAuthGroup.Use(mw.JWTValidation())
 	movieHttp.MapAuthMovieRoutes(movieAuthGroup, mHandler)
+
+	seasonAuthGroup := authGroup.Group("/seasons")
+	seasonAuthGroup.Use(mw.JWTValidation())
+	seasonHttp.MapAuthSeasonRoutes(seasonAuthGroup, iSeasonHandler)
+
+	episodeAuthGroup := authGroup.Group("/episodes")
+	episodeAuthGroup.Use(mw.JWTValidation())
+	episodeHttp.MapAuthEpisodeRoutes(episodeAuthGroup, iEpisodeHandler)
 
 	genreAuthGroup := authGroup.Group("/genres")
 	genreAuthGroup.Use(mw.JWTValidation())
@@ -115,14 +139,20 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	movieGroup := apiV1.Group("/movies")
 
+	seasonGroup := apiV1.Group("/seasons")
+
+	episodeGroup := apiV1.Group("/episodes")
+
 	genreGroup := apiV1.Group("/genres")
 
 	searchGroup := apiV1.Group("/search")
 
 	viewGroup := apiV1.Group("/views")
 
-	// Map routes
+	// Map public routes
 	movieHttp.MapMovieRoutes(movieGroup, mHandler)
+	seasonHttp.MapSeasonRoutes(seasonGroup, iSeasonHandler)
+	episodeHttp.MapEpisodeRoutes(episodeGroup, iEpisodeHandler)
 	genreHttp.MapGenreRoutes(genreGroup, gHandler)
 	searchHttp.MapGraphRoutes(searchGroup, sHandler)
 	viewHttp.MapViewRoutes(viewGroup, vHandler)

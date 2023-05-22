@@ -23,6 +23,6 @@ type RoleDto struct {
 }
 
 type Viewer struct {
-	MovieId string `json:"movie_id"`
+	MovieId int    `json:"movie_id"`
 	Viewer  string `json:"viewer"`
 }

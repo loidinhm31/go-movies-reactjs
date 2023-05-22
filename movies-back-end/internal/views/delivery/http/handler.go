@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
+	"log"
 	"movies-service/internal/dto"
 	"movies-service/internal/views"
 	"movies-service/pkg/utils"
@@ -22,8 +23,8 @@ func NewViewHandler(viewService views.Service) views.Handler {
 func (h *viewHandler) RecognizeViewForMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		viewer := &dto.Viewer{}
-
 		if err := utils.ReadRequest(c, viewer); err != nil {
+			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
 			})

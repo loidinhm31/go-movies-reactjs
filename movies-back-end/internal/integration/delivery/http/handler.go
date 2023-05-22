@@ -42,6 +42,7 @@ func (ih *integrationHandler) UploadVideo() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
+			"message":  "ok",
 			"fileName": resp,
 		})
 	}
@@ -60,7 +61,8 @@ func (ih *integrationHandler) DeleteVideo() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
-			"result": res,
+			"message": "ok",
+			"result":  res,
 		})
 	}
 }

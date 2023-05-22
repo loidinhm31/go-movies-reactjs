@@ -5,7 +5,7 @@ import (
 	"movies-service/internal/integration"
 )
 
-// MapIntegrationRoutes Map auth routes
+// MapIntegrationRoutes Map integration routes
 func MapIntegrationRoutes(integrationGroup *gin.RouterGroup, h integration.Handler) {
 	integrationGroup.POST("/videos", h.UploadVideo())
 	integrationGroup.DELETE("/videos/:key", h.DeleteVideo())

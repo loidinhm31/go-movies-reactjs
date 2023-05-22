@@ -10,8 +10,8 @@ type User struct {
 	Email     string
 	FirstName string
 	LastName  string
-	RoleID    int
 	IsNew     bool
+	RoleID    int
 	Role      *Role `gorm:"foreignKey:RoleID"`
 	CreatedAt time.Time
 	CreatedBy string

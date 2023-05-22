@@ -5,7 +5,7 @@ import (
 	"movies-service/internal/views"
 )
 
-// MapViewRoutes Map auth routes
+// MapViewRoutes Map view routes
 func MapViewRoutes(viewGroup *gin.RouterGroup, h views.Handler) {
 	viewGroup.POST("/", h.RecognizeViewForMovie())
 	viewGroup.GET("/:movieId", h.FetchNumberOfViewsByMovieId())

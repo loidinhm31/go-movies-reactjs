@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/errors"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/models"
@@ -35,13 +35,13 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, movieType string
 		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, movieType, pageRequest, page)
 		if err != nil {
 			log.Println(err)
-			return nil, errors.New("not found")
+			return nil, errors.ErrResourceNotFound
 		}
 	} else {
 		movieResults, err = ms.movieRepository.FindAllMovies(ctx, pageRequest, page)
 		if err != nil {
 			log.Println(err)
-			return nil, errors.New("not found")
+			return nil, errors.ErrResourceNotFound
 		}
 	}
 
@@ -61,7 +61,7 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 	movie, err := ms.movieRepository.FindMovieById(ctx, id)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("not found")
+		return nil, errors.ErrResourceNotFound
 	}
 
 	movieDto := mapper.MapToMovieDto(movie)
@@ -74,7 +74,7 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
 	if err != nil {
 		log.Println(err)
-		return nil, errors.New("not found")
+		return nil, errors.ErrResourceNotFound
 	}
 
 	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
@@ -93,7 +93,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.New("unauthorized")
+		return errors.ErrUnAuthorized
 	}
 
 	var genreObjects []*models.Genre
@@ -106,7 +106,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		movie.ReleaseDate.IsZero() ||
 		movie.MpaaRating == "" ||
 		(movie.Genres == nil || len(movie.Genres) == 0) {
-		return errors.New("invalid input")
+		return errors.ErrInvalidInput
 	}
 
 	for _, genre := range movie.Genres {
@@ -129,7 +129,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.New("unauthorized")
+		return errors.ErrUnAuthorized
 	}
 
 	if movie.ID == 0 ||
@@ -138,13 +138,13 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		movie.Description == "" ||
 		movie.ReleaseDate.IsZero() ||
 		(movie.Genres == nil || len(movie.Genres) == 0) {
-		return errors.New("invalid input")
+		return errors.ErrInvalidInput
 	}
 
 	// Check movie exists
 	movieObj, err := ms.movieRepository.FindMovieById(ctx, movie.ID)
 	if err != nil {
-		return errors.New("cannot find object")
+		return errors.ErrResourceNotFound
 	}
 
 	// After check object exists, write updating value
@@ -172,7 +172,7 @@ func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.New("unauthorized")
+		return errors.ErrUnAuthorized
 	}
 
 	err := ms.movieRepository.DeleteMovieById(ctx, id)
