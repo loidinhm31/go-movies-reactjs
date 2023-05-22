@@ -85,6 +85,33 @@ CREATE TABLE public.views
     movie_id  INTEGER REFERENCES movies (id)
 );
 
+CREATE TABLE public.seasons
+(
+    id          SERIAL PRIMARY KEY,
+    name        VARCHAR(50)              NOT NULL,
+    air_date    TIMESTAMP                NOT NULL,
+    description TEXT                     NOT NULL,
+    movie_id    INTEGER REFERENCES movies (id),
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by  TEXT                     NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_by  TEXT                     NOT NULL
+);
+
+CREATE TABLE public.episodes
+(
+    id         SERIAL PRIMARY KEY,
+    name       VARCHAR(50)              NOT NULL,
+    air_date   TIMESTAMP                NOT NULL,
+    runtime    INTEGER                  NOT NULL,
+    video_path VARCHAR(255),
+    season_id  INTEGER REFERENCES seasons (id),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by TEXT                     NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_by TEXT                     NOT NULL
+);
+
 INSERT INTO mpaa(code, name, created_at, created_by, updated_at, updated_by)
 VALUES ('G', 'G', now(), 'admin', now(), 'admin'),
        ('PG', 'PG', now(), 'admin', now(), 'admin'),
@@ -168,6 +195,53 @@ VALUES ((SELECT m.id FROM movies m WHERE m.title = 'Highlander'),
        ((SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'),
         (SELECT g.id FROM genres g WHERE g.name = 'Comedy' AND g.type_code = 'TV'));
 
+INSERT INTO public.seasons(name, air_date, description, movie_id, created_at, created_by, updated_at, updated_by)
+VALUES ('Season 1', '2019-06-01', 'First Season at OT', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'),
+        now(), 'admin', now(), 'admin'),
+       ('Season 2', '2020-06-01', 'Second Season at OT', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'),
+        now(), 'admin', now(), 'admin'),
+       ('Season 3', '2021-06-01', 'Third Season at OT', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'),
+        now(), 'admin', now(), 'admin'),
+       ('Season 4', '2022-06-01', 'Fourth Season at OT', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'),
+        now(), 'admin', now(), 'admin');
+
+INSERT INTO public.episodes(name, air_date, runtime, season_id, created_at, created_by, updated_at, updated_by)
+VALUES ('Episode 1', '2019-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 1'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 2', '2020-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 1'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 3', '2021-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 1'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 4', '2022-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 1'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 1', '2022-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 2'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 2', '2022-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 2'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin'),
+       ('Episode 3', '2022-06-01', 60, (SELECT s.id
+                                        FROM seasons s
+                                        WHERE s.name = 'Season 2'
+                                          AND s.movie_id = (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire')),
+        now(), 'admin', now(), 'admin');
+
 INSERT INTO public.roles(role_name, role_code, created_at, created_by, updated_at, updated_by)
 VALUES ('admin', 'ADMIN', now(), 'admin', now(), 'admin'),
        ('moderator', 'MOD', now(), 'admin', now(), 'admin'),
@@ -189,5 +263,4 @@ VALUES ('2023-03-01', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'T
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Thor: Ragnarok')),
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
        ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
-       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander')),
-       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Harry Maguire'));
+       ('2023-04-06', 'anonymous', (SELECT m.id FROM movies m WHERE m.title = 'Highlander'));
