@@ -90,14 +90,6 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 }
 
 func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error {
-	// Get author
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
-	}
-
-	var genreObjects []*models.Genre
-
 	if movie.ID > 0 ||
 		movie.Title == "" ||
 		movie.TypeCode == "" ||
@@ -109,6 +101,13 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		return errors.ErrInvalidInput
 	}
 
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !ms.mgmtCtrl.CheckPrivilege(author) {
+		return errors.ErrUnAuthorized
+	}
+
+	var genreObjects []*models.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
@@ -126,12 +125,6 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 }
 
 func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) error {
-	// Get author
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
-	}
-
 	if movie.ID == 0 ||
 		movie.Title == "" ||
 		movie.Runtime == 0 ||
@@ -145,6 +138,12 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	movieObj, err := ms.movieRepository.FindMovieById(ctx, movie.ID)
 	if err != nil {
 		return errors.ErrResourceNotFound
+	}
+
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !ms.mgmtCtrl.CheckPrivilege(author) {
+		return errors.ErrUnAuthorized
 	}
 
 	// After check object exists, write updating value
@@ -169,6 +168,10 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 }
 
 func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
+	if id == 0 {
+		return errors.ErrInvalidInput
+	}
+
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !ms.mgmtCtrl.CheckPrivilege(author) {

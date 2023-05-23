@@ -94,16 +94,16 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 		return errors.ErrInvalidInput
 	}
 
-	// Get author
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !s.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
-	}
-
 	// Check season exists
 	seasonObj, err := s.seasonRepository.FindSeasonByID(ctx, season.ID)
 	if err != nil {
 		return errors.ErrResourceNotFound
+	}
+
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !s.mgmtCtrl.CheckPrivilege(author) {
+		return errors.ErrUnAuthorized
 	}
 
 	movieObj, err := s.movieRepository.FindMovieById(ctx, season.MovieID)
@@ -136,6 +136,7 @@ func (s seasonService) DeleteSeasonById(ctx context.Context, id int) error {
 		return errors.ErrInvalidInput
 	}
 
+	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !s.mgmtCtrl.CheckPrivilege(author) {
 		return errors.ErrUnAuthorized

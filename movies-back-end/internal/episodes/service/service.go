@@ -46,18 +46,18 @@ func (e episodeService) GetEpisodesBySeasonID(ctx context.Context, seasonID int)
 }
 
 func (e episodeService) AddEpisode(ctx context.Context, episode *dto.EpisodeDto) error {
-	// Get author
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !e.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
-	}
-
 	if episode.ID > 0 ||
 		episode.Name == "" ||
 		episode.AirDate.IsZero() ||
 		episode.Runtime == 0 ||
 		episode.SeasonID == 0 {
 		return errors.ErrInvalidInput
+	}
+
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !e.mgmtCtrl.CheckPrivilege(author) {
+		return errors.ErrUnAuthorized
 	}
 
 	seasonObj, err := e.seasonRepository.FindSeasonByID(ctx, episode.SeasonID)
@@ -84,12 +84,6 @@ func (e episodeService) AddEpisode(ctx context.Context, episode *dto.EpisodeDto)
 }
 
 func (e episodeService) UpdateEpisode(ctx context.Context, episode *dto.EpisodeDto) error {
-	// Get author
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !e.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
-	}
-
 	if episode.ID == 0 ||
 		episode.Name == "" ||
 		episode.AirDate.IsZero() ||
@@ -102,6 +96,12 @@ func (e episodeService) UpdateEpisode(ctx context.Context, episode *dto.EpisodeD
 	episodeObj, err := e.episodeRepository.FindEpisodeByID(ctx, episode.ID)
 	if err != nil {
 		return errors.ErrResourceNotFound
+	}
+
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !e.mgmtCtrl.CheckPrivilege(author) {
+		return errors.ErrUnAuthorized
 	}
 
 	seasonObj, err := e.seasonRepository.FindSeasonByID(ctx, episode.SeasonID)
@@ -135,6 +135,7 @@ func (e episodeService) DeleteEpisodeById(ctx context.Context, id int) error {
 		return errors.ErrInvalidInput
 	}
 
+	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !e.mgmtCtrl.CheckPrivilege(author) {
 		return errors.ErrUnAuthorized
