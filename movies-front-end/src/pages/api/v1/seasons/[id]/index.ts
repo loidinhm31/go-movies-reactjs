@@ -1,25 +1,22 @@
 const handler = async (req, res) => {
-    let data = req.body;
+    let {id} = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
 
     const requestOptions = {
-        method: "POST",
+        method: "GET",
         headers: headers,
-        body: JSON.stringify(data),
     }
 
+    const response = await fetch(`${process.env.API_BASE_URL}/seasons/${id}`,
+        requestOptions
+    );
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/views`,
-            requestOptions
-        );
-
         res.status(response.status).json(await response.json());
     } catch (error) {
-        console.log(error);
+        res.status(response.status).json({message: "server error"});
     }
-
 };
 
 export default handler;

@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
-import {useSession} from "next-auth/react";
+import {signIn, useSession} from "next-auth/react";
 import {GenreType, MovieType} from "src/types/movies";
 import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
@@ -29,9 +29,11 @@ import NotifySnackbar, {NotifyState, sleep} from "../../../components/shared/sna
 import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
 import {movieTypes} from "src/components/MovieTypeSelect";
+import {useCheckTokenAndRole} from "../../../hooks/auth/useCheckTokenAndRole";
 
 const EditMovie = () => {
     const router = useRouter();
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
     const [isOpenAlertDialog, setIsOpenAlertDialog] = useState<boolean>(false);
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
@@ -76,16 +78,11 @@ const EditMovie = () => {
     ];
 
     useEffect(() => {
-        if (status === "loading") {
+        if (isInvalid) {
+            signIn();
             return;
         }
-        const role = session?.user.role;
-
-        if (role === "admin" || role === "moderator") {
-            return;
-        }
-        router.push("/");
-    }, [router, session, status])
+    }, [isInvalid]);
 
     useEffect(() => {
         if (id === undefined) {
@@ -101,17 +98,9 @@ const EditMovie = () => {
 
             const checks: GenreType[] = [];
 
-            fetchGenres()
-                .then((result) => {
-                    result?.forEach((g) => {
-                        checks.push({id: g.id, checked: false, name: g.name, type_code: g.type_code});
-                    });
-                })
-
-            setMovie((m) => ({
-                ...m,
-                genres: checks,
-            }));
+            if (movie.type_code) {
+                handleFetchGenres();
+            }
 
         } else {
             fetchMovie().then((movie) => {
@@ -135,22 +124,7 @@ const EditMovie = () => {
 
     useEffect(() => {
         if (movie.type_code !== undefined && movie.type_code !== "") {
-            const checks: GenreType[] = [];
-
-            fetchGenres().then((result) => {
-                result?.forEach((g) => {
-                    if (movie?.genres.some(mg => mg.id === g.id)) {
-                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
-                    } else {
-                        checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
-                    }
-                });
-            })
-
-            setMovie({
-                ...movie,
-                genres: checks,
-            } as MovieType);
+            handleFetchGenres();
         }
     }, [id, movie.type_code]);
 
@@ -183,7 +157,26 @@ const EditMovie = () => {
                     });
                 });
         }
-    }, [isConfirmDelete])
+    }, [isConfirmDelete]);
+
+    const handleFetchGenres = () => {
+        const checks: GenreType[] = [];
+
+        fetchGenres().then((result) => {
+            result?.forEach((g) => {
+                if (movie?.genres.some(mg => mg.id === g.id)) {
+                    checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
+                } else {
+                    checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
+                }
+            });
+
+            setMovie({
+                ...movie,
+                genres: checks,
+            } as MovieType);
+        })
+    }
 
     const handleSubmit = (event) => {
         event.preventDefault();

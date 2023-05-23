@@ -4,10 +4,10 @@ import React, {useState} from "react";
 import useSWR from "swr";
 import {get, patch} from "src/libs/api";
 import {Button, DialogActions, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup} from "@mui/material";
-import {RoleType, UserType} from "../types/users";
+import {RoleType, UserType} from "../../types/users";
 import DialogTitle from "@mui/material/DialogTitle";
 import useSWRMutation from "swr/mutation";
-import {NotifyState} from "./shared/snackbar";
+import {NotifyState} from "../shared/snackbar";
 
 interface RoleDialogProps {
     user: UserType | null;

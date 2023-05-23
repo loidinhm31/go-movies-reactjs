@@ -18,8 +18,10 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
 import {blue} from "@mui/material/colors";
 import {Drawer, DrawerHeader} from "../shared/drawer";
+import {useHasAnyRole} from "../../hooks/auth/useHasAnyRole";
 
 function MiniDrawer(props: SideMenuLayoutProps) {
+    const isPrivilege = useHasAnyRole(["admin", "moderator"]);
     const router = useRouter();
     const theme = useTheme();
     const [open, setOpen] = useState(false);
@@ -60,7 +62,7 @@ function MiniDrawer(props: SideMenuLayoutProps) {
                 </List>
                 <Divider/>
                 <List>
-                    {props.adminMenuButtonOptions!.map((item, itemIndex) => (
+                    {isPrivilege && props.adminMenuButtonOptions!.map((item, itemIndex) => (
                         <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item}
                                       itemIndex={itemIndex}/>
                     ))}

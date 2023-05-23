@@ -15,7 +15,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/integration/videos/${objectKey}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/videos/${objectKey}`,
         requestOptions
     );
 

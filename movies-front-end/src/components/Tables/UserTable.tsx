@@ -17,7 +17,7 @@ import {Direction, PageType} from "../../types/page";
 import {visuallyHidden} from "@mui/utils";
 import {useCallback, useEffect, useState} from "react";
 import {UserType} from "../../types/users";
-import RoleDialog from "../RoleDialog";
+import RoleDialog from "../Dialog/RoleDialog";
 import {NotifyState} from "../shared/snackbar";
 
 export interface UserData {

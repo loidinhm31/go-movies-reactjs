@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Box, Divider, Stack, Tab, Tabs, Typography} from "@mui/material";
+import {Box, Divider, Paper, Stack, Tab, Tabs, Typography} from "@mui/material";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import TvIcon from "@mui/icons-material/Tv";
 import {TabMovie} from "../../components/Tab/TabMovie";
@@ -46,10 +46,15 @@ function Movies() {
             </Box>
             <Divider/>
 
-            <Tabs value={tabValue} onChange={handleChangeTab} aria-label="icon label tabs example">
-                <Tab icon={<TheatersIcon/>} label="Movies"/>
-                <Tab icon={<TvIcon/>} label="TV Series"/>
-            </Tabs>
+            <Paper
+                elevation={3}
+                sx={{p: 2}}
+            >
+                <Tabs value={tabValue} onChange={handleChangeTab} aria-label="icon label tabs example">
+                    <Tab icon={<TheatersIcon/>} label="Movies"/>
+                    <Tab icon={<TvIcon/>} label="TV Series"/>
+                </Tabs>
+            </Paper>
 
             <TabPanel value={tabValue} index={0}>
                 <TabMovie/>

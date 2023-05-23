@@ -4,13 +4,6 @@ import format from "date-fns/format";
 import Link from "next/link";
 import {MovieType} from "src/types/movies";
 
-const Img = styled("img")({
-    margin: "auto",
-    display: "block",
-    maxWidth: "100%",
-    maxHeight: "100%",
-});
-
 interface ReferencesTableProps {
     movieType: string;
     data: MovieType[];
