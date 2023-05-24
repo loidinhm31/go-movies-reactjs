@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"movies-service/internal/dto"
+	"movies-service/internal/errors"
 	"movies-service/internal/models"
 	"testing"
 )
@@ -106,7 +107,6 @@ func TestGetAllGenresByTypeCode(t *testing.T) {
 		assert.Equal(t, "MOVIE", genres[0].TypeCode)
 		assert.Equal(t, "Comedy2", genres[1].Name)
 		assert.Equal(t, "TV", genres[1].TypeCode)
-
 	})
 }
 
@@ -166,7 +166,7 @@ func TestAddGenres(t *testing.T) {
 
 		err := genreService.AddGenres(context.Background(), genreDtos)
 		assert.Error(t, err)
-		assert.Equal(t, "cannot add Genre2", err.Error())
+		assert.Equal(t, errors.ErrCannotExecuteAction.Error(), err.Error())
 	})
 
 	t.Run("Invalid genre type code", func(t *testing.T) {
@@ -183,7 +183,7 @@ func TestAddGenres(t *testing.T) {
 		}
 		err := genreService.AddGenres(context.Background(), genreDtos)
 		assert.Error(t, err)
-		assert.Equal(t, "invalid type code", err.Error())
+		assert.Equal(t, errors.ErrInvalidInput.Error(), err.Error())
 	})
 
 	t.Run("Unauthorized user", func(t *testing.T) {
@@ -197,6 +197,6 @@ func TestAddGenres(t *testing.T) {
 		}
 		err := genreService.AddGenres(context.Background(), genreDtos)
 		assert.Error(t, err)
-		assert.Equal(t, "unauthorized", err.Error())
+		assert.Equal(t, errors.ErrUnAuthorized.Error(), err.Error())
 	})
 }

@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/errors"
 	"movies-service/internal/genres"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
@@ -34,13 +34,13 @@ func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType st
 		allGenres, err = gs.genreRepository.FindAllGenresByTypeCode(ctx, movieType)
 		if err != nil {
 			log.Println(err)
-			return nil, errors.New("not found")
+			return nil, errors.ErrResourceNotFound
 		}
 	} else {
 		allGenres, err = gs.genreRepository.FindAllGenres(ctx)
 		if err != nil {
 			log.Println(err)
-			return nil, errors.New("not found")
+			return nil, errors.ErrResourceNotFound
 		}
 	}
 
@@ -52,7 +52,7 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !gs.mgmtCtrl.CheckPrivilege(author) {
-		return errors.New("unauthorized")
+		return errors.ErrUnAuthorized
 	}
 
 	var newGenres []*models.Genre
@@ -66,11 +66,11 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 		}
 
 		if !checkGenreType(g.TypeCode) {
-			return errors.New("invalid type code")
+			return errors.ErrInvalidInput
 		}
 
 		if foundedGenre.Name == g.Name && foundedGenre.TypeCode == foundedGenre.TypeCode {
-			return errors.New(fmt.Sprintf("cannot add %s", g.Name))
+			return errors.ErrCannotExecuteAction
 		}
 
 		newGenres = append(newGenres, &models.Genre{
