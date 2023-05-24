@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"movies-service/config"
 	"movies-service/internal/genres"
@@ -53,21 +52,21 @@ func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieTyp
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx *gin.Context, genre *models.Genre) (*models.Genre, error) {
+func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *models.Genre) (*models.Genre, error) {
 	var result models.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&models.Genre{}).Where(genre).Find(result).Error
+	err := tx.Model(&models.Genre{}).Where("name = ? AND type_code = ?", genre.Name, genre.TypeCode).Find(result).Error
 	if err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (gr *genreRepository) InsertGenres(ctx *gin.Context, genres []*models.Genre) error {
+func (gr *genreRepository) InsertGenres(ctx context.Context, genres []*models.Genre) error {
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()

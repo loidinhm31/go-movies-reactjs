@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
@@ -28,7 +27,6 @@ func NewGenreService(mgmtCtrl control.Service, genreRepository genres.GenreRepos
 }
 
 func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType string) ([]*dto.GenreDto, error) {
-
 	var err error
 	var allGenres []*models.Genre
 
@@ -50,7 +48,7 @@ func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType st
 	return genreDtos, nil
 }
 
-func (gs *genreService) AddGenres(ctx *gin.Context, genreDtos []dto.Genres) error {
+func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto) error {
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !gs.mgmtCtrl.CheckPrivilege(author) {
@@ -60,7 +58,8 @@ func (gs *genreService) AddGenres(ctx *gin.Context, genreDtos []dto.Genres) erro
 	var newGenres []*models.Genre
 	for _, g := range genreDtos {
 		foundedGenre, err := gs.genreRepository.FindGenreByNameAndTypeCode(ctx, &models.Genre{
-			Name: fmt.Sprintf("%s", g),
+			Name:     g.Name,
+			TypeCode: g.TypeCode,
 		})
 		if err != nil {
 			return err
@@ -70,8 +69,8 @@ func (gs *genreService) AddGenres(ctx *gin.Context, genreDtos []dto.Genres) erro
 			return errors.New("invalid type code")
 		}
 
-		if foundedGenre.Name == g.Name {
-			return errors.New(fmt.Sprintf("cannot add %s", g))
+		if foundedGenre.Name == g.Name && foundedGenre.TypeCode == foundedGenre.TypeCode {
+			return errors.New(fmt.Sprintf("cannot add %s", g.Name))
 		}
 
 		newGenres = append(newGenres, &models.Genre{
