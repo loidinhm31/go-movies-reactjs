@@ -7,90 +7,45 @@ import (
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/models"
+	"movies-service/pkg/test_helper"
 	"testing"
 )
 
-// Mock genreRepository for testing
-type MockGenreRepository struct {
-	mock.Mock
-}
-
-func (m *MockGenreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*models.Genre, error) {
-	args := m.Called(ctx, movieType)
-	return args.Get(0).([]*models.Genre), args.Error(1)
-}
-
-func (m *MockGenreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *models.Genre) (*models.Genre, error) {
-	args := m.Called(ctx, genre)
-	return args.Get(0).(*models.Genre), args.Error(1)
-}
-
-func (m *MockGenreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, error) {
-	args := m.Called(ctx)
-	return args.Get(0).([]*models.Genre), args.Error(1)
-}
-
-func (m *MockGenreRepository) InsertGenres(ctx context.Context, genres []*models.Genre) error {
-	args := m.Called(ctx, genres)
-	return args.Error(0)
-}
-
-// MockManagementCtrl is a mock implementation of the Service interface for testing.
-type MockManagementCtrl struct {
-	mock.Mock
-}
-
-func (m *MockManagementCtrl) CheckPrivilege(username string) bool {
-	args := m.Called(username)
-	return args.Bool(0)
-}
-
-func (m *MockManagementCtrl) CheckAdminPrivilege(username string) bool {
-	args := m.Called(username)
-	return args.Bool(0)
-}
-
-func (m *MockManagementCtrl) CheckUser(username string) bool {
-	args := m.Called(username)
-	return args.Bool(0)
-}
-
-func setupMock() (*MockManagementCtrl, *MockGenreRepository, *genreService) {
+func setupMock() (*test_helper.MockManagementCtrl, *test_helper.MockGenreRepository, *genreService) {
 	// Create a mock genre repository
-	mockRepo := new(MockGenreRepository)
+	mockRepo := new(test_helper.MockGenreRepository)
 
 	// Create a mock management controller
-	mockCtrl := new(MockManagementCtrl)
+	mockCtrl := new(test_helper.MockManagementCtrl)
 
 	// Create a genre service instance with the mock repository and controller
 	genreService := &genreService{
 		genreRepository: mockRepo,
 		mgmtCtrl:        mockCtrl,
 	}
-
 	return mockCtrl, mockRepo, genreService
 }
 
 func TestGetAllGenresByTypeCode(t *testing.T) {
 
-	t.Run("Valid movie type (action)", func(t *testing.T) {
+	t.Run("Valid movie type (MOVIE)", func(t *testing.T) {
 		_, mockRepo, genreService := setupMock()
 
 		// Set up mock expectations and return values
-		mockRepo.On("FindAllGenresByTypeCode", context.Background(), "action").
+		mockRepo.On("FindAllGenresByTypeCode", context.Background(), "MOVIE").
 			Return([]*models.Genre{
 				{Name: "Action1", TypeCode: "MOVIE"},
 				{Name: "Action2", TypeCode: "MOVIE"},
 			}, nil)
 
-		genres, err := genreService.GetAllGenresByTypeCode(context.Background(), "action")
+		genres, err := genreService.GetAllGenresByTypeCode(context.Background(), "MOVIE")
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(genres))
 		assert.Equal(t, "Action1", genres[0].Name)
 		assert.Equal(t, "Action2", genres[1].Name)
 	})
 
-	t.Run("Invalid movie type", func(t *testing.T) {
+	t.Run("Empty movie type", func(t *testing.T) {
 		_, mockRepo, genreService := setupMock()
 
 		// Set up mock expectations and return values
