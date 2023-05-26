@@ -110,8 +110,17 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 	var genreObjects []*models.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
+			if genre.TypeCode != movie.TypeCode {
+				log.Println("genre type must equal movie type")
+				return errors.ErrInvalidInput
+			}
 			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
 		}
+	}
+
+	if len(genreObjects) == 0 {
+		log.Println("empty genres")
+		return errors.ErrInvalidInputDetail("genres cannot empty")
 	}
 
 	movieObject := mapper.MapToMovie(movie, author)
@@ -127,6 +136,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) error {
 	if movie.ID == 0 ||
 		movie.Title == "" ||
+		movie.TypeCode == "" ||
 		movie.Runtime == 0 ||
 		movie.Description == "" ||
 		movie.ReleaseDate.IsZero() ||
@@ -157,9 +167,19 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	var genreObjects []*models.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
+			if genre.TypeCode != movie.TypeCode {
+				log.Println("genre type must equal movie type")
+				return errors.ErrInvalidInput
+			}
 			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
 		}
 	}
+
+	if len(genreObjects) == 0 {
+		log.Println("empty genres")
+		return errors.ErrInvalidInputDetail("genres cannot empty")
+	}
+
 	err = ms.movieRepository.UpdateMovieGenres(ctx, movieObj, genreObjects)
 	if err != nil {
 		return err

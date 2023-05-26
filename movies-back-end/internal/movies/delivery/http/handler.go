@@ -38,7 +38,7 @@ func (mh *movieHandler) FetchMoviesByType() gin.HandlerFunc {
 
 		allMovies, err := mh.movieService.GetAllMoviesByType(c, movieType, pageable)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
 			c.Abort()
@@ -59,7 +59,7 @@ func (mh *movieHandler) FetchMovieById() gin.HandlerFunc {
 
 		movie, err := mh.movieService.GetMovieById(c, movieId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
 			c.Abort()
@@ -138,7 +138,7 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 		err = mh.movieService.DeleteMovieById(c, movieId)
 		if err != nil {
 			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
 			})
 			c.Abort()

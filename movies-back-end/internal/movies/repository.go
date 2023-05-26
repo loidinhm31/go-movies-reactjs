@@ -7,7 +7,7 @@ import (
 )
 
 type MovieRepository interface {
-	InsertMovie(ctx context.Context, user *models.Movie) error
+	InsertMovie(ctx context.Context, movie *models.Movie) error
 
 	FindAllMovies(ctx context.Context, pageRequest *pagination.PageRequest,
 		page *pagination.Page[*models.Movie]) (*pagination.Page[*models.Movie], error)
