@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
-import {GenreType, MovieType} from "src/types/movies";
+import {GenreType, MovieType, RatingType} from "src/types/movies";
 import {get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
@@ -31,6 +31,7 @@ import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
 import {ClientError} from "../../../../libs/api_client";
 import {movieTypes} from "../../../../components/MovieTypeSelect";
+import useSWR from "swr";
 
 const ReferenceMovie = () => {
     const router = useRouter();
@@ -69,14 +70,7 @@ const ReferenceMovie = () => {
     const {trigger: removeVideo} = useSWRMutation(`../../api/v1/admin/movies/video/remove`, post);
     const {trigger: addNewGenres} = useSWRMutation(`../../api/v1/admin/genres`, post);
 
-    const mpaaOptions = [
-        {id: "G", value: "G"},
-        {id: "PG", value: "PG"},
-        {id: "PG13", value: "PG-13"},
-        {id: "R", value: "R"},
-        {id: "NC17", value: "NC-17"},
-        {id: "18A", value: "18A"},
-    ];
+    const {data: mpaaOptions} = useSWR<RatingType[]>("../api/v1/ratings", get);
 
     useEffect(() => {
         if (status === "loading") {
@@ -472,8 +466,8 @@ const ReferenceMovie = () => {
                                     value={movie.mpaa_rating}
                                     onChange={e => handleChange(e, "mpaa_rating")}
                                 >
-                                    {mpaaOptions.map((o) =>
-                                        <MenuItem key={o.id} value={o.value}>{o.value}</MenuItem>
+                                    {mpaaOptions && mpaaOptions.map((o) =>
+                                        <MenuItem key={o.id} value={o.code}>{o.name}</MenuItem>
                                     )}
                                 </TextField>
                             </Grid>

@@ -15,6 +15,9 @@ import {FieldData} from "src/types/search";
 import {SearchDate} from "./SearchDate";
 import {SearchGenre} from "./SearchGenre";
 import {SearchString} from "./SearchString";
+import useSWR from "swr";
+import {RatingType} from "../../../types/movies";
+import {get} from "../../../libs/api";
 
 interface SearchFieldProps {
     trigger: (fieldData: FieldData[]) => void;
@@ -23,15 +26,7 @@ interface SearchFieldProps {
 }
 
 export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMap: setFieldData}: SearchFieldProps) {
-
-    const mpaaOptions = [
-        {id: "G", value: "G"},
-        {id: "PG", value: "PG"},
-        {id: "PG13", value: "PG-13"},
-        {id: "R", value: "R"},
-        {id: "NC17", value: "NC-17"},
-        {id: "18A", value: "18A"},
-    ];
+    const {data: mpaaOptions} = useSWR<RatingType[]>("../api/v1/ratings", get);
 
     const handleStringField = (label: string, values: string | string[], forField: string, defType: string) => {
         let data = fieldDataMap.get(label) as FieldData;
@@ -153,17 +148,20 @@ export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMa
                                 readOnly: true,
                             }}
                         />
-                        <Autocomplete
-                            fullWidth
-                            onChange={(_, value) => handleStringField("mpaa_rating", value.map(v => v.value), "def", "string")}
-                            multiple
-                            id="rating-3"
-                            options={mpaaOptions}
-                            getOptionLabel={(option) => option.value}
-                            renderInput={(params) => (
-                                <TextField {...params} placeholder="MPAA Rating"/>
-                            )}
-                        />
+                        {mpaaOptions &&
+                            <Autocomplete
+                                fullWidth
+                                onChange={(_, value) => handleStringField("mpaa_rating", value.map(v => v.code), "def", "string")}
+                                multiple
+                                id="rating-3"
+                                options={mpaaOptions}
+                                getOptionLabel={(option) => option.code}
+                                renderInput={(params) => (
+                                    <TextField {...params} placeholder="MPAA Rating"/>
+                                )}
+                            />
+                        }
+
                     </Stack>
                 </AccordionDetails>
             </Accordion>

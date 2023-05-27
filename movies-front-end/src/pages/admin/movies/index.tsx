@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {signIn, useSession} from "next-auth/react";
-import {GenreType, MovieType} from "src/types/movies";
+import {GenreType, MovieType, RatingType} from "src/types/movies";
 import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
@@ -30,6 +30,7 @@ import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
 import {movieTypes} from "src/components/MovieTypeSelect";
 import {useCheckTokenAndRole} from "../../../hooks/auth/useCheckTokenAndRole";
+import useSWR from "swr";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -49,7 +50,6 @@ const EditMovie = () => {
         description: "",
         release_date: null,
         runtime: 0,
-        mpaa_rating: "",
         genres: [],
         image_path: "",
     });
@@ -68,14 +68,7 @@ const EditMovie = () => {
     const {trigger: uploadVideo} = useSWRMutation(`../api/v1/admin/movies/video/upload`, postForm);
     const {trigger: removeVideo} = useSWRMutation(`../api/v1/admin/movies/video/remove`, post);
 
-    const mpaaOptions = [
-        {id: "G", value: "G"},
-        {id: "PG", value: "PG"},
-        {id: "PG13", value: "PG-13"},
-        {id: "R", value: "R"},
-        {id: "NC17", value: "NC-17"},
-        {id: "18A", value: "18A"},
-    ];
+    const {data: mpaaOptions} = useSWR<RatingType[]>("../api/v1/ratings", get);
 
     useEffect(() => {
         if (isInvalid) {
@@ -465,8 +458,8 @@ const EditMovie = () => {
                                     value={movie.mpaa_rating}
                                     onChange={e => handleChange(e, "mpaa_rating")}
                                 >
-                                    {mpaaOptions.map((o) =>
-                                        <MenuItem key={o.id} value={o.value}>{o.value}</MenuItem>
+                                    {mpaaOptions && mpaaOptions.map((o, index) =>
+                                        <MenuItem key={`${o.id}-${index}`} value={o.code}>{o.name}</MenuItem>
                                     )}
                                 </TextField>
                             </Grid>
