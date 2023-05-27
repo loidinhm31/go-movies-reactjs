@@ -3,9 +3,9 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 	"movies-service/internal/search"
-	"movies-service/pkg/utils"
+	"movies-service/pkg/util"
 	"net/http"
 )
 
@@ -22,9 +22,9 @@ func NewGraphHandler(graphService search.Service) search.Handler {
 func (gh *graphHandler) Search() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the query from the request
-		filter := &models.SearchParams{}
+		filter := &model.SearchParams{}
 
-		if err := utils.ReadRequest(c, filter); err != nil {
+		if err := util.ReadRequest(c, filter); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -33,7 +33,7 @@ func (gh *graphHandler) Search() gin.HandlerFunc {
 			return
 		}
 
-		result, err := gh.graphService.Search(c, filter)
+		result, err := gh.graphService.SearchMovie(c, filter)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

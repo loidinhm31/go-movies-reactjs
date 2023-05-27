@@ -4,7 +4,7 @@ import (
 	"context"
 	"movies-service/internal/dto"
 	"movies-service/internal/mapper"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 	"movies-service/internal/search"
 	"movies-service/pkg/pagination"
 )
@@ -19,8 +19,8 @@ func NewSearchService(searchRepository search.Repository) search.Service {
 	}
 }
 
-func (gs *searchService) Search(ctx context.Context, searchParams *models.SearchParams) (*pagination.Page[*dto.MovieDto], error) {
-	page, err := gs.searchRepository.Search(ctx, searchParams)
+func (gs *searchService) SearchMovie(ctx context.Context, searchParams *model.SearchParams) (*pagination.Page[*dto.MovieDto], error) {
+	page, err := gs.searchRepository.SearchMovie(ctx, searchParams)
 	if err != nil {
 		return nil, err
 	}
