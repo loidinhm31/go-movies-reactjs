@@ -2,21 +2,21 @@ package service
 
 import (
 	"context"
-	"errors"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
-	"movies-service/internal/views"
+	"movies-service/internal/errors"
+	"movies-service/internal/view"
 )
 
 type viewService struct {
 	mgmtCtrl       control.Service
-	viewRepository views.Repository
+	viewRepository view.Repository
 }
 
 func NewViewService(
 	mgmtCtrl control.Service,
-	viewRepository views.Repository,
-) views.Service {
+	viewRepository view.Repository,
+) view.Service {
 	return &viewService{
 		mgmtCtrl:       mgmtCtrl,
 		viewRepository: viewRepository,
@@ -25,12 +25,12 @@ func NewViewService(
 
 func (vs viewService) RecognizeViewForMovie(ctx context.Context, viewer *dto.Viewer) error {
 	if viewer.Viewer == "" {
-		return errors.New("invalid")
+		return errors.ErrInvalidClient
 	}
 
 	if viewer.Viewer != "anonymous" {
 		if !vs.mgmtCtrl.CheckUser(viewer.Viewer) {
-			return errors.New("invalid user")
+			return errors.ErrInvalidClient
 		}
 	}
 

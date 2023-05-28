@@ -5,8 +5,8 @@ import (
 	"gorm.io/gorm"
 	"movies-service/config"
 	"movies-service/internal/dto"
-	"movies-service/internal/models"
-	"movies-service/internal/views"
+	"movies-service/internal/model"
+	"movies-service/internal/view"
 	"time"
 )
 
@@ -15,7 +15,7 @@ type viewRepository struct {
 	db  *gorm.DB
 }
 
-func NewViewRepository(cfg *config.Config, db *gorm.DB) views.Repository {
+func NewViewRepository(cfg *config.Config, db *gorm.DB) view.Repository {
 	return &viewRepository{cfg: cfg, db: db}
 }
 
@@ -24,7 +24,7 @@ func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) er
 	if vr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	result := tx.Create(&models.View{
+	result := tx.Create(&model.View{
 		ViewedBy: viewer.Viewer,
 		ViewedAt: time.Now(),
 		MovieId:  viewer.MovieId,
@@ -43,8 +43,8 @@ func (vr *viewRepository) CountViewsByMovieId(ctx context.Context, movieId int) 
 	if vr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Table("views").
-		Where("views.movie_id = ?", movieId).
+	err := tx.Table("view").
+		Where("view.movie_id = ?", movieId).
 		Count(&totalViews).Error
 	if err != nil {
 		return 0, err

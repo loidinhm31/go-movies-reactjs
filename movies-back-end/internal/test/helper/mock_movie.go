@@ -1,9 +1,9 @@
-package test_helper
+package helper
 
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 	"movies-service/pkg/pagination"
 )
 
@@ -12,45 +12,45 @@ type MockMovieRepository struct {
 	mock.Mock
 }
 
-func (m *MockMovieRepository) InsertMovie(ctx context.Context, movie *models.Movie) error {
+func (m *MockMovieRepository) InsertMovie(ctx context.Context, movie *model.Movie) error {
 	args := m.Called(ctx, movie)
 	return args.Error(0)
 }
 
 func (m *MockMovieRepository) FindAllMovies(ctx context.Context,
 	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*models.Movie]) (*pagination.Page[*models.Movie], error) {
+	page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
 	args := m.Called(ctx, pageRequest, page)
-	return args.Get(0).(*pagination.Page[*models.Movie]), args.Error(1)
+	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
 func (m *MockMovieRepository) FindAllMoviesByType(ctx context.Context,
 	movieType string,
 	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*models.Movie]) (*pagination.Page[*models.Movie], error) {
+	page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
 	args := m.Called(ctx, movieType, pageRequest, page)
-	return args.Get(0).(*pagination.Page[*models.Movie]), args.Error(1)
+	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
-func (m *MockMovieRepository) FindMovieById(ctx context.Context, id int) (*models.Movie, error) {
+func (m *MockMovieRepository) FindMovieById(ctx context.Context, id int) (*model.Movie, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).(*models.Movie), args.Error(1)
+	return args.Get(0).(*model.Movie), args.Error(1)
 }
 
 func (m *MockMovieRepository) FindMoviesByGenre(ctx context.Context,
 	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*models.Movie],
-	genreId int) (*pagination.Page[*models.Movie], error) {
+	page *pagination.Page[*model.Movie],
+	genreId int) (*pagination.Page[*model.Movie], error) {
 	args := m.Called(ctx, pageRequest, page, genreId)
-	return args.Get(0).(*pagination.Page[*models.Movie]), args.Error(1)
+	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
-func (m *MockMovieRepository) UpdateMovie(ctx context.Context, movie *models.Movie) error {
+func (m *MockMovieRepository) UpdateMovie(ctx context.Context, movie *model.Movie) error {
 	args := m.Called(ctx, movie)
 	return args.Error(0)
 }
 
-func (m *MockMovieRepository) UpdateMovieGenres(ctx context.Context, movie *models.Movie, genres []*models.Genre) error {
+func (m *MockMovieRepository) UpdateMovieGenres(ctx context.Context, movie *model.Movie, genres []*model.Genre) error {
 	args := m.Called(ctx, movie, genres)
 	return args.Error(0)
 }

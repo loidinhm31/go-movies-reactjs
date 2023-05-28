@@ -1,4 +1,4 @@
-package test_helper
+package helper
 
 import "github.com/stretchr/testify/mock"
 

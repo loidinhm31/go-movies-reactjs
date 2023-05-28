@@ -4,17 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/dto"
-	"movies-service/internal/views"
-	"movies-service/pkg/utils"
+	"movies-service/internal/view"
+	"movies-service/pkg/util"
 	"net/http"
 	"strconv"
 )
 
 type viewHandler struct {
-	viewService views.Service
+	viewService view.Service
 }
 
-func NewViewHandler(viewService views.Service) views.Handler {
+func NewViewHandler(viewService view.Service) view.Handler {
 	return &viewHandler{
 		viewService: viewService,
 	}
@@ -23,7 +23,7 @@ func NewViewHandler(viewService views.Service) views.Handler {
 func (h *viewHandler) RecognizeViewForMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		viewer := &dto.Viewer{}
-		if err := utils.ReadRequest(c, viewer); err != nil {
+		if err := util.ReadRequest(c, viewer); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -59,7 +59,7 @@ func (h *viewHandler) FetchNumberOfViewsByMovieId() gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
-			"views":   totalViews,
+			"view":    totalViews,
 		})
 	}
 }

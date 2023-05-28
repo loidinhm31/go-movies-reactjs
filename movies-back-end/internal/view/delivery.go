@@ -1,4 +1,4 @@
-package views
+package view
 
 import "github.com/gin-gonic/gin"
 
