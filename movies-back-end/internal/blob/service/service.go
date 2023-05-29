@@ -29,7 +29,7 @@ func NewBlobService(cfg *config.Config, ctrl control.Service) blob.Service {
 	}
 }
 
-func (is *blobService) UploadVideo(ctx context.Context, file multipart.File) (string, error) {
+func (is *blobService) UploadFile(ctx context.Context, file multipart.File, fileType string) (string, error) {
 	log.Println("processing uploading file...")
 	log.Println("checking role...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
@@ -37,10 +37,21 @@ func (is *blobService) UploadVideo(ctx context.Context, file multipart.File) (st
 		return "", errors.ErrUnAuthorized
 	}
 
+	if fileType == "" {
+		return "", errors.ErrInvalidInput
+	}
+
 	object := config2.CloudinaryObject{}
 	cld := object.GetCloudinaryObject(is.cfg.Cloudinary)
-	log.Println("uploading file...")
-	fileKey := is.cfg.Cloudinary.VideoFolderPath + strconv.FormatInt(time.Now().Unix(), 10)
+	log.Printf("uploading %s file...\n", fileType)
+
+	var fileKey string
+	if fileType == "video" {
+		fileKey = fmt.Sprintf("%s/%s/%s", is.cfg.Cloudinary.FolderPath, "videos", strconv.FormatInt(time.Now().Unix(), 10))
+	} else if fileType == "image" {
+		fileKey = fmt.Sprintf("%s/%s/%s", is.cfg.Cloudinary.FolderPath, "images", strconv.FormatInt(time.Now().Unix(), 10))
+	}
+
 	res, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
 		PublicID:   fileKey,
 		EagerAsync: api.Bool(true),
@@ -48,11 +59,23 @@ func (is *blobService) UploadVideo(ctx context.Context, file multipart.File) (st
 	if err != nil {
 		return "", err
 	}
+
+	var fileResult string
+	if fileType == "video" {
+		fileResult = fileKey + "." + res.Format
+	} else if fileType == "image" {
+		fileResult = fmt.Sprintf("%s/%s/%s/%s.%s",
+			"https://res.cloudinary.com",
+			is.cfg.Cloudinary.CloudName,
+			"image/upload/c_scale,w_200,h_300",
+			fileKey, res.Format,
+		)
+	}
 	log.Printf("complete upload file %s\n", fileKey)
-	return fileKey + "." + res.Format, nil
+	return fileResult, nil
 }
 
-func (is *blobService) DeleteVideo(ctx context.Context, fileId string) (string, error) {
+func (is *blobService) DeleteFile(ctx context.Context, fileId string, fileType string) (string, error) {
 	log.Println("checking role...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
@@ -61,12 +84,25 @@ func (is *blobService) DeleteVideo(ctx context.Context, fileId string) (string, 
 
 	object := config2.CloudinaryObject{}
 	cld := object.GetCloudinaryObject(is.cfg.Cloudinary)
-	log.Println("deleting file...")
-	filePath := is.cfg.Cloudinary.VideoFolderPath + fileId
-	res, err := cld.Upload.Destroy(ctx, uploader.DestroyParams{
-		PublicID:     filePath,
-		ResourceType: "video",
-	})
+	log.Printf("deleting %s file...\n", fileType)
+
+	var res *uploader.DestroyResult
+	var err error
+	var filePath string
+	if fileType == "video" {
+		filePath = fmt.Sprintf("%s/%s/%s", is.cfg.Cloudinary.FolderPath, "videos", fileId)
+		res, err = cld.Upload.Destroy(ctx, uploader.DestroyParams{
+			PublicID:     filePath,
+			ResourceType: "video",
+		})
+	} else if fileType == "image" {
+		filePath = fmt.Sprintf("%s/%s/%s", is.cfg.Cloudinary.FolderPath, "images", fileId)
+		res, err = cld.Upload.Destroy(ctx, uploader.DestroyParams{
+			PublicID:     filePath,
+			ResourceType: "image",
+		})
+	}
+
 	if err != nil {
 		return "", err
 	}

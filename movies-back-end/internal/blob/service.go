@@ -6,6 +6,6 @@ import (
 )
 
 type Service interface {
-	UploadVideo(ctx context.Context, file multipart.File) (string, error)
-	DeleteVideo(ctx context.Context, fileId string) (string, error)
+	UploadFile(ctx context.Context, file multipart.File, fileType string) (string, error)
+	DeleteFile(ctx context.Context, fileId string, fileType string) (string, error)
 }

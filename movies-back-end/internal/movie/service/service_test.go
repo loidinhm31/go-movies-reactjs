@@ -413,9 +413,16 @@ func TestDeleteMovieById(t *testing.T) {
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
-		mockRepo.On("FindMovieById", context.Background(), 1).Return(&model.Movie{VideoPath: sql.NullString{String: "path", Valid: true}}, nil)
+		mockRepo.On("FindMovieById", context.Background(), 1).
+			Return(&model.Movie{
+				VideoPath: sql.NullString{String: "path", Valid: true},
+				ImageUrl:  sql.NullString{String: "path", Valid: true},
+			}, nil)
 
-		mockBlobSvc.On("DeleteVideo", context.Background(), "path").
+		mockBlobSvc.On("DeleteFile", context.Background(), "path", "video").
+			Return("ok", nil)
+
+		mockBlobSvc.On("DeleteFile", context.Background(), "path", "image").
 			Return("ok", nil)
 
 		mockRepo.On("DeleteMovieById", context.Background(), 1).

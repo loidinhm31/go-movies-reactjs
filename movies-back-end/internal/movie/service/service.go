@@ -209,20 +209,41 @@ func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
 		return err
 	}
 
+	// Delete video from blob concurrently
 	if movieObj.VideoPath.Valid {
 		var wg sync.WaitGroup
 		wg.Add(1)
 
-		// Delete video from blob concurrently
 		go func() {
 			defer wg.Done()
 			videoPath := movieObj.VideoPath.String
 			videoPathSplit := strings.Split(videoPath, "/")
 			videoKey := videoPathSplit[len(videoPathSplit)-1]
-			_, err := ms.blobService.DeleteVideo(ctx, videoKey)
+			res, err := ms.blobService.DeleteFile(ctx, videoKey, "video")
 			if err != nil {
 				log.Println("cannot delete video")
 			}
+			log.Println(res)
+		}()
+		wg.Wait()
+	}
+
+	// Delete image from blob concurrently
+	if movieObj.ImageUrl.Valid {
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			imageUrl := movieObj.ImageUrl.String
+			imageUrlSplit := strings.Split(imageUrl, "/")
+			imageFile := imageUrlSplit[len(imageUrlSplit)-1]
+			imageKey := strings.Split(imageFile, ".")[0]
+			res, err := ms.blobService.DeleteFile(ctx, imageKey, "image")
+			if err != nil {
+				log.Println("cannot delete image")
+			}
+			log.Println(res)
+
 		}()
 		wg.Wait()
 	}

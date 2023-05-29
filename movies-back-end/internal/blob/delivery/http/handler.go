@@ -29,8 +29,9 @@ func (ih *blobHandler) UploadVideo() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		fileType := c.PostForm("fileType")
 
-		resp, err := ih.blobService.UploadVideo(c, file)
+		resp, err := ih.blobService.UploadFile(c, file, fileType)
 		if err != nil || resp == "" {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -47,9 +48,10 @@ func (ih *blobHandler) UploadVideo() gin.HandlerFunc {
 
 func (ih *blobHandler) DeleteVideo() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		videoKey := c.Param("key")
+		fileKey := c.Param("key")
+		fileType := c.Query("fileType")
 
-		res, err := ih.blobService.DeleteVideo(c, videoKey)
+		res, err := ih.blobService.DeleteFile(c, fileKey, fileType)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
