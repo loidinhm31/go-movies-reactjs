@@ -4,18 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/dto"
-	"movies-service/internal/movies"
+	"movies-service/internal/movie"
 	"movies-service/pkg/pagination"
-	"movies-service/pkg/utils"
+	"movies-service/pkg/util"
 	"net/http"
 	"strconv"
 )
 
 type movieHandler struct {
-	movieService movies.Service
+	movieService movie.Service
 }
 
-func NewMovieHandler(movieService movies.Service) movies.MovieHandler {
+func NewMovieHandler(movieService movie.Service) movie.Handler {
 	return &movieHandler{
 		movieService: movieService,
 	}
@@ -23,11 +23,12 @@ func NewMovieHandler(movieService movies.Service) movies.MovieHandler {
 
 func (mh *movieHandler) FetchMoviesByType() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		keyword := c.Query("q")
 		movieType := c.Query("type")
 
 		pageable, _ := pagination.ReadPageRequest(c)
 
-		if err := utils.ReadRequest(c, pageable); err != nil {
+		if err := util.ReadRequest(c, pageable); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -36,7 +37,7 @@ func (mh *movieHandler) FetchMoviesByType() gin.HandlerFunc {
 			return
 		}
 
-		allMovies, err := mh.movieService.GetAllMoviesByType(c, movieType, pageable)
+		allMovies, err := mh.movieService.GetAllMoviesByType(c, keyword, movieType, pageable)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -57,7 +58,7 @@ func (mh *movieHandler) FetchMovieById() gin.HandlerFunc {
 			return
 		}
 
-		movie, err := mh.movieService.GetMovieById(c, movieId)
+		result, err := mh.movieService.GetMovieById(c, movieId)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -65,7 +66,7 @@ func (mh *movieHandler) FetchMovieById() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.JSON(http.StatusOK, movie)
+		c.JSON(http.StatusOK, result)
 	}
 }
 
@@ -80,7 +81,7 @@ func (mh *movieHandler) FetchMovieByGenre() gin.HandlerFunc {
 
 		pageable, _ := pagination.ReadPageRequest(c)
 
-		if err := utils.ReadRequest(c, pageable); err != nil {
+		if err := util.ReadRequest(c, pageable); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -103,9 +104,9 @@ func (mh *movieHandler) FetchMovieByGenre() gin.HandlerFunc {
 
 func (mh *movieHandler) PutMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		movie := &dto.MovieDto{}
+		theMovie := &dto.MovieDto{}
 
-		if err := utils.ReadRequest(c, movie); err != nil {
+		if err := util.ReadRequest(c, theMovie); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -114,7 +115,7 @@ func (mh *movieHandler) PutMovie() gin.HandlerFunc {
 			return
 		}
 
-		err := mh.movieService.AddMovie(c, movie)
+		err := mh.movieService.AddMovie(c, theMovie)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -150,9 +151,9 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 
 func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		movie := &dto.MovieDto{}
+		theMovie := &dto.MovieDto{}
 
-		if err := utils.ReadRequest(c, movie); err != nil {
+		if err := util.ReadRequest(c, theMovie); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -161,7 +162,7 @@ func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
 			return
 		}
 
-		err := mh.movieService.UpdateMovie(c, movie)
+		err := mh.movieService.UpdateMovie(c, theMovie)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),

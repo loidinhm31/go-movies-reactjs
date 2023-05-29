@@ -1,8 +1,8 @@
-package movies
+package movie
 
 import "github.com/gin-gonic/gin"
 
-type MovieHandler interface {
+type Handler interface {
 	FetchMoviesByType() gin.HandlerFunc
 	FetchMovieById() gin.HandlerFunc
 	FetchMovieByGenre() gin.HandlerFunc
