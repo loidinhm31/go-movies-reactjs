@@ -4,41 +4,46 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"movies-service/internal/blob"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/models"
-	"movies-service/internal/movies"
+	"movies-service/internal/model"
+	"movies-service/internal/movie"
 	"movies-service/pkg/pagination"
+	"strings"
+	"sync"
 )
 
 type movieService struct {
 	mgmtCtrl        control.Service
-	movieRepository movies.MovieRepository
+	movieRepository movie.Repository
+	blobService     blob.Service
 }
 
-func NewMovieService(mgmtCtrl control.Service, movieRepository movies.MovieRepository) movies.Service {
+func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, blobService blob.Service) movie.Service {
 	return &movieService{
 		mgmtCtrl:        mgmtCtrl,
 		movieRepository: movieRepository,
+		blobService:     blobService,
 	}
 }
 
-func (ms *movieService) GetAllMoviesByType(ctx context.Context, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*models.Movie]{}
+func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
+	page := &pagination.Page[*model.Movie]{}
 
 	var err error
-	var movieResults *pagination.Page[*models.Movie]
+	var movieResults *pagination.Page[*model.Movie]
 	if movieType != "" {
-		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, movieType, pageRequest, page)
+		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, keyword, movieType, pageRequest, page)
 		if err != nil {
 			log.Println(err)
 			return nil, errors.ErrResourceNotFound
 		}
 	} else {
-		movieResults, err = ms.movieRepository.FindAllMovies(ctx, pageRequest, page)
+		movieResults, err = ms.movieRepository.FindAllMovies(ctx, keyword, pageRequest, page)
 		if err != nil {
 			log.Println(err)
 			return nil, errors.ErrResourceNotFound
@@ -58,18 +63,18 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, movieType string
 }
 
 func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto, error) {
-	movie, err := ms.movieRepository.FindMovieById(ctx, id)
+	result, err := ms.movieRepository.FindMovieById(ctx, id)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.ErrResourceNotFound
 	}
 
-	movieDto := mapper.MapToMovieDto(movie)
+	movieDto := mapper.MapToMovieDto(result)
 	return movieDto, nil
 }
 
 func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId int) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*models.Movie]{}
+	page := &pagination.Page[*model.Movie]{}
 
 	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
 	if err != nil {
@@ -107,7 +112,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		return errors.ErrUnAuthorized
 	}
 
-	var genreObjects []*models.Genre
+	var genreObjects []*model.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
@@ -164,7 +169,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		return err
 	}
 
-	var genreObjects []*models.Genre
+	var genreObjects []*model.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
@@ -198,7 +203,31 @@ func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
 		return errors.ErrUnAuthorized
 	}
 
-	err := ms.movieRepository.DeleteMovieById(ctx, id)
+	// Get current movie
+	movieObj, err := ms.movieRepository.FindMovieById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if movieObj.VideoPath.Valid {
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		// Delete video from blob concurrently
+		go func() {
+			defer wg.Done()
+			videoPath := movieObj.VideoPath.String
+			videoPathSplit := strings.Split(videoPath, "/")
+			videoKey := videoPathSplit[len(videoPathSplit)-1]
+			_, err := ms.blobService.DeleteVideo(ctx, videoKey)
+			if err != nil {
+				log.Println("cannot delete video")
+			}
+		}()
+		wg.Wait()
+	}
+
+	err = ms.movieRepository.DeleteMovieById(ctx, id)
 	if err != nil {
 		return err
 	}
