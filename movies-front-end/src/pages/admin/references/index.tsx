@@ -1,26 +1,18 @@
-import {
-    Box, Container,
-    Divider,
-    FormControl,
-    FormControlLabel,
-    FormLabel, Grid,
-    LinearProgress,
-    Radio,
-    RadioGroup,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
+import {Box, Divider, Grid, LinearProgress, Stack, TextField, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
 import {useEffect, useState} from "react";
 import useSWRMutation from "swr/mutation";
-import {ReferencesTable} from "../../../components/Tables/ReferencesTable";
-import {post} from "../../../libs/api";
-import {MovieType} from "../../../types/movies";
+import {ReferencesTable} from "src/components/Tables/ReferencesTable";
+import {post} from "src/libs/api";
+import {MovieType} from "src/types/movies";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-import MovieTypeSelect, { movieTypes } from "src/components/MovieTypeSelect";
+import MovieTypeSelect, {movieTypes} from "src/components/MovieTypeSelect";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
+import {signIn} from "next-auth/react";
 
 export default function References() {
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+
     const [searchKey, setSearchKey] = useState<string>("");
     const [progress, setProgress] = useState(0);
     const [isClickSearch, setIsClickSearch] = useState(false);
@@ -33,8 +25,14 @@ export default function References() {
 
     // Get Tables
     const {trigger} =
-        useSWRMutation(`../api/v1/admin/movies/references`, post);
+        useSWRMutation(`/api/v1/admin/movies/references`, post);
 
+    useEffect(() => {
+        if (isInvalid) {
+            signIn();
+            return;
+        }
+    }, [isInvalid]);
 
     useEffect(() => {
         if (isClickSearch) {
@@ -64,8 +62,6 @@ export default function References() {
             }
         }
     }, [progress, isClickSearch]);
-
-
     const handleSearchClick = () => {
         if (searchKey !== "") {
             setProgress(0);

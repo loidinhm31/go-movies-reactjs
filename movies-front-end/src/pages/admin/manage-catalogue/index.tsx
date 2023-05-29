@@ -1,34 +1,27 @@
 import React, {useEffect, useState} from "react";
-import {useRouter} from "next/router";
 import {Box, Button, Divider, Paper, Stack, Typography} from "@mui/material";
-import {useSession} from "next-auth/react";
+import {signIn} from "next-auth/react";
 import ManageMoviesTable from "src/components/Tables/ManageMoviesTable";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import SeasonDialog from "src/components/Dialog/SeasonDialog";
 import {MovieType} from "src/types/movies";
 import AddIcon from "@mui/icons-material/Add";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 
 const ManageCatalogue = () => {
-    const {data: session, status} = useSession();
-    const router = useRouter();
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     const [selectedMovie, setSelectedMovie] = useState<MovieType | null>(null);
     const [openSeasonDialog, setOpenSeasonDialog] = useState(false);
 
-
     useEffect(() => {
-        if (status === "loading") {
+        if (isInvalid) {
+            signIn();
             return;
         }
-        const role = session?.user.role;
-
-        if (role === "admin" || role === "moderator") {
-            return;
-        }
-        router.push("/");
-    }, [router, session, status])
-
+    }, [isInvalid]);
 
     return (
         <>
@@ -46,7 +39,7 @@ const ManageCatalogue = () => {
                         <Button
                             sx={{m: 1, p: 2}}
                             variant="contained"
-                            href="/admin/movies"
+                            href="/admin/manage-catalogue/movies"
                         >
                             Add Movie <AddIcon/>
                         </Button>

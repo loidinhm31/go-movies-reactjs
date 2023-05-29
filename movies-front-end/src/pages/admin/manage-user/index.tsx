@@ -1,20 +1,22 @@
-import useSWRMutation from "swr/mutation";
 import {useEffect, useState} from "react";
-import {post} from "src/libs/api";
-import UserTable, {UserData} from "../../../components/Tables/UserTable";
-import {Direction, PageType} from "../../../types/page";
-import NotifySnackbar, {NotifyState} from "../../../components/shared/snackbar";
-import {UserType} from "../../../types/users";
-import {Box, Checkbox, Divider, Grid, Paper, Stack, TextField, Typography} from "@mui/material";
-import Button from "@mui/material/Button";
-import SearchUsers from "../../../components/Search/SearchUser/SearchUsers";
-import SearchUsersOIDC from "../../../components/Search/SearchUser/SearchUsersOIDC";
+import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
+import {Box, Divider, Paper, Stack, Typography} from "@mui/material";
+import SearchUsers from "src/components/Search/SearchUser/SearchUsers";
+import SearchUsersOIDC from "src/components/Search/SearchUser/SearchUsersOIDC";
+import {useCheckTokenAndRole} from "../../../hooks/auth/useCheckTokenAndRole";
+import {signIn} from "next-auth/react";
 
 export default function Users() {
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
-
+    useEffect(() => {
+        if (isInvalid) {
+            signIn();
+            return;
+        }
+    }, [isInvalid]);
 
     return (
         <>

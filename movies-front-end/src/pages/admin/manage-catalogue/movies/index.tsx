@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
-import {signIn, useSession} from "next-auth/react";
+import {signIn} from "next-auth/react";
 import {GenreType, MovieType, RatingType} from "src/types/movies";
 import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
@@ -24,12 +24,12 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import AlertDialog from "../../../components/shared/alert";
-import NotifySnackbar, {NotifyState, sleep} from "../../../components/shared/snackbar";
+import AlertDialog from "src/components/shared/alert";
+import NotifySnackbar, {NotifyState, sleep} from "src/components/shared/snackbar";
 import {format} from "date-fns";
 import {RemoveCircle} from "@mui/icons-material";
 import {movieTypes} from "src/components/MovieTypeSelect";
-import {useCheckTokenAndRole} from "../../../hooks/auth/useCheckTokenAndRole";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 import useSWR from "swr";
 
 const EditMovie = () => {
@@ -41,8 +41,6 @@ const EditMovie = () => {
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
-
-    const {data: session, status} = useSession();
 
     const [movie, setMovie] = useState<MovieType>({
         title: "",
@@ -61,14 +59,14 @@ const EditMovie = () => {
     const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
     const [videoPath, setVideoPath] = useState<string>("");
 
-    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`../api/v1/genres?type=${movie.type_code}`, get);
-    const {trigger: fetchMovie} = useSWRMutation<MovieType>(`../api/v1/movies/${id}`, get);
-    const {trigger: triggerMovie} = useSWRMutation(`../api/v1/admin/movies/save`, post);
-    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${id}`, del);
-    const {trigger: uploadVideo} = useSWRMutation(`../api/v1/admin/movies/video/upload`, postForm);
-    const {trigger: removeVideo} = useSWRMutation(`../api/v1/admin/movies/video/remove`, post);
+    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${movie.type_code}`, get);
+    const {trigger: fetchMovie} = useSWRMutation<MovieType>(`/api/v1/movies/${id}`, get);
+    const {trigger: triggerMovie} = useSWRMutation(`/api/v1/admin/movies/save`, post);
+    const {trigger: deleteMovie} = useSWRMutation(`/api/v1/admin/movies/delete/${id}`, del);
+    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/video/upload`, postForm);
+    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/video/remove`, post);
 
-    const {data: mpaaOptions} = useSWR<RatingType[]>("../api/v1/ratings", get);
+    const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
 
     useEffect(() => {
         if (isInvalid) {
@@ -88,8 +86,6 @@ const EditMovie = () => {
                 mpaa_rating: "",
                 genres: [],
             });
-
-            const checks: GenreType[] = [];
 
             if (movie.type_code) {
                 handleFetchGenres();
@@ -154,16 +150,14 @@ const EditMovie = () => {
 
     const handleFetchGenres = () => {
         const checks: GenreType[] = [];
-
         fetchGenres().then((result) => {
             result?.forEach((g) => {
-                if (movie?.genres.some(mg => mg.id === g.id)) {
+                if (movie?.genres.some(mg => mg.name === g.name && mg.type_code == g.type_code)) {
                     checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
                 } else {
                     checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
                 }
             });
-
             setMovie({
                 ...movie,
                 genres: checks,
@@ -276,7 +270,7 @@ const EditMovie = () => {
         setVideoFile(fileObj);
 
         const formData = new FormData();
-        formData.append("video", fileObj);
+        formData.append("file", fileObj);
 
         uploadVideo(formData).then((result) => {
             if (result.fileName) {
@@ -354,7 +348,6 @@ const EditMovie = () => {
         <>
             <NotifySnackbar state={notifyState} setState={setNotifyState}/>
 
-
             {isOpenAlertDialog &&
                 <AlertDialog
                     open={isOpenAlertDialog}
@@ -383,7 +376,6 @@ const EditMovie = () => {
                 <Box sx={{display: "flex", justifyContent: "center", p: 1, m: 1, width: 1}}>
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
-                            <input type="hidden" name="id" defaultValue={movie.id} id="id" readOnly={true}></input>
                             <Grid item xs={8}>
                                 <TextField
                                     fullWidth
@@ -474,47 +466,49 @@ const EditMovie = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={12}>
-                                <input
-                                    ref={videoFileRef}
-                                    hidden={true}
-                                    type="file"
-                                    name="video"
-                                    onChange={handleVideoFileChange}
-                                />
-                                <Stack spacing={2} direction="row">
-                                    <Box sx={{display: "flex", alignItems: "center"}}>
-                                        <Typography variant="subtitle1">Upload Video</Typography>
-                                    </Box>
+                            {movie && movie.type_code === "MOVIE" &&
+                                <Grid item xs={12}>
+                                    <input
+                                        ref={videoFileRef}
+                                        hidden={true}
+                                        type="file"
+                                        name="video"
+                                        onChange={handleVideoFileChange}
+                                    />
+                                    <Stack spacing={2} direction="row">
+                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                            <Typography variant="subtitle1">Upload Video</Typography>
+                                        </Box>
 
-                                    <Button variant="contained" onClick={handleChooseVideoFileClick}>
-                                        Choose File
-                                    </Button>
+                                        <Button variant="contained" onClick={handleChooseVideoFileClick}>
+                                            Choose File
+                                        </Button>
 
-                                    <Box sx={{display: "flex", alignItems: "center"}}>
-                                        <Typography>{videoFile?.name}</Typography>
-                                    </Box>
+                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                            <Typography>{videoFile?.name}</Typography>
+                                        </Box>
 
-                                    {videoPath !== "" &&
-                                        <>
-                                            <Box sx={{display: "flex", alignItems: "center"}}>
-                                                <Link
-                                                    href={`${process.env.NEXT_PUBLIC_URL}/video/upload/${videoPath}`}
-                                                    target="_blank"
-                                                >
-                                                    {
-                                                        videoPath.split("/").reverse()[0]
-                                                    }
-                                                </Link>
-                                            </Box>
-                                            <IconButton aria-label="delete" color="error"
-                                                        onClick={handleRemoveVideoFileClick}>
-                                                <RemoveCircle/>
-                                            </IconButton>
-                                        </>
-                                    }
-                                </Stack>
-                            </Grid>
+                                        {videoPath !== "" &&
+                                            <>
+                                                <Box sx={{display: "flex", alignItems: "center"}}>
+                                                    <Link
+                                                        href={`${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${videoPath}`}
+                                                        target="_blank"
+                                                    >
+                                                        {
+                                                            videoPath.split("/").reverse()[0]
+                                                        }
+                                                    </Link>
+                                                </Box>
+                                                <IconButton aria-label="delete" color="error"
+                                                            onClick={handleRemoveVideoFileClick}>
+                                                    <RemoveCircle/>
+                                                </IconButton>
+                                            </>
+                                        }
+                                    </Stack>
+                                </Grid>
+                            }
 
                             <Grid item xs={12}>
                                 <TextField
@@ -535,23 +529,18 @@ const EditMovie = () => {
                         <Grid item xs={12}>
                             <FormGroup>
                                 <Grid container spacing={1}>
-                                    {movie.genres && movie.genres.length > 1 && (
-                                        <>
-                                            {Array.from(movie.genres).map((g, index) => (
-                                                <Grid key={g.id} item xs={2} sx={{m: 1}}>
-                                                    <FormControlLabel
-                                                        label={g.name}
-                                                        name="genre"
-                                                        key={`${g.id}-${index}`}
-                                                        id={`${g.id}-${index}`}
-                                                        onChange={(event) => handleCheck(event, index)}
-                                                        value={g.id}
-                                                        control={<Checkbox checked={movie.genres[index].checked}/>}
-                                                    />
-                                                </Grid>
-                                            ))}
-                                        </>
-                                    )}
+                                    {movie.genres && movie.genres.length > 0 &&
+                                        movie.genres.map((g, index) => (
+                                            <Grid key={`${g.id}-${index}`} item xs={2} sx={{m: 1}}>
+                                                <FormControlLabel
+                                                    label={g.name}
+                                                    onChange={(event) => handleCheck(event, index)}
+                                                    value={g.id}
+                                                    control={<Checkbox checked={g.checked === true}/>}
+                                                />
+                                            </Grid>
+                                        ))
+                                    }
                                 </Grid>
 
                             </FormGroup>

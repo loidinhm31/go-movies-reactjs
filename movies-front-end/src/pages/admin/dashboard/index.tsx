@@ -1,24 +1,26 @@
 import {Box, Container, Grid, Stack, Typography} from "@mui/material";
 import Divider from '@mui/material/Divider';
-import LineChart from "../../../components/Chart/LineChart";
-import DoughnutChart from "../../../components/Chart/DoughnutChart";
-import AreaChart from "../../../components/Chart/AreaChart";
-import {signIn, useSession} from "next-auth/react";
+import LineChart from "src/components/Chart/LineChart";
+import DoughnutChart from "src/components/Chart/DoughnutChart";
+import AreaChart from "src/components/Chart/AreaChart";
+import {signIn} from "next-auth/react";
 import {useEffect, useState} from "react";
-import MovieTypeSelect from "../../../components/MovieTypeSelect";
+import MovieTypeSelect from "src/components/MovieTypeSelect";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 
 function Dashboard() {
-    const {data: session} = useSession();
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
     const optionalType = ["Both"];
 
     const [selectedType, setSelectedType] = useState<string>(optionalType[0]);
 
     useEffect(() => {
-        if (session?.error === "RefreshAccessTokenError") {
-            signIn(); // Force sign in to hopefully resolve error
+        if (isInvalid) {
+            signIn();
+            return;
         }
-    }, [session]);
+    }, [isInvalid]);
 
     return (
         <Stack spacing={2}>
