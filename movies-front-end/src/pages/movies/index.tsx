@@ -2,8 +2,8 @@ import {useState} from "react";
 import {Box, Divider, Paper, Stack, Tab, Tabs, Typography} from "@mui/material";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import TvIcon from "@mui/icons-material/Tv";
-import {TabMovie} from "../../components/Tab/TabMovie";
-import {TabTvSeries} from "../../components/Tab/TabTvSeries";
+import {TabMovie} from "src/components/Tab/TabMovie";
+import {TabTvSeries} from "src/components/Tab/TabTvSeries";
 
 interface TabPanelProps {
     children?: React.ReactNode;
