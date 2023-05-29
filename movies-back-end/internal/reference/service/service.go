@@ -3,100 +3,37 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
-	"mime/multipart"
 	"movies-service/config"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
-	"movies-service/internal/integration"
+	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/movies"
+	"movies-service/internal/reference"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
-
-	"github.com/cloudinary/cloudinary-go/v2"
-	"github.com/cloudinary/cloudinary-go/v2/api"
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 )
 
-type integrationService struct {
-	cfg             *config.Config
-	ctrl            control.Service
-	movieRepository movies.MovieRepository
+type referenceService struct {
+	cfg  *config.Config
+	ctrl control.Service
 }
 
-func NewIntegrationService(cfg *config.Config, ctrl control.Service, movieRepository movies.MovieRepository) integration.Service {
-	return &integrationService{
+func NewReferenceService(cfg *config.Config, ctrl control.Service) reference.Service {
+	return &referenceService{
 		cfg,
 		ctrl,
-		movieRepository,
 	}
 }
 
-func (is *integrationService) credentials() *cloudinary.Cloudinary {
-	// Add your Cloudinary credentials, set configuration parameter
-	cld, _ := cloudinary.NewFromParams(
-		is.cfg.Cloudinary.CloudName,
-		is.cfg.Cloudinary.ApiKey,
-		is.cfg.Cloudinary.ApiSecret,
-	)
-	cld.Config.URL.Secure = true
-	return cld
-}
-
-func (is *integrationService) UploadVideo(ctx context.Context, file multipart.File) (string, error) {
-	log.Println("checking role...")
-	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !is.ctrl.CheckUser(username) {
-		return "", errors.New("user not found")
-	}
-
-	cld := is.credentials()
-	log.Println("uploading file...")
-	fileKey := is.cfg.Cloudinary.FolderPath + strconv.FormatInt(time.Now().Unix(), 10)
-	res, err := cld.Upload.Upload(ctx, file, uploader.UploadParams{
-		PublicID:   fileKey,
-		EagerAsync: api.Bool(true),
-	})
-	if err != nil {
-		return "", err
-	}
-	log.Printf("complete upload file %s\n", fileKey)
-	return fileKey + "." + res.Format, nil
-}
-
-func (is *integrationService) DeleteVideo(ctx context.Context, fileId string) (string, error) {
-	log.Println("checking role...")
-	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !is.ctrl.CheckUser(username) {
-		return "", errors.New("user not found")
-	}
-
-	cld := is.credentials()
-
-	log.Println("deleting file...")
-	filePath := is.cfg.Cloudinary.FolderPath + fileId
-	res, err := cld.Upload.Destroy(ctx, uploader.DestroyParams{
-		PublicID:     filePath,
-		ResourceType: "video",
-	})
-	if err != nil {
-		return "", err
-	}
-	log.Printf("deleted file %s\n", filePath)
-	return res.Result, nil
-}
-
-func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.MovieDto) ([]*dto.MovieDto, error) {
+func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.MovieDto) ([]*dto.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
-		return nil, errors.New("unauthorized")
+		return nil, errors.ErrUnAuthorized
 	}
 
 	client := &http.Client{}
@@ -146,11 +83,21 @@ func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.Mo
 
 	var movieDtos []*dto.MovieDto
 	var releaseDate time.Time
+
 	for _, m := range responseObject.Results {
-		releaseDate, err = time.Parse("2006-01-02", m.ReleaseDae)
+		releaseDate, err = time.Parse("2006-01-02", m.ReleaseDate)
+		var title string
+		if movie.TypeCode == "TV" {
+			title = m.Name
+			releaseDate, err = time.Parse("2006-01-02", m.FirstAirDate)
+		} else if movie.TypeCode == "MOVIE" {
+			title = m.Title
+			releaseDate, err = time.Parse("2006-01-02", m.ReleaseDate)
+		}
+
 		movieDtos = append(movieDtos, &dto.MovieDto{
 			ID:          int(m.ID),
-			Title:       m.Title,
+			Title:       title,
 			ReleaseDate: releaseDate,
 			Description: m.Overview,
 			ImagePath:   m.PosterPath,
@@ -161,11 +108,11 @@ func (is *integrationService) GetMoviesByType(ctx context.Context, movie *dto.Mo
 	return movieDtos, nil
 }
 
-func (is *integrationService) GetMovieById(ctx context.Context, movieId int64, movieType string) (*dto.MovieDto, error) {
+func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, movieType string) (*dto.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
-		return nil, errors.New("unauthorized")
+		return nil, errors.ErrUnAuthorized
 	}
 
 	client := &http.Client{}
@@ -221,15 +168,29 @@ func (is *integrationService) GetMovieById(ctx context.Context, movieId int64, m
 		})
 	}
 
-	releaseDate, err := time.Parse("2006-01-02", responseObject.ReleaseDae)
+	var title string
+	var releaseDate time.Time
+	var runtime int
+	if movieType == "TV" {
+		title = responseObject.Name
+		releaseDate, err = time.Parse("2006-01-02", responseObject.FirstAirDate)
+		if len(responseObject.EpisodeRuntime) > 0 {
+			runtime = responseObject.EpisodeRuntime[0]
+		}
+	} else if movieType == "MOVIE" {
+		title = responseObject.Title
+		releaseDate, err = time.Parse("2006-01-02", responseObject.ReleaseDate)
+		runtime = responseObject.Runtime
+	}
+
 	return &dto.MovieDto{
 		ID:          int(responseObject.ID),
 		TypeCode:    movieType,
-		Title:       responseObject.Title,
+		Title:       title,
 		ReleaseDate: releaseDate,
 		Description: responseObject.Overview,
 		ImagePath:   responseObject.PosterPath,
-		Runtime:     responseObject.Runtime,
+		Runtime:     runtime,
 		Genres:      genres,
 	}, nil
 }
