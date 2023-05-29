@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"movies-service/internal/analysis"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
+	"movies-service/internal/errors"
+	"movies-service/internal/middlewares"
 )
 
 type analysisService struct {
@@ -20,6 +23,12 @@ func NewAnalysisService(mgmtCtrl control.Service, analysisRepository analysis.Re
 }
 
 func (as *analysisService) GetNumberOfMoviesByGenre(ctx context.Context, movieType string) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	result, err := as.analysisRepository.CountMoviesByGenre(ctx, movieType)
 	if err != nil {
 		return nil, err
@@ -38,6 +47,12 @@ func (as *analysisService) GetNumberOfMoviesByGenre(ctx context.Context, movieTy
 }
 
 func (as *analysisService) GetNumberOfMoviesByReleaseDate(ctx context.Context, year string, months []string) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	result, err := as.analysisRepository.CountMoviesByReleaseDate(ctx, year, months)
 	if err != nil {
 		return nil, err
@@ -55,6 +70,12 @@ func (as *analysisService) GetNumberOfMoviesByReleaseDate(ctx context.Context, y
 }
 
 func (as *analysisService) GetNumberOfMoviesByCreatedDate(ctx context.Context, year string, months []string) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	result, err := as.analysisRepository.CountMoviesByCreatedDate(ctx, year, months)
 	if err != nil {
 		return nil, err
@@ -72,6 +93,12 @@ func (as *analysisService) GetNumberOfMoviesByCreatedDate(ctx context.Context, y
 }
 
 func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	if request.TypeCode == "" {
 		return &dto.ResultDto{Data: nil}, nil
 	}
@@ -94,6 +121,12 @@ func (as *analysisService) GetNumberOfViewsByGenreAndViewedDate(ctx context.Cont
 }
 
 func (as *analysisService) GetCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	if request.TypeCode == "" {
 		return &dto.ResultDto{Data: nil}, nil
 	}
@@ -117,6 +150,12 @@ func (as *analysisService) GetCumulativeViewsByGenreAndViewedDate(ctx context.Co
 }
 
 func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	result, err := as.analysisRepository.CountViewsByViewedDate(ctx, request)
 	if err != nil {
 		return nil, err
@@ -134,6 +173,12 @@ func (as *analysisService) GetNumberOfViewsByViewedDate(ctx context.Context, req
 }
 
 func (as *analysisService) GetNumberOfMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
 	if request.TypeCode == "" {
 		return &dto.ResultDto{Data: nil}, nil
 	}

@@ -5,7 +5,7 @@ import (
 	"log"
 	"movies-service/internal/analysis"
 	"movies-service/internal/dto"
-	"movies-service/pkg/utils"
+	"movies-service/pkg/util"
 	"net/http"
 )
 
@@ -39,7 +39,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByReleaseDate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		input := &dto.AnalysisDto{}
 
-		if err := utils.ReadRequest(c, input); err != nil {
+		if err := util.ReadRequest(c, input); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -64,7 +64,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByCreatedDate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		input := &dto.AnalysisDto{}
 
-		if err := utils.ReadRequest(c, input); err != nil {
+		if err := util.ReadRequest(c, input); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -90,7 +90,7 @@ func (rh *researchHandler) FetchViewsByGenreAndViewedDate() gin.HandlerFunc {
 		var err error
 
 		input := &dto.RequestData{}
-		if err = utils.ReadRequest(c, input); err != nil {
+		if err = util.ReadRequest(c, input); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -119,7 +119,7 @@ func (rh *researchHandler) FetchViewsByGenreAndViewedDate() gin.HandlerFunc {
 func (rh *researchHandler) FetchNumberOfViewsByViewedDate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		request := &dto.RequestData{}
-		if err := utils.ReadRequest(c, request); err != nil {
+		if err := util.ReadRequest(c, request); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -144,7 +144,7 @@ func (rh *researchHandler) FetchNumberOfMoviesByGenreAndReleaseDate() gin.Handle
 	return func(c *gin.Context) {
 		input := &dto.RequestData{}
 
-		if err := utils.ReadRequest(c, input); err != nil {
+		if err := util.ReadRequest(c, input); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",

@@ -6,7 +6,7 @@ import (
 	"movies-service/config"
 	"movies-service/internal/analysis"
 	"movies-service/internal/dto"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 )
 
 type analysisRepository struct {
@@ -18,8 +18,8 @@ func NewAnalysisRepository(cfg *config.Config, db *gorm.DB) analysis.Repository 
 	return &analysisRepository{cfg: cfg, db: db}
 }
 
-func (ar *analysisRepository) CountMoviesByGenre(ctx context.Context, movieType string) ([]*models.GenreCount, error) {
-	var result []*models.GenreCount
+func (ar *analysisRepository) CountMoviesByGenre(ctx context.Context, movieType string) ([]*model.GenreCount, error) {
+	var result []*model.GenreCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -51,8 +51,8 @@ func (ar *analysisRepository) CountMoviesByGenre(ctx context.Context, movieType 
 	return result, nil
 }
 
-func (ar *analysisRepository) CountMoviesByReleaseDate(ctx context.Context, year string, months []string) ([]*models.MovieCount, error) {
-	var result []*models.MovieCount
+func (ar *analysisRepository) CountMoviesByReleaseDate(ctx context.Context, year string, months []string) ([]*model.MovieCount, error) {
+	var result []*model.MovieCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -71,8 +71,8 @@ func (ar *analysisRepository) CountMoviesByReleaseDate(ctx context.Context, year
 	return result, nil
 }
 
-func (ar *analysisRepository) CountMoviesByCreatedDate(ctx context.Context, year string, months []string) ([]*models.MovieCount, error) {
-	var result []*models.MovieCount
+func (ar *analysisRepository) CountMoviesByCreatedDate(ctx context.Context, year string, months []string) ([]*model.MovieCount, error) {
+	var result []*model.MovieCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -91,8 +91,8 @@ func (ar *analysisRepository) CountMoviesByCreatedDate(ctx context.Context, year
 	return result, nil
 }
 
-func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
-	var result []*models.ViewCount
+func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*model.ViewCount, error) {
+	var result []*model.ViewCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -123,8 +123,8 @@ func (ar *analysisRepository) CountViewsByGenreAndViewedDate(ctx context.Context
 	return result, nil
 }
 
-func (ar *analysisRepository) CountCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
-	var result []*models.ViewCount
+func (ar *analysisRepository) CountCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*model.ViewCount, error) {
+	var result []*model.ViewCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -156,8 +156,8 @@ func (ar *analysisRepository) CountCumulativeViewsByGenreAndViewedDate(ctx conte
 	return result, nil
 }
 
-func (ar *analysisRepository) CountViewsByViewedDate(ctx context.Context, request *dto.RequestData) ([]*models.ViewCount, error) {
-	var result []*models.ViewCount
+func (ar *analysisRepository) CountViewsByViewedDate(ctx context.Context, request *dto.RequestData) ([]*model.ViewCount, error) {
+	var result []*model.ViewCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
@@ -189,8 +189,8 @@ func (ar *analysisRepository) CountViewsByViewedDate(ctx context.Context, reques
 	return result, nil
 }
 
-func (ar *analysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) ([]*models.MovieCount, error) {
-	var result []*models.MovieCount
+func (ar *analysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) ([]*model.MovieCount, error) {
+	var result []*model.MovieCount
 
 	tx := ar.db.WithContext(ctx)
 	if ar.cfg.Server.Debug {
