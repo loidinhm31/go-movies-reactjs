@@ -30,7 +30,7 @@ func initMock() (*helper.MockManagementCtrl, *helper.MockMovieRepository, *helpe
 	return mockCtrl, mockRepo, mockBlobSvc, movieService
 }
 
-func TestGetAllMoviesByType(t *testing.T) {
+func TestMovieService_GetAllMoviesByType(t *testing.T) {
 
 	t.Run("Valid movie type (MOVIE)", func(t *testing.T) {
 		_, mockRepo, _, movieService := initMock()
@@ -60,7 +60,7 @@ func TestGetAllMoviesByType(t *testing.T) {
 		_, mockRepo, _, movieService := initMock()
 
 		// Set up mock expectations and return values
-		mockRepo.On("FindAllMovies", context.Background(), &pagination.PageRequest{}, &pagination.Page[*model.Movie]{}).
+		mockRepo.On("FindAllMovies", context.Background(), "title", &pagination.PageRequest{}, &pagination.Page[*model.Movie]{}).
 			Return(&pagination.Page[*model.Movie]{
 				PageSize:      1,
 				PageNumber:    0,
@@ -84,7 +84,7 @@ func TestGetAllMoviesByType(t *testing.T) {
 	})
 }
 
-func TestGetMovieById(t *testing.T) {
+func TestMovieService_GetMovieById(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
 		_, mockRepo, _, movieService := initMock()
 
@@ -104,7 +104,7 @@ func TestGetMovieById(t *testing.T) {
 	})
 }
 
-func TestGetMoviesByGenre(t *testing.T) {
+func TestMovieService_GetMoviesByGenre(t *testing.T) {
 	t.Run("Valid data", func(t *testing.T) {
 		_, mockRepo, _, movieService := initMock()
 
@@ -137,7 +137,7 @@ func TestGetMoviesByGenre(t *testing.T) {
 	})
 }
 
-func TestAddMovie(t *testing.T) {
+func TestMovieService_AddMovie(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
 		_, _, _, movieService := initMock()
 
@@ -210,7 +210,7 @@ func TestAddMovie(t *testing.T) {
 			},
 		})
 		assert.Error(t, err)
-		assert.Equal(t, errors.ErrInvalidInputDetail("genre cannot empty").Error(), err.Error())
+		assert.Equal(t, errors.ErrInvalidInputDetail("genres cannot empty").Error(), err.Error())
 	})
 
 	t.Run("Valid data", func(t *testing.T) {
@@ -238,7 +238,7 @@ func TestAddMovie(t *testing.T) {
 	})
 }
 
-func TestUpdateMovie(t *testing.T) {
+func TestMovieService_UpdateMovie(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
 		_, _, _, movieService := initMock()
 
@@ -352,7 +352,7 @@ func TestUpdateMovie(t *testing.T) {
 			},
 		})
 		assert.Error(t, err)
-		assert.Equal(t, errors.ErrInvalidInputDetail("genre cannot empty").Error(), err.Error())
+		assert.Equal(t, errors.ErrInvalidInputDetail("genres cannot empty").Error(), err.Error())
 	})
 
 	t.Run("Valid data", func(t *testing.T) {
@@ -387,7 +387,7 @@ func TestUpdateMovie(t *testing.T) {
 	})
 }
 
-func TestDeleteMovieById(t *testing.T) {
+func TestMovieService_DeleteMovieById(t *testing.T) {
 	t.Run("Invalid ID", func(t *testing.T) {
 		_, _, _, movieService := initMock()
 

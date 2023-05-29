@@ -17,18 +17,13 @@ func (m *MockMovieRepository) InsertMovie(ctx context.Context, movie *model.Movi
 	return args.Error(0)
 }
 
-func (m *MockMovieRepository) FindAllMovies(ctx context.Context,
-	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
-	args := m.Called(ctx, pageRequest, page)
+func (m *MockMovieRepository) FindAllMovies(ctx context.Context, keyword string, pageRequest *pagination.PageRequest, page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
+	args := m.Called(ctx, keyword, pageRequest, page)
 	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
-func (m *MockMovieRepository) FindAllMoviesByType(ctx context.Context,
-	movieType string,
-	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
-	args := m.Called(ctx, movieType, pageRequest, page)
+func (m *MockMovieRepository) FindAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest, page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
+	args := m.Called(ctx, keyword, movieType, pageRequest, page)
 	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
