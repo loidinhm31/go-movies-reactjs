@@ -7,7 +7,7 @@ import (
 	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/dto"
-	"movies-service/pkg/utils"
+	"movies-service/pkg/util"
 	"net/http"
 )
 
@@ -37,7 +37,7 @@ func (h *authHandler) Login() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := &dto.UserDto{}
 
-		if err := utils.ReadRequest(c, user); err != nil {
+		if err := util.ReadRequest(c, user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
 			})
@@ -60,7 +60,7 @@ func (h *authHandler) Login() gin.HandlerFunc {
 func (h *authHandler) SignUp() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := &dto.UserDto{}
-		if err := utils.ReadRequest(c, user); err != nil {
+		if err := util.ReadRequest(c, user); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",

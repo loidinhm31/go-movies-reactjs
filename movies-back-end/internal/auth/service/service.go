@@ -4,36 +4,30 @@ import (
 	"context"
 	"fmt"
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/golang-jwt/jwt"
 	"log"
 	"movies-service/config"
 	"movies-service/internal/auth"
+	"movies-service/internal/cloak"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/models"
-	"movies-service/internal/roles"
-	"movies-service/internal/users"
+	"movies-service/internal/model"
+	"movies-service/internal/role"
+	"movies-service/internal/user"
 	"strings"
 	"time"
 )
 
-type AuthClaims struct {
-	jwt.StandardClaims
-	Username string `json:"username"`
-	UserId   string `json:"userId"`
-}
-
 type authService struct {
 	keycloak       config.KeycloakConfig
-	cloak          *gocloak.GoCloak
+	cloak          cloak.GoCloakClientInterface
 	mgmtCtrl       control.Service
-	roleRepository roles.Repository
-	userRepository users.UserRepository
+	roleRepository role.Repository
+	userRepository user.UserRepository
 }
 
-func NewAuthService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, mgmtCtrl control.Service, roleRepository roles.Repository, userRepository users.UserRepository) auth.Service {
+func NewAuthService(keycloak config.KeycloakConfig, cloak cloak.GoCloakClientInterface, mgmtCtrl control.Service, roleRepository role.Repository, userRepository user.UserRepository) auth.Service {
 	return &authService{
 		keycloak:       keycloak,
 		cloak:          cloak,
@@ -45,20 +39,19 @@ func NewAuthService(keycloak config.KeycloakConfig, cloak *gocloak.GoCloak, mgmt
 
 func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
 	fmtUsername := strings.ToLower(userDto.Username)
-	euser, _ := a.userRepository.FindUserByUsername(ctx, &models.User{
+	euser, _ := a.userRepository.FindUserByUsername(ctx, &model.User{
 		Username: fmtUsername,
-		IsNew:    false,
 	})
-	if euser != nil && !userDto.IsNew {
+	if euser != nil {
 		return nil, errors.ErrUserExisted
 	}
 
-	role, err := a.roleRepository.FindRoleByRoleCode(ctx, "BANNED")
+	theRole, err := a.roleRepository.FindRoleByRoleCode(ctx, "BANNED")
 	if err != nil {
 		return nil, err
 	}
 
-	user := &models.User{
+	theUser := &model.User{
 		Username:  fmtUsername,
 		FirstName: userDto.FirstName,
 		LastName:  userDto.LastName,
@@ -68,9 +61,9 @@ func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.Us
 		CreatedBy: "keycloak",
 		UpdatedAt: time.Now(),
 		UpdatedBy: "keycloak",
-		Role:      role,
+		Role:      theRole,
 	}
-	err = a.userRepository.InsertUser(ctx, user)
+	err = a.userRepository.InsertUser(ctx, theUser)
 	if err != nil {
 		return nil, err
 	}
@@ -78,29 +71,29 @@ func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.Us
 }
 
 func (a *authService) SignIn(ctx context.Context, username string) (*dto.UserDto, error) {
-	user, _ := a.userRepository.FindUserByUsername(ctx, &models.User{
+	theUser, _ := a.userRepository.FindUserByUsername(ctx, &model.User{
 		Username: username,
 		IsNew:    false,
 	})
-	if user == nil {
+	if theUser == nil {
 		return nil, errors.ErrResourceNotFound
 	}
 
 	userDto := &dto.UserDto{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
+		ID:        theUser.ID,
+		Username:  theUser.Username,
+		Email:     theUser.Email,
+		FirstName: theUser.FirstName,
+		LastName:  theUser.LastName,
 		Role: dto.RoleDto{
-			ID:        user.Role.ID,
-			RoleName:  user.Role.RoleName,
-			RoleCode:  user.Role.RoleCode,
-			CreatedAt: user.Role.CreatedAt,
-			UpdatedAt: user.Role.UpdatedAt,
+			ID:        theUser.Role.ID,
+			RoleName:  theUser.Role.RoleName,
+			RoleCode:  theUser.Role.RoleCode,
+			CreatedAt: theUser.Role.CreatedAt,
+			UpdatedAt: theUser.Role.UpdatedAt,
 		},
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		CreatedAt: theUser.CreatedAt,
+		UpdatedAt: theUser.UpdatedAt,
 	}
 	return userDto, nil
 }
@@ -109,7 +102,7 @@ func (a *authService) FindUserFromODIC(ctx context.Context, username *string) (*
 	log.Println("checking admin privilege...")
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !a.mgmtCtrl.CheckPrivilege(author) {
-		return nil, errors.ErrResourceNotFound
+		return nil, errors.ErrUnAuthorized
 	}
 
 	accessToken := fmt.Sprintf("%s", ctx.Value(middlewares.CtxAccessToken))
@@ -120,12 +113,12 @@ func (a *authService) FindUserFromODIC(ctx context.Context, username *string) (*
 		return nil, err
 	}
 	if len(getUsers) == 0 {
-		return nil, nil
+		return nil, errors.ErrUserNotFound
 	}
 
 	oidcUser := getUsers[0]
 	if !*oidcUser.Enabled {
-		return nil, errors.ErrInvalidClient
+		return nil, errors.ErrUserNotFound
 	}
 
 	return &dto.UserDto{
