@@ -59,7 +59,7 @@ func (h *viewHandler) FetchNumberOfViewsByMovieId() gin.HandlerFunc {
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OK",
-			"view":    totalViews,
+			"views":   totalViews,
 		})
 	}
 }

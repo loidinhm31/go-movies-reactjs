@@ -43,8 +43,8 @@ func (vr *viewRepository) CountViewsByMovieId(ctx context.Context, movieId int) 
 	if vr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Table("view").
-		Where("view.movie_id = ?", movieId).
+	err := tx.Table("views").
+		Where("views.movie_id = ?", movieId).
 		Count(&totalViews).Error
 	if err != nil {
 		return 0, err
