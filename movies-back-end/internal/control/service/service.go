@@ -3,57 +3,57 @@ package service
 import (
 	"context"
 	"movies-service/internal/control"
-	"movies-service/internal/models"
-	"movies-service/internal/users"
+	"movies-service/internal/model"
+	"movies-service/internal/user"
 )
 
 type managementCtrl struct {
-	userRepository users.UserRepository
+	userRepository user.UserRepository
 }
 
-func NewManagementCtrl(userRepository users.UserRepository) control.Service {
+func NewManagementCtrl(userRepository user.UserRepository) control.Service {
 	return &managementCtrl{
 		userRepository: userRepository,
 	}
 }
 
 func (mc *managementCtrl) CheckPrivilege(username string) bool {
-	user, err := mc.userRepository.FindUserByUsername(context.Background(), &models.User{
+	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
 		Username: username,
 		IsNew:    false,
 	})
 	if err != nil {
 		return false
 	}
-	if user.Role.RoleCode == "ADMIN" || user.Role.RoleCode == "MOD" {
+	if theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD" {
 		return true
 	}
 	return false
 }
 
 func (mc *managementCtrl) CheckAdminPrivilege(username string) bool {
-	user, err := mc.userRepository.FindUserByUsername(context.Background(), &models.User{
+	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
 		Username: username,
 		IsNew:    false,
 	})
 	if err != nil {
 		return false
 	}
-	if user.Role.RoleCode == "ADMIN" {
+	if theUser.Role.RoleCode == "ADMIN" {
 		return true
 	}
 	return false
 }
 
 func (mc *managementCtrl) CheckUser(username string) bool {
-	user, err := mc.userRepository.FindUserByUsername(context.Background(), &models.User{
+	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
 		Username: username,
 		IsNew:    false,
 	})
 	if err != nil {
 		return false
 	}
-	if user.Username == username && user.Role.RoleCode != "BANNED" {
+	if theUser.Username == username && theUser.Role.RoleCode != "BANNED" {
 		return true
 	}
 	return false
