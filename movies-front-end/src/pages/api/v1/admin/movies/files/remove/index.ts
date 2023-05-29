@@ -15,7 +15,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/videos/${objectKey}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/blob/videos/${objectKey}?fileType=${data.fileType}`,
         requestOptions
     );
 
@@ -23,7 +23,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         res.status(200).json(await response.json());
     } else {
         const message = await response.json()
-        res.status(response.status).json(message.message! || "Failed to delete video");
+        res.status(response.status).json(message.message! || "Failed to delete file");
     }
 });
 

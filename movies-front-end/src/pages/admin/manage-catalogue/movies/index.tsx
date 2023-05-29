@@ -6,7 +6,7 @@ import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
     Box,
-    Button,
+    Button, CardMedia,
     Checkbox,
     Divider,
     FormControl,
@@ -32,6 +32,11 @@ import {movieTypes} from "src/components/MovieTypeSelect";
 import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 import useSWR from "swr";
 
+const enum FileType {
+    VIDEO = "video",
+    IMAGE = "image",
+}
+
 const EditMovie = () => {
     const router = useRouter();
     const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
@@ -49,7 +54,7 @@ const EditMovie = () => {
         release_date: null,
         runtime: 0,
         genres: [],
-        image_path: "",
+        image_url: "",
     });
 
     // Get id from the URL
@@ -59,12 +64,17 @@ const EditMovie = () => {
     const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
     const [videoPath, setVideoPath] = useState<string>("");
 
+    const imageFileRef = useRef<any>(null);
+    const [imageFile, setImageFile] = useState<HTMLInputElement | null>(null);
+    const [imageUrl, setImageUrl] = useState<string>("");
+
     const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${movie.type_code}`, get);
     const {trigger: fetchMovie} = useSWRMutation<MovieType>(`/api/v1/movies/${id}`, get);
     const {trigger: triggerMovie} = useSWRMutation(`/api/v1/admin/movies/save`, post);
     const {trigger: deleteMovie} = useSWRMutation(`/api/v1/admin/movies/delete/${id}`, del);
-    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/video/upload`, postForm);
-    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/video/remove`, post);
+
+    const {trigger: uploadFile} = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
+    const {trigger: removeFile} = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
 
     const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
 
@@ -258,75 +268,38 @@ const EditMovie = () => {
         videoFileRef.current.click();
     };
 
-    const handleVideoFileChange = event => {
+    const handleChooseImageFileClick = () => {
+        imageFileRef.current.click();
+    };
+
+    const handleFileChange = (event: any, type: FileType) => {
         const fileObj = event.target.files && event.target.files[0];
         if (!fileObj) {
             return;
         }
-
+        console.log(type)
         // Reset file input
         event.target.value = null;
 
-        setVideoFile(fileObj);
-
         const formData = new FormData();
         formData.append("file", fileObj);
+        formData.append("fileType", type);
 
-        uploadVideo(formData).then((result) => {
-            if (result.fileName) {
-                setVideoPath(result.fileName);
+        if (type === FileType.VIDEO) {
+            setVideoFile(fileObj);
 
-                setMovie({
-                    ...movie,
-                    video_path: result.fileName.split(".")[0],
-                });
-
-                setNotifyState({
-                    open: true,
-                    message: "Video Uploaded",
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "info"
-                });
-            }
-        }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
-            });
-        });
-    };
-
-    const handleRemoveVideoFileClick = () => {
-        if (videoPath !== "") {
-            const paths = videoPath.split("/");
-            const fileName = paths[paths.length - 1];
-            removeVideo({
-                fileName: fileName,
-            }).then((result) => {
-                if (result.result === "ok") {
-                    setVideoFile(null);
-                    setVideoPath("");
+            uploadFile(formData).then((result) => {
+                if (result.fileName) {
+                    setVideoPath(result.fileName);
 
                     setMovie({
                         ...movie,
-                        video_path: "",
+                        video_path: result.fileName.split(".")[0],
                     });
 
                     setNotifyState({
                         open: true,
-                        message: "Video Removed",
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "info"
-                    });
-                } else {
-                    setNotifyState({
-                        open: true,
-                        message: `Cannot remove video, ${result.result}`,
+                        message: "Video Uploaded",
                         vertical: "top",
                         horizontal: "right",
                         severity: "info"
@@ -340,9 +313,112 @@ const EditMovie = () => {
                     horizontal: "right",
                     severity: "error"
                 });
-            })
+            });
+        } else if (type === FileType.IMAGE) {
+            setImageFile(fileObj);
+
+            uploadFile(formData).then((result) => {
+                if (result.fileName) {
+                    setImageUrl(result.fileName);
+
+                    setMovie({
+                        ...movie,
+                        image_url: result.fileName,
+                    });
+
+                    setNotifyState({
+                        open: true,
+                        message: "Image Uploaded",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info"
+                    });
+                }
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
+            });
         }
     };
+
+    const handleRemoveFileClick = (fileType: FileType) => {
+        let paths;
+        if (fileType === FileType.VIDEO) {
+            if (videoPath === "") return;
+
+            paths = videoPath.split("/")
+        } else if (fileType === FileType.IMAGE) {
+            if (movie.image_url!.startsWith("https://image.tmdb.org")) {
+                setMovie({
+                    ...movie,
+                    image_url: "",
+                })
+                return;
+            }
+
+            if (imageUrl === "") return;
+
+            paths = imageUrl.split("/");
+        }
+
+        const fileName = paths[paths.length - 1];
+        removeFile({
+            fileName: fileName,
+            fileType: fileType,
+        }).then((result) => {
+            if (result.result === "ok") {
+                if (fileType === FileType.VIDEO) {
+                    setVideoFile(null);
+                    setVideoPath("");
+
+                    setMovie({
+                        ...movie,
+                        video_path: "",
+                    });
+                } else if (fileType === FileType.IMAGE) {
+                    setImageFile(null);
+                    setImageUrl("");
+
+                    setMovie({
+                        ...movie,
+                        image_url: "",
+                    })
+                }
+
+                setNotifyState({
+                    open: true,
+                    message: `${fileType} removed`,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "info"
+                });
+            } else {
+                setNotifyState({
+                    open: true,
+                    message: `Cannot remove video, ${result.result}`,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "info"
+                });
+            }
+        }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
+        })
+
+
+    };
+
 
     return (
         <>
@@ -456,14 +532,58 @@ const EditMovie = () => {
                                 </TextField>
                             </Grid>
 
-                            <Grid item xs={12}>
-                                <TextField
-                                    fullWidth
-                                    label="Image Path"
-                                    variant="outlined"
-                                    value={movie.image_path}
-                                    onChange={e => handleChange(e, "image_path")}
-                                />
+                            <Grid container item xs={12} spacing={3} sx={{display: "flex", alignItems: "center"}}>
+
+
+                                {movie && !movie.image_url &&
+                                    <>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                fullWidth
+                                                label="Image Path"
+                                                variant="outlined"
+                                                value={movie.image_url}
+                                                onChange={e => handleChange(e, "image_url")}
+                                            />
+                                        </Grid>
+                                        <Grid container item xs={6} spacing={2} sx={{display: "flex"}}>
+                                            <input
+                                                ref={imageFileRef}
+                                                hidden={true}
+                                                type="file"
+                                                name="image"
+                                                onChange={(event) => handleFileChange(event, FileType.IMAGE)}
+                                            />
+                                            <Stack direction="row" spacing={2}>
+                                                <Box sx={{display: "flex", alignItems: "center"}}>
+                                                    <Typography variant="subtitle1">Or Upload Image</Typography>
+                                                </Box>
+
+                                                <Button variant="contained" onClick={handleChooseImageFileClick}>
+                                                    Choose File
+                                                </Button>
+                                            </Stack>
+                                        </Grid>
+                                    </>
+                                }
+
+                                {movie && movie.image_url &&
+                                    <>
+                                        <Grid item>
+                                            <CardMedia
+                                                component="img"
+                                                sx={{borderRadius: "16px"}}
+                                                src={movie.image_url}
+                                            />
+                                        </Grid>
+                                        <Grid>
+                                            <IconButton aria-label="delete" color="error"
+                                                        onClick={() => handleRemoveFileClick(FileType.IMAGE)}>
+                                                <RemoveCircle/>
+                                            </IconButton>
+                                        </Grid>
+                                    </>
+                                }
                             </Grid>
 
                             {movie && movie.type_code === "MOVIE" &&
@@ -473,7 +593,7 @@ const EditMovie = () => {
                                         hidden={true}
                                         type="file"
                                         name="video"
-                                        onChange={handleVideoFileChange}
+                                        onChange={(event) => handleFileChange(event, FileType.VIDEO)}
                                     />
                                     <Stack spacing={2} direction="row">
                                         <Box sx={{display: "flex", alignItems: "center"}}>
@@ -501,7 +621,7 @@ const EditMovie = () => {
                                                     </Link>
                                                 </Box>
                                                 <IconButton aria-label="delete" color="error"
-                                                            onClick={handleRemoveVideoFileClick}>
+                                                            onClick={() => handleRemoveFileClick(FileType.VIDEO)}>
                                                     <RemoveCircle/>
                                                 </IconButton>
                                             </>
