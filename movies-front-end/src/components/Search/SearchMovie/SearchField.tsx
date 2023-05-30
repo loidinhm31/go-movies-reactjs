@@ -5,28 +5,35 @@ import {
     AccordionSummary,
     Autocomplete,
     Box,
-    Button,
+    Button, Container,
     MenuItem,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
-import {FieldData} from "src/types/search";
+import {FieldData, SearchRequest} from "src/types/search";
 import {SearchDate} from "./SearchDate";
 import {SearchGenre} from "./SearchGenre";
 import {SearchString} from "./SearchString";
 import useSWR from "swr";
-import {RatingType} from "../../../types/movies";
-import {get} from "../../../libs/api";
+import {RatingType} from "src/types/movies";
+import {get} from "src/libs/api";
+import MovieTypeSelect, {movieTypes} from "../../MovieTypeSelect";
+import {useState} from "react";
 
 interface SearchFieldProps {
-    trigger: (fieldData: FieldData[]) => void;
+    setIsClickSearch: (flag: boolean) => void;
+    setSearchRequest: (searchRequest: SearchRequest) => void;
     fieldDataMap: Map<string, FieldData>
     setFieldDataMap: (value: Map<string, FieldData>) => void;
 }
 
-export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMap: setFieldData}: SearchFieldProps) {
-    const {data: mpaaOptions} = useSWR<RatingType[]>("../api/v1/ratings", get);
+export function SearchField({setIsClickSearch, setSearchRequest, fieldDataMap: fieldDataMap, setFieldDataMap: setFieldData}: SearchFieldProps) {
+    const optionalType = ["Both"];
+
+    const [selectedType, setSelectedType] = useState<string>(optionalType[0]);
+
+    const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
 
     const handleStringField = (label: string, values: string | string[], forField: string, defType: string) => {
         let data = fieldDataMap.get(label) as FieldData;
@@ -76,6 +83,15 @@ export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMa
 
     const handleSearch = () => {
         let filters: FieldData[] = [];
+        filters.push({
+            field: "type_code",
+            operator: "and",
+            def: {
+                type: "string",
+                values: [selectedType.toLowerCase() !== "both" ? selectedType : ""]
+            }
+        });
+
         fieldDataMap.forEach((value: FieldData, key) => {
             if (value.field &&
                 value.operator &&
@@ -83,11 +99,24 @@ export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMa
                 filters.push(value);
             }
         });
-        trigger(filters);
+
+        setSearchRequest({
+            filters: filters,
+        } as SearchRequest);
+
+        setIsClickSearch(true);
     }
 
     return (
         <Stack sx={{width: 1}} spacing={2}>
+            <Container>
+                <MovieTypeSelect
+                    optionalType={optionalType}
+                    selectedType={selectedType}
+                    setSelectedType={setSelectedType}
+                />
+            </Container>
+
             <SearchString
                 label="Title"
                 field="title"
@@ -167,6 +196,7 @@ export function SearchField({trigger, fieldDataMap: fieldDataMap, setFieldDataMa
             </Accordion>
 
             <SearchGenre
+                movieType={selectedType}
                 handleStringField={handleStringField}
             />
 

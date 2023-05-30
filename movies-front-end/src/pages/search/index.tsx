@@ -1,13 +1,13 @@
-import {Box, Divider, Skeleton, Stack, Typography} from "@mui/material";
+import {Box, Divider, Paper, Skeleton, Stack, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import {SearchField} from "src/components/Search/SearchField";
+import {SearchField} from "src/components/Search/SearchMovie/SearchField";
 import {FieldData, SearchRequest} from "src/types/search";
 import useSWRMutation from "swr/mutation";
-import SearchTable, {Data} from "../../components/Tables/SearchTable";
-import {post} from "../../libs/api";
-import {MovieType} from "../../types/movies";
-import {Direction, PageType} from "../../types/page";
-import NotifySnackbar, {NotifyState} from "../../components/shared/snackbar";
+import SearchTable, {Data} from "src/components/Tables/SearchTable";
+import {post} from "src/libs/api";
+import {MovieType} from "src/types/movies";
+import {Direction, PageType} from "src/types/page";
+import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 
 
 function Search() {
@@ -19,20 +19,29 @@ function Search() {
     const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
 
     const [fieldDataMap, setFieldDataMap] = useState<Map<string, FieldData>>(new Map());
-    const searchRequest: SearchRequest = {};
+    const [searchRequest, setSearchRequest] = useState<SearchRequest>({
+        filters: [],
+    });
+
+    const [isClickSearch, setIsClickSearch] = useState<boolean>(false);
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     // Get Tables
-    const {trigger: requestPage} = useSWRMutation(`../api/v1/search`, post);
+    const {trigger: requestPage} = useSWRMutation(`/api/v1/search`, post);
 
     useEffect(() => {
-        searchRequest.filters = [];
         handleChangeSearchRequest(searchRequest!.filters!);
-    }, [pageIndex, pageSize, order, orderBy])
+    }, [pageIndex, pageSize, order, orderBy]);
+
+    useEffect(() => {
+        if (isClickSearch) {
+            setPageIndex(0);
+            handleChangeSearchRequest(searchRequest.filters!);
+        }
+    }, [isClickSearch]);
 
     const handleChangeSearchRequest = (fieldData: FieldData[]) => {
-        console.log(fieldData)
         if (fieldData) {
             searchRequest!.page_request = {
                 page: pageIndex,
@@ -48,6 +57,8 @@ function Search() {
             };
             searchRequest!.filters = fieldData;
 
+            setSearchRequest(searchRequest);
+
             requestPage(
                 searchRequest
             ).then((data) => {
@@ -60,7 +71,7 @@ function Search() {
                     horizontal: "right",
                     severity: "error"
                 });
-            })
+            }).finally(() => setIsClickSearch(false));
         }
     }
 
@@ -73,11 +84,17 @@ function Search() {
                 </Box>
                 <Divider/>
 
-                <SearchField
-                    trigger={handleChangeSearchRequest}
-                    fieldDataMap={fieldDataMap}
-                    setFieldDataMap={setFieldDataMap}
-                />
+                <Paper
+                    elevation={3}
+                    sx={{p: 2}}
+                >
+                    <SearchField
+                        setIsClickSearch={setIsClickSearch}
+                        setSearchRequest={setSearchRequest}
+                        fieldDataMap={fieldDataMap}
+                        setFieldDataMap={setFieldDataMap}
+                    />
+                </Paper>
 
                 {!page &&
                     <>

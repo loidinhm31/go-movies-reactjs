@@ -14,31 +14,32 @@ import {post} from "src/libs/api";
 import {GenreType} from "src/types/movies";
 import useSWRMutation from "swr/mutation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {useMovieType} from "../../../hooks/useMovieType";
 
 interface SearchGenreProps {
+    movieType: string;
     handleStringField: (label: string, values: string | string[], forField: string, defType: string) => void
 }
 
-export function SearchGenre({handleStringField}: SearchGenreProps) {
+export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<readonly GenreType[]>([]);
-    const loading = open && options.length === 0;
 
-    const {trigger} = useSWRMutation<GenreType[]>(`../../api/v1/genres`, post);
+    const selectedType = useMovieType(movieType);
+
+    const {trigger} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, post);
 
     useEffect(() => {
-        if (!loading) {
-            return undefined;
+        if (!open) {
+            return;
         }
 
-        if (options.length == 0) {
-            trigger()
-                .then((data: GenreType[]) => {
-                    setOptions(data);
-                })
-                .catch((error) => console.log(error))
-        }
-    }, [loading]);
+        trigger()
+            .then((data: GenreType[]) => {
+                setOptions(data);
+            })
+            .catch((error) => console.log(error))
+    }, [open, movieType]);
 
     return (
         <Accordion>
@@ -84,9 +85,9 @@ export function SearchGenre({handleStringField}: SearchGenreProps) {
                         }}
                         isOptionEqualToValue={(option, value) => option.name === value.name}
                         options={options}
-                        getOptionLabel={(option) => option.name}
-                        loading={loading}
-                        onChange={(_, value) => handleStringField("genres", value.map(v => v.name), "def", "string")}
+                        getOptionLabel={(option) => `${option.name} - ${option.type_code}`}
+                        loading={open}
+                        onChange={(_, value) => handleStringField("genres", value.map(v => `${v.name}-${v.type_code}`), "def", "string")}
                         multiple
                         id="genre-3"
                         renderInput={(params) => (
@@ -97,7 +98,7 @@ export function SearchGenre({handleStringField}: SearchGenreProps) {
                                     ...params.InputProps,
                                     endAdornment: (
                                         <Fragment>
-                                            {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                                            {open ? <CircularProgress color="inherit" size={20}/> : null}
                                             {params.InputProps.endAdornment}
                                         </Fragment>
                                     ),
