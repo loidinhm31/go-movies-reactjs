@@ -1,10 +1,13 @@
 import {boolean} from "boolean";
 import type {AuthOptions, DefaultUser} from "next-auth";
 import NextAuth from "next-auth";
-import {Provider} from "next-auth/providers";
+import {OAuthConfig, Provider} from "next-auth/providers";
 import CredentialsProvider from "next-auth/providers/credentials";
-import KeycloakProvider from "next-auth/providers/keycloak";
+import KeycloakProvider, {KeycloakProfile} from "next-auth/providers/keycloak";
 import {NextApiRequest} from "next";
+import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
+import oga = MimetypesKind.oga;
+import {JWT} from "next-auth/jwt";
 
 async function refreshAccessToken(token) {
     try {
@@ -112,7 +115,7 @@ if (process.env.KEYCLOAK_CLIENT_ID) {
 export const authOptions: AuthOptions = {
         providers,
         pages: {
-            signIn: "/auth/signin"
+            signIn: "/auth/signin",
             // TODO error: "/auth/error",
         },
         callbacks: {
@@ -166,6 +169,7 @@ export const authOptions: AuthOptions = {
                 if (account && user) {
                     return {
                         ...token,
+                        id_token: account.id_token,
                         id: user.id,
                         accessToken: user.token,
                         expiresAt: account.expires_at!,
@@ -193,6 +197,12 @@ export const authOptions: AuthOptions = {
             async signIn() {
                 console.log("handle event sign in");
             },
+            async signOut({session, token}) {
+                const issuerUrl = (authOptions.providers.find(p => p.id === "keycloak") as OAuthConfig<KeycloakProfile>).options!.issuer!
+                const logOutUrl = new URL(`${issuerUrl}/protocol/openid-connect/logout`)
+                logOutUrl.searchParams.set("id_token_hint", token.id_token!)
+                await fetch(logOutUrl);
+            }
         },
         session: {
             strategy: "jwt"
