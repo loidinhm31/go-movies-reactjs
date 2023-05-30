@@ -22,6 +22,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import AlertDialog from "src/components/shared/alert";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import {FileType} from "src/types/movies";
+
 interface EditEpisodeProps {
     id?: number;
     seasonId: number;
@@ -51,8 +53,8 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
     const {trigger: fetchEpisode} = useSWRMutation<EpisodeType>(`/api/v1/episodes/${id}`, get);
     const {trigger: triggerEpisode} = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/save`, post);
     const {trigger: deleteEpisode} = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/delete/${id}`, del);
-    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/video/upload`, postForm);
-    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/video/remove`, post);
+    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
+    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
 
     useEffect(() => {
         if (id === undefined) {
@@ -160,8 +162,10 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         let value: string | number = event.target.value;
         if (name === "runtime") {
             value = Number(value);
+        } else if (name === "air_date") {
+            if (Number.isNaN(new Date(event.target.value).getTime()))
+                return;
         }
-        console.log(episode.season_id)
         setEpisode({
             ...episode,
             [name]: value,
@@ -189,7 +193,8 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         setVideoFile(fileObj);
 
         const formData = new FormData();
-        formData.append("video", fileObj);
+        formData.append("file", fileObj);
+        formData.append("fileType", FileType.VIDEO);
 
         uploadVideo(formData).then((result) => {
             if (result.fileName) {
@@ -383,7 +388,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                             <>
                                                 <Box sx={{display: "flex", alignItems: "center"}}>
                                                     <Link
-                                                        href={`${process.env.NEXT_PUBLIC_URL}/video/upload/${videoPath}`}
+                                                        href={`${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${videoPath}`}
                                                         target="_blank"
                                                     >
                                                         {

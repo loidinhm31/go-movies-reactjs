@@ -164,6 +164,10 @@ const EditSeason = () => {
 
     const handleChange = (event, name: string) => {
         let value: string | number = event.target.value;
+        if (name === "air_date") {
+            if (Number.isNaN(new Date(event.target.value).getTime()))
+                return;
+        }
 
         setSeason({
             ...season,

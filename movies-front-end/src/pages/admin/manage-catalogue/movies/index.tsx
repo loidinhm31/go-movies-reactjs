@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import {useRouter} from "next/router";
 import {signIn} from "next-auth/react";
-import {GenreType, MovieType, RatingType} from "src/types/movies";
+import {FileType, GenreType, MovieType, RatingType} from "src/types/movies";
 import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
@@ -31,11 +31,6 @@ import {RemoveCircle} from "@mui/icons-material";
 import {movieTypes} from "src/components/MovieTypeSelect";
 import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 import useSWR from "swr";
-
-const enum FileType {
-    VIDEO = "video",
-    IMAGE = "image",
-}
 
 const EditMovie = () => {
     const router = useRouter();
@@ -241,7 +236,11 @@ const EditMovie = () => {
         let value: string | number = event.target.value;
         if (name === "runtime") {
             value = Number(value);
+        } else if (name === "release_date") {
+            if (Number.isNaN(new Date(event.target.value).getTime()))
+                return;
         }
+
         setMovie({
             ...movie,
             [name]: value,
@@ -277,7 +276,6 @@ const EditMovie = () => {
         if (!fileObj) {
             return;
         }
-        console.log(type)
         // Reset file input
         event.target.value = null;
 
