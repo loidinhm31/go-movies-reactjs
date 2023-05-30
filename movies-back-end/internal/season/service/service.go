@@ -6,24 +6,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
-	"movies-service/internal/episodes"
+	"movies-service/internal/episode"
 	"movies-service/internal/errors"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/models"
-	"movies-service/internal/movies"
-	"movies-service/internal/seasons"
+	"movies-service/internal/model"
+	"movies-service/internal/movie"
+	"movies-service/internal/season"
 	"time"
 )
 
 type seasonService struct {
 	mgmtCtrl          control.Service
-	movieRepository   movies.MovieRepository
-	seasonRepository  seasons.Repository
-	episodeRepository episodes.Repository
+	movieRepository   movie.Repository
+	seasonRepository  season.Repository
+	episodeRepository episode.Repository
 }
 
-func NewSeasonService(mgmtCtrl control.Service, movieRepository movies.MovieRepository, seasonRepository seasons.Repository, episodeRepository episodes.Repository) seasons.Service {
+func NewSeasonService(mgmtCtrl control.Service, movieRepository movie.Repository, seasonRepository season.Repository, episodeRepository episode.Repository) season.Service {
 	return &seasonService{
 		mgmtCtrl:          mgmtCtrl,
 		movieRepository:   movieRepository,
@@ -68,7 +68,7 @@ func (s seasonService) AddSeason(ctx context.Context, season *dto.SeasonDto) err
 		return err
 	}
 
-	seasonObject := &models.Season{
+	seasonObject := &model.Season{
 		Name:        season.Name,
 		AirDate:     season.AirDate,
 		Description: season.Description,
@@ -112,7 +112,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 	}
 
 	// After check object exists, write updating value
-	seasonObj = &models.Season{
+	seasonObj = &model.Season{
 		ID:          season.ID,
 		Name:        season.Name,
 		AirDate:     season.AirDate,
@@ -131,7 +131,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 	return nil
 }
 
-func (s seasonService) DeleteSeasonById(ctx context.Context, id int) error {
+func (s seasonService) RemoveSeasonByID(ctx context.Context, id int) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}

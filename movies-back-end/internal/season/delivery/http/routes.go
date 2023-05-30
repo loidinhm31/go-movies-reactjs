@@ -2,15 +2,15 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/seasons"
+	"movies-service/internal/season"
 )
 
-func MapSeasonRoutes(seasonGroup *gin.RouterGroup, h seasons.Handler) {
+func MapSeasonRoutes(seasonGroup *gin.RouterGroup, h season.Handler) {
 	seasonGroup.GET("/:id", h.FetchSeasonsByID())
 	seasonGroup.GET("/", h.FetchSeasonsByMovieID())
 }
 
-func MapAuthSeasonRoutes(seasonGroup *gin.RouterGroup, h seasons.Handler) {
+func MapAuthSeasonRoutes(seasonGroup *gin.RouterGroup, h season.Handler) {
 	seasonGroup.GET("/", h.FetchSeasonsByMovieID())
 	seasonGroup.PUT("/", h.PutSeason())
 	seasonGroup.PATCH("/", h.PatchSeason())

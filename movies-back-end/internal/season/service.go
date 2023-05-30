@@ -1,4 +1,4 @@
-package seasons
+package season
 
 import (
 	"context"
@@ -11,5 +11,5 @@ type Service interface {
 	GetSeasonsByMovieID(ctx context.Context, movieID int) ([]*dto.SeasonDto, error)
 	AddSeason(ctx context.Context, season *dto.SeasonDto) error
 	UpdateSeason(ctx context.Context, season *dto.SeasonDto) error
-	DeleteSeasonById(ctx context.Context, id int) error
+	RemoveSeasonByID(ctx context.Context, id int) error
 }

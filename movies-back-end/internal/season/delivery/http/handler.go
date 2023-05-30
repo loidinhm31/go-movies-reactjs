@@ -4,17 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/dto"
-	"movies-service/internal/seasons"
-	"movies-service/pkg/utils"
+	"movies-service/internal/season"
+	"movies-service/pkg/util"
 	"net/http"
 	"strconv"
 )
 
 type seasonHandler struct {
-	seasonService seasons.Service
+	seasonService season.Service
 }
 
-func NewSeasonHandler(seasonService seasons.Service) seasons.Handler {
+func NewSeasonHandler(seasonService season.Service) season.Handler {
 	return &seasonHandler{
 		seasonService: seasonService,
 	}
@@ -57,7 +57,7 @@ func (s seasonHandler) FetchSeasonsByMovieID() gin.HandlerFunc {
 func (s seasonHandler) PutSeason() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		season := &dto.SeasonDto{}
-		if err := utils.ReadRequest(c, season); err != nil {
+		if err := util.ReadRequest(c, season); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -80,8 +80,8 @@ func (s seasonHandler) PutSeason() gin.HandlerFunc {
 
 func (s seasonHandler) PatchSeason() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		season := &dto.SeasonDto{}
-		if err := utils.ReadRequest(c, season); err != nil {
+		theSeason := &dto.SeasonDto{}
+		if err := util.ReadRequest(c, theSeason); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -90,7 +90,7 @@ func (s seasonHandler) PatchSeason() gin.HandlerFunc {
 			return
 		}
 
-		err := s.seasonService.UpdateSeason(c, season)
+		err := s.seasonService.UpdateSeason(c, theSeason)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -111,7 +111,7 @@ func (s seasonHandler) DeleteSeason() gin.HandlerFunc {
 			return
 		}
 
-		err = s.seasonService.DeleteSeasonById(c, seasonID)
+		err = s.seasonService.RemoveSeasonByID(c, seasonID)
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{

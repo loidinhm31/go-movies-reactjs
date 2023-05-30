@@ -1,4 +1,4 @@
-package seasons
+package season
 
 import "github.com/gin-gonic/gin"
 
