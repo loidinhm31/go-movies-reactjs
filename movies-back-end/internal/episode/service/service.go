@@ -3,25 +3,24 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
-	"movies-service/internal/episodes"
+	"movies-service/internal/episode"
 	"movies-service/internal/errors"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/models"
-	"movies-service/internal/seasons"
+	"movies-service/internal/model"
+	"movies-service/internal/season"
 	"time"
 )
 
 type episodeService struct {
 	mgmtCtrl          control.Service
-	seasonRepository  seasons.Repository
-	episodeRepository episodes.Repository
+	seasonRepository  season.Repository
+	episodeRepository episode.Repository
 }
 
-func NewSeasonService(mgmtCtrl control.Service, seasonRepository seasons.Repository, episodeRepository episodes.Repository) episodes.Service {
+func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Repository, episodeRepository episode.Repository) episode.Service {
 	return &episodeService{
 		mgmtCtrl:          mgmtCtrl,
 		seasonRepository:  seasonRepository,
@@ -29,7 +28,7 @@ func NewSeasonService(mgmtCtrl control.Service, seasonRepository seasons.Reposit
 	}
 }
 
-func (e episodeService) GetEpisodesByID(ctx *gin.Context, id int) (*dto.EpisodeDto, error) {
+func (e episodeService) GetEpisodesByID(ctx context.Context, id int) (*dto.EpisodeDto, error) {
 	result, err := e.episodeRepository.FindEpisodeByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -65,7 +64,7 @@ func (e episodeService) AddEpisode(ctx context.Context, episode *dto.EpisodeDto)
 		return err
 	}
 
-	episodeObject := &models.Episode{
+	episodeObject := &model.Episode{
 		Name:      episode.Name,
 		AirDate:   episode.AirDate,
 		Runtime:   episode.Runtime,
@@ -110,7 +109,7 @@ func (e episodeService) UpdateEpisode(ctx context.Context, episode *dto.EpisodeD
 	}
 
 	// After check object exists, write updating value
-	episodeObj = &models.Episode{
+	episodeObj = &model.Episode{
 		ID:        episode.ID,
 		Name:      episode.Name,
 		AirDate:   episode.AirDate,
@@ -130,7 +129,7 @@ func (e episodeService) UpdateEpisode(ctx context.Context, episode *dto.EpisodeD
 	return nil
 }
 
-func (e episodeService) DeleteEpisodeById(ctx context.Context, id int) error {
+func (e episodeService) RemoveEpisodeByID(ctx context.Context, id int) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}
@@ -141,7 +140,7 @@ func (e episodeService) DeleteEpisodeById(ctx context.Context, id int) error {
 		return errors.ErrUnAuthorized
 	}
 
-	err := e.episodeRepository.DeleteEpisodeById(ctx, id)
+	err := e.episodeRepository.DeleteEpisodeByID(ctx, id)
 	if err != nil {
 		return err
 	}

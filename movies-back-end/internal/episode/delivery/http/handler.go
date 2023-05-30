@@ -4,17 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/dto"
-	"movies-service/internal/episodes"
-	"movies-service/pkg/utils"
+	"movies-service/internal/episode"
+	"movies-service/pkg/util"
 	"net/http"
 	"strconv"
 )
 
 type episodeHandler struct {
-	episodeService episodes.Service
+	episodeService episode.Service
 }
 
-func NewEpisodeHandler(episodeService episodes.Service) episodes.Handler {
+func NewEpisodeHandler(episodeService episode.Service) episode.Handler {
 	return &episodeHandler{
 		episodeService: episodeService,
 	}
@@ -56,8 +56,8 @@ func (e episodeHandler) FetchEpisodesBySeasonID() gin.HandlerFunc {
 
 func (e episodeHandler) PutEpisode() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		episode := &dto.EpisodeDto{}
-		if err := utils.ReadRequest(c, episode); err != nil {
+		thEpisode := &dto.EpisodeDto{}
+		if err := util.ReadRequest(c, thEpisode); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -66,7 +66,7 @@ func (e episodeHandler) PutEpisode() gin.HandlerFunc {
 			return
 		}
 
-		err := e.episodeService.AddEpisode(c, episode)
+		err := e.episodeService.AddEpisode(c, thEpisode)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -80,8 +80,8 @@ func (e episodeHandler) PutEpisode() gin.HandlerFunc {
 
 func (e episodeHandler) PatchEpisode() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		episode := &dto.EpisodeDto{}
-		if err := utils.ReadRequest(c, episode); err != nil {
+		thEpisode := &dto.EpisodeDto{}
+		if err := util.ReadRequest(c, thEpisode); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
@@ -90,7 +90,7 @@ func (e episodeHandler) PatchEpisode() gin.HandlerFunc {
 			return
 		}
 
-		err := e.episodeService.UpdateEpisode(c, episode)
+		err := e.episodeService.UpdateEpisode(c, thEpisode)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -111,7 +111,7 @@ func (e episodeHandler) DeleteEpisode() gin.HandlerFunc {
 			return
 		}
 
-		err = e.episodeService.DeleteEpisodeById(c, seasonID)
+		err = e.episodeService.RemoveEpisodeByID(c, seasonID)
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{
