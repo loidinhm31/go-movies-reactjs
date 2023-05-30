@@ -20,7 +20,8 @@ export function TabTvSeries() {
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {
         setPageIndex(0);
-    }, [pageSize])
+    }, [pageSize, searchKey]);
+
     return (
         <Grid>
             <SearchKey

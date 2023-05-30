@@ -1,9 +1,10 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {
     Box,
-    Button,
-    Chip, IconButton,
-    Paper, Skeleton,
+    Chip,
+    IconButton,
+    Paper,
+    Skeleton,
     Table,
     TableBody,
     TableCell,
@@ -14,17 +15,17 @@ import {
     TableSortLabel
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
-import {MovieType} from "../../types/movies";
-import AlertDialog from "../shared/alert";
-import {Direction, PageType} from "../../types/page";
+import {MovieType} from "src/types/movies";
+import AlertDialog from "src/components/shared/alert";
+import {Direction, PageType} from "src/types/page";
 import {format} from "date-fns";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import SeasonDialog from "../Dialog/SeasonDialog";
 import useSWRMutation from "swr/mutation";
-import {del, post} from "../../libs/api";
-import {NotifyState} from "../shared/snackbar";
+import {del, post} from "src/libs/api";
+import {NotifyState} from "src/components/shared/snackbar";
+import SearchKey from "../Search/SearchKey";
 
 export interface Data {
     title: string;
@@ -133,19 +134,21 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
 
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState(false);
 
+    const [searchKey, setSearchKey] = useState<string>("");
+
     // Get Tables
     const {trigger: requestPage} =
-        useSWRMutation(`../api/v1/movies?pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
-    const {trigger: deleteMovie} = useSWRMutation(`../api/v1/admin/movies/delete/${deleteId}`, del);
+        useSWRMutation(`/api/v1/movies?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
+    const {trigger: deleteMovie} = useSWRMutation(`/api/v1/admin/movies/delete/${deleteId}`, del);
 
     useEffect(() => {
         handeRequestPage();
-    }, [pageIndex, pageSize, order, orderBy])
+    }, [pageIndex, pageSize, order, orderBy, searchKey])
 
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {
         setPageIndex(0);
-    }, [pageSize])
+    }, [pageSize, searchKey])
 
     useEffect(() => {
         if (deleteId && isConfirmDelete) {
@@ -267,7 +270,10 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                     <Skeleton animation={false}/>
                 </>
             }
-
+            <SearchKey
+                keyword={searchKey}
+                setKeyword={setSearchKey}
+            />
             {page && page.content &&
                 <Box sx={{width: "100%"}}>
                     <Paper sx={{width: "100%", mb: 2}}>
@@ -309,7 +315,7 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                                                         <Box sx={{display: "flex", gap: 1}}>
                                                             <IconButton
                                                                 color="inherit"
-                                                                href={`/admin/movies?id=${row.id}`}
+                                                                href={`/admin/manage-catalogue/movies?id=${row.id}`}
                                                             >
                                                                 <EditIcon/>
                                                             </IconButton>
