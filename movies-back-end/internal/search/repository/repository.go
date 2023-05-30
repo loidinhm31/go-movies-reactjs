@@ -14,12 +14,13 @@ import (
 
 const (
 	Id          = "id"
+	TypeCode    = "type_code"
 	Title       = "title"
 	Description = "description"
 	Runtime     = "runtime"
 	MpaaRating  = "mpaa_rating"
 	ReleaseDate = "release_date"
-	Genres      = "genre"
+	Genres      = "genres"
 )
 
 // searchRepository is the type for our graphql operations
@@ -41,11 +42,16 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 	if sr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	tx = tx.Table("movie")
+	tx = tx.Table("movies")
 
 	for _, f := range searchParams.Filters {
 		switch f.Field {
 		case Id:
+			break
+		case TypeCode:
+			if f.TypeValue.Values[0] != "" {
+				tx.Where("type_code = ?", f.TypeValue.Values[0])
+			}
 			break
 		case Title:
 			err := sr.buildLikeQuery(tx, Title, f.Operator, f.TypeValue)
@@ -79,9 +85,19 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 			break
 		case Genres:
 			if len(f.TypeValue.Values) > 0 {
-				tx.Where("id IN (SELECT m.id FROM movie m "+
-					"JOIN movies_genres mg on m.id = mg.movie_id "+
-					"JOIN genre g on g.id = mg.genre_id WHERE genre IN ?)", f.TypeValue.Values)
+				subQuery := sr.db.Table("movies").
+					Select("movies.id").
+					Joins("JOIN movies_genres mg ON movies.id = mg.movie_id").
+					Joins("JOIN genres g ON g.id = mg.genre_id")
+
+				var orBuild = sr.db
+				for _, g := range f.TypeValue.Values {
+					genreSplit := strings.Split(g, "-")
+					orBuild = orBuild.Or("g.name = ? AND g.type_code = ?", genreSplit[0], genreSplit[1])
+				}
+
+				subQuery = subQuery.Where(orBuild)
+				tx.Where("id IN (?)", subQuery)
 			}
 			break
 		}

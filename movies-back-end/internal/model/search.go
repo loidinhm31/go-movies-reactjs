@@ -1,4 +1,4 @@
-package models
+package model
 
 import "movies-service/pkg/pagination"
 
