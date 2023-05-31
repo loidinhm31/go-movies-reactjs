@@ -10,6 +10,7 @@ const (
 const (
 	DATE   = "date"
 	STRING = "string"
+	NUMBER = "number"
 )
 
 type SearchParams struct {

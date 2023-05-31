@@ -7,14 +7,17 @@ type TheMovieDBPage struct {
 }
 
 type TheMovieDB struct {
-	ID          int64   `json:"id"`
-	Title       string  `json:"title"`
-	ReleaseDae  string  `json:"release_date,omitempty"`
-	PosterPath  string  `json:"poster_path,omitempty"`
-	Runtime     int     `json:"runtime,omitempty"`
-	VoteAverage float32 `json:"vote_average,omitempty"`
-	VoteCount   int     `json:"vote_count,omitempty"`
-	Genres      []struct {
+	ID             int64   `json:"id"`
+	Title          string  `json:"title"`
+	Name           string  `json:"name"`
+	ReleaseDate    string  `json:"release_date,omitempty"`
+	FirstAirDate   string  `json:"first_air_date,omitempty"`
+	PosterPath     string  `json:"poster_path,omitempty"`
+	Runtime        int     `json:"runtime,omitempty"`
+	EpisodeRuntime []int   `json:"episode_run_time,omitempty"`
+	VoteAverage    float32 `json:"vote_average,omitempty"`
+	VoteCount      int     `json:"vote_count,omitempty"`
+	Genres         []struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	} `json:"genres,omitempty"`

@@ -10,7 +10,7 @@ type MovieDto struct {
 	Runtime     int         `json:"runtime,omitempty"`
 	MpaaRating  string      `json:"mpaa_rating,omitempty"`
 	Description string      `json:"description,omitempty"`
-	ImagePath   string      `json:"image_path,omitempty"`
+	ImageUrl    string      `json:"image_url,omitempty"`
 	VideoPath   string      `json:"video_path,omitempty"`
 	CreatedAt   time.Time   `json:"-"`
 	UpdatedAt   time.Time   `json:"-"`

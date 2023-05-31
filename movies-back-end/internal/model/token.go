@@ -1,4 +1,4 @@
-package models
+package model
 
 type UserToken struct {
 	Claims Claims `json:"Claims"`

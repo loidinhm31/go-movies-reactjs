@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"database/sql"
@@ -14,7 +14,7 @@ type Movie struct {
 	Runtime     int
 	MpaaRating  string
 	Description string
-	ImagePath   sql.NullString `gorm:"type:varchar(255), default:null"`
+	ImageUrl    sql.NullString `gorm:"type:varchar(255), default:null"`
 	VideoPath   sql.NullString `gorm:"type:varchar(255), default:null"`
 	CreatedAt   time.Time
 	CreatedBy   string
