@@ -30,7 +30,7 @@ export function ReferencesTable({movieType, data}: ReferencesTableProps) {
                                             <CardMedia
                                                 sx={{borderRadius: "16px"}}
                                                 component="img"
-                                                src={`https://image.tmdb.org/t/p/w200/${movie.image_path}`}
+                                                src={`${process.env.NEXT_PUBLIC_TMDB_IMAGE_PATH}/${movie.image_url}`}
                                             />
                                         </Box>
                                     </Grid>

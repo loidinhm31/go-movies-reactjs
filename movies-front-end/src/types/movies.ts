@@ -1,3 +1,8 @@
+export const enum FileType {
+    VIDEO = "video",
+    IMAGE = "image",
+}
+
 export type MovieType = {
     id?: number,
     title: string,
@@ -6,7 +11,7 @@ export type MovieType = {
     release_date: string | null,
     runtime: number,
     mpaa_rating?: string,
-    image_path?: string,
+    image_url?: string,
     video_path?: string,
     genres: GenreType[],
     vote_average?: number,
