@@ -97,7 +97,12 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 				}
 
 				subQuery = subQuery.Where(orBuild)
-				tx.Where("id IN (?)", subQuery)
+
+				if strings.EqualFold(f.Operator, model.AND) {
+					tx.Where("id IN (?)", subQuery)
+				} else if strings.EqualFold(f.Operator, model.OR) {
+					tx.Or("id IN (?)", subQuery)
+				}
 			}
 			break
 		}
