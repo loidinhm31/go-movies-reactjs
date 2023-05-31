@@ -3,14 +3,13 @@ import {format} from "date-fns";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import VideoPlayer, {VideoJsOption} from "../Player/VideoPlayer";
-import {Views} from "../Views";
+import VideoPlayer, {VideoJsOption} from "src/components/Player/VideoPlayer";
+import {Views} from "src/components/Views";
 import SeasonInformation from "./SeasonInformation";
-import React, {useEffect, useState} from "react";
-import useSWRMutation from "swr/mutation";
-import {get, post} from "../../libs/api";
+import React, {useState} from "react";
+import {get} from "src/libs/api";
 import useSWR from "swr";
-import {MovieType} from "../../types/movies";
+import {MovieType} from "src/types/movies";
 
 interface WatchMovieProps {
     mutateView: boolean;
@@ -36,7 +35,7 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                     ...videoJsOptions,
                     sources: [
                         {
-                            src: `${process.env.NEXT_PUBLIC_URL}/video/upload/${result.video_path}`,
+                            src: `${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${result.video_path}`,
                             type: "video/mp4",
                         }
                     ],
@@ -84,12 +83,12 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                         <Grid container spacing={3}>
                             <Grid item xs={12} md={2}>
                                 <Stack>
-                                    {movie.image_path !== "" &&
+                                    {movie.image_url !== "" &&
                                         <Box sx={{display: "flex", justifyContent: "center", width: 1, height: 1}}>
                                             <CardMedia
                                                 sx={{borderRadius: "16px"}}
                                                 component="img"
-                                                src={`https://image.tmdb.org/t/p/w200/${movie.image_path}`}
+                                                src={movie.image_url}
                                                 alt="poster"/>
                                         </Box>
                                     }

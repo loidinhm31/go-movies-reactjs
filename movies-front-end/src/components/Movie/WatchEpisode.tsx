@@ -1,11 +1,8 @@
-import {useHasUsername} from "../../hooks/auth/useHasUsername";
 import React, {useState} from "react";
-import VideoPlayer, {VideoJsOption} from "../Player/VideoPlayer";
-import useSWRMutation from "swr/mutation";
-import {get, post} from "../../libs/api";
+import VideoPlayer, {VideoJsOption} from "src/components/Player/VideoPlayer";
+import {get} from "src/libs/api";
 import useSWR from "swr";
-import {MovieType} from "../../types/movies";
-import {EpisodeType} from "../../types/seasons";
+import {EpisodeType} from "src/types/seasons";
 
 interface WatchEpisodeProps {
     setMutateView: (flag: boolean) => void;
@@ -27,7 +24,7 @@ export default function WatchEpisode({setMutateView, author, movieId, episodeId}
                     ...videoJsOptions,
                     sources: [
                         {
-                            src: `${process.env.NEXT_PUBLIC_URL}/video/upload/${result.video_path}`,
+                            src: `${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${result.video_path}`,
                             type: "video/mp4",
                         }
                     ],
