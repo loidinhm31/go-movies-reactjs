@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"movies-service/config"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,7 +24,7 @@ func NewPsqlDB(cfg *config.Config, migrate bool) (*gorm.DB, error) {
 	}
 
 	if migrate {
-		db.AutoMigrate(&models.User{})
+		db.AutoMigrate(&model.User{})
 		// if err != nil {
 		// 	panic("Error when run migrations")
 		// }

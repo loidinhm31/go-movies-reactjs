@@ -5,7 +5,7 @@ import (
 	"movies-service/config"
 	"movies-service/internal/server"
 	database "movies-service/pkg/database/postgres"
-	"movies-service/pkg/utils"
+	"movies-service/pkg/util"
 	"os"
 )
 
@@ -13,7 +13,7 @@ func main() {
 	log.Println("Starting API server")
 
 	envProfile := os.Getenv("profile")
-	configPath := utils.GetConfigPath(envProfile)
+	configPath := util.GetConfigPath(envProfile)
 	cfgFile, err := config.LoadConfig(configPath, envProfile)
 
 	if err != nil {
