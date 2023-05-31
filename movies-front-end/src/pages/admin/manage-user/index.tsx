@@ -9,6 +9,8 @@ import {signIn} from "next-auth/react";
 export default function Users() {
     const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
+    const [wasUpdated, setWasUpdated] = useState(false);
+
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     useEffect(() => {
@@ -33,7 +35,11 @@ export default function Users() {
                     elevation={6}
                     sx={{p: 2}}
                 >
-                    <SearchUsersOIDC setNotifyState={setNotifyState} />
+                    <SearchUsersOIDC
+                        setNotifyState={setNotifyState}
+                        wasUpdated={wasUpdated}
+                        setWasUpdated={setWasUpdated}
+                    />
                 </Paper>
 
                 <Divider/>
@@ -42,7 +48,11 @@ export default function Users() {
                     elevation={6}
                     sx={{p: 2}}
                 >
-                    <SearchUsers setNotifyState={setNotifyState} />
+                    <SearchUsers
+                        setNotifyState={setNotifyState}
+                        wasUpdated={wasUpdated}
+                        setWasUpdated={setWasUpdated}
+                    />
 
                 </Paper>
             </Stack>

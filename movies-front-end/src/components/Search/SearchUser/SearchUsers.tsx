@@ -1,18 +1,20 @@
 import {Checkbox, Grid, Stack, TextField, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
-import UserTable, {UserData} from "../../Tables/UserTable";
+import UserTable, {UserData} from "src/components/Tables/UserTable";
 import {useEffect, useState} from "react";
-import {Direction, PageType} from "../../../types/page";
-import {UserType} from "../../../types/users";
+import {Direction, PageType} from "src/types/page";
+import {UserType} from "src/types/users";
 import useSWRMutation from "swr/mutation";
-import {post} from "../../../libs/api";
-import {NotifyState} from "../../shared/snackbar";
+import {post} from "src/libs/api";
+import {NotifyState} from "src/components/shared/snackbar";
 
 interface SearchUsersProps {
     setNotifyState: (state: NotifyState) => void;
+    wasUpdated: boolean;
+    setWasUpdated: (flag: boolean) => void;
 }
 
-export default function SearchUsers({setNotifyState}: SearchUsersProps) {
+export default function SearchUsers({setNotifyState, wasUpdated, setWasUpdated}: SearchUsersProps) {
     const [isNew, setIsNew] = useState(true);
     const [searchKey, setSearchKey] = useState("");
 
@@ -24,9 +26,8 @@ export default function SearchUsers({setNotifyState}: SearchUsersProps) {
     const [order, setOrder] = useState<Direction>(Direction.ASC);
     const [orderBy, setOrderBy] = useState<keyof UserData>("created_at");
 
-    const [wasUpdated, setWasUpdated] = useState(false);
 
-    const {trigger: requestPage} = useSWRMutation(`../../api/v1/admin/users?pageSize=${pageSize}&pageIndex=${pageIndex}&isNew=${isNew}&query=${searchKey}`, post);
+    const {trigger: requestPage} = useSWRMutation(`/api/v1/admin/users?pageSize=${pageSize}&pageIndex=${pageIndex}&isNew=${isNew}&query=${searchKey}`, post);
 
     useEffect(() => {
         handeRequestPage();
@@ -67,9 +68,7 @@ export default function SearchUsers({setNotifyState}: SearchUsersProps) {
     }
 
     const handleSearchClick = () => {
-        if (searchKey !== "") {
-            handeRequestPage();
-        }
+        handeRequestPage();
     }
 
     const handleKeyPressSearch = (event) => {

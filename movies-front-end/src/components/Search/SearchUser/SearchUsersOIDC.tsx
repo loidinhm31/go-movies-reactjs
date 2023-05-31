@@ -15,17 +15,19 @@ import {
 import Button from "@mui/material/Button";
 import React, {useState} from "react";
 import useSWRMutation from "swr/mutation";
-import {get, put} from "../../../libs/api";
-import {NotifyState} from "../../shared/snackbar";
-import {RoleType, UserType} from "../../../types/users";
+import {get, put} from "src/libs/api";
+import {NotifyState} from "src/components/shared/snackbar";
+import {RoleType, UserType} from "src/types/users";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import useSWR from "swr";
 
 interface SearchUsersOIDCProps {
     setNotifyState: (state: NotifyState) => void;
+    wasUpdated: boolean;
+    setWasUpdated: (flag: boolean) => void;
 }
 
-export default function SearchUsersOIDC({setNotifyState}: SearchUsersOIDCProps) {
+export default function SearchUsersOIDC({setNotifyState, wasUpdated, setWasUpdated}: SearchUsersOIDCProps) {
 
     const [username, setUsername] = useState("");
 
@@ -33,8 +35,8 @@ export default function SearchUsersOIDC({setNotifyState}: SearchUsersOIDCProps) 
 
     const [selectedRole, setSelectedRole] = useState<string>("");
 
-    const {trigger: fetchUser} = useSWRMutation<UserType>(`../../api/v1/admin/users/oidc?username=${username}`, get);
-    const {trigger: putUser} = useSWRMutation(`../../api/v1/admin/users/oidc`, put);
+    const {trigger: fetchUser} = useSWRMutation<UserType>(`/api/v1/admin/users/oidc?username=${username}`, get);
+    const {trigger: putUser} = useSWRMutation(`/api/v1/admin/users/oidc`, put);
     const {data: roles} = useSWR<RoleType[]>("/api/v1/admin/roles", get);
 
     const handleSearchClick = () => {
@@ -67,14 +69,24 @@ export default function SearchUsersOIDC({setNotifyState}: SearchUsersOIDCProps) 
 
         if (oidcUser) {
             oidcUser.role.role_code = selectedRole;
-            putUser(oidcUser!).then(() => {
-                setNotifyState({
-                    open: true,
-                    message: "OIDC User added",
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "success"
-                });
+            putUser(oidcUser!).then((result) => {
+                if (result.message === "ok") {
+                    setNotifyState({
+                        open: true,
+                        message: "OIDC User added",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "success"
+                    });
+
+                    // Update table
+                    setWasUpdated(true);
+
+                    // Clear information
+                    setOidcUser(null);
+                    setSelectedRole("");
+                    setUsername("");
+                }
             }).catch((error) => {
                 setNotifyState({
                     open: true,
