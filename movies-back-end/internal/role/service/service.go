@@ -3,14 +3,14 @@ package service
 import (
 	"context"
 	"movies-service/internal/dto"
-	"movies-service/internal/roles"
+	"movies-service/internal/role"
 )
 
 type roleService struct {
-	roleRepository roles.Repository
+	roleRepository role.Repository
 }
 
-func NewRoleService(roleRepository roles.Repository) roles.Service {
+func NewRoleService(roleRepository role.Repository) role.Service {
 	return &roleService{
 		roleRepository: roleRepository,
 	}

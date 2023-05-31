@@ -2,15 +2,15 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/roles"
+	"movies-service/internal/role"
 	"net/http"
 )
 
 type roleHandler struct {
-	roleService roles.Service
+	roleService role.Service
 }
 
-func NewRoleHandler(roleService roles.Service) roles.Handler {
+func NewRoleHandler(roleService role.Service) role.Handler {
 	return &roleHandler{
 		roleService: roleService,
 	}
