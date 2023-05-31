@@ -32,7 +32,7 @@ const AppBar = styled(MuiAppBar, {
 
 export function Header() {
     const {data: session} = useSession();
-    const homeURL = session ? "/dashboard" : "/";
+    const homeURL = session ? "/admin/dashboard" : "/";
 
     return (
         <AppBar position="fixed" sx={{background: "orange"}}>
