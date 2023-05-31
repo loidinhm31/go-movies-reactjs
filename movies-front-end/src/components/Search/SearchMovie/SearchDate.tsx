@@ -1,5 +1,7 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {Accordion, AccordionDetails, AccordionSummary, MenuItem, Stack, TextField, Typography} from "@mui/material";
+import {useEffect, useState} from "react";
+import {format} from "date-fns";
 
 interface SearchDateProps {
     label: string;
@@ -9,6 +11,24 @@ interface SearchDateProps {
 }
 
 export function SearchDate({label, field, defType, handleDateField}: SearchDateProps) {
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEnDate] = useState("");
+
+    useEffect(() => {
+        if (startDate === "") {
+            setEnDate("");
+        }
+        handleDateField(field, startDate, "def", defType, "from");
+    }, [startDate]);
+
+    useEffect(() => {
+        if (endDate === "") {
+            setStartDate("");
+        }
+        handleDateField(field, endDate, "def", defType, "to");
+
+    }, [endDate]);
+
     return (
         <Accordion>
             <AccordionSummary
@@ -49,7 +69,8 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
                         label="From"
                         type="date"
                         name="release-3"
-                        onChange={e => handleDateField(field, e.target.value, "def", defType, "from")}
+                        value={startDate}
+                        onChange={e => setStartDate(e.target.value)}
                     />
 
                     <TextField
@@ -58,7 +79,8 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
                         label="To"
                         type="date"
                         name="release-4"
-                        onChange={e => handleDateField(field, e.target.value, "def", defType, "to")}
+                        value={endDate}
+                        onChange={e => setEnDate(e.target.value)}
                     />
 
                 </Stack>

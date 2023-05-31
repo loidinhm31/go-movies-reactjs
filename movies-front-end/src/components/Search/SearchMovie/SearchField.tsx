@@ -60,6 +60,15 @@ export function SearchField({setIsClickSearch, setSearchRequest, fieldDataMap: f
             data = {field: label};
         }
 
+        // Reset empty date
+        if (value === "") {
+            data.def = {
+                type: defType,
+                values: [],
+            };
+            return;
+        }
+
         if (forField === "operator") {
             data.operator = value as string;
         } else if (forField === "def") {
