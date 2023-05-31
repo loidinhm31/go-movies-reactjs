@@ -2,10 +2,10 @@ package mapper
 
 import (
 	"movies-service/internal/dto"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 )
 
-func MapToMovieDto(movie *models.Movie) *dto.MovieDto {
+func MapToMovieDto(movie *model.Movie) *dto.MovieDto {
 	genreDtos := MapToGenreDtoSlice(movie.Genres)
 	return &dto.MovieDto{
 		ID:          movie.ID,
@@ -15,7 +15,7 @@ func MapToMovieDto(movie *models.Movie) *dto.MovieDto {
 		Runtime:     movie.Runtime,
 		MpaaRating:  movie.MpaaRating,
 		Description: movie.Description,
-		ImagePath:   movie.ImagePath.String,
+		ImageUrl:    movie.ImageUrl.String,
 		VideoPath:   movie.VideoPath.String,
 		CreatedAt:   movie.CreatedAt,
 		UpdatedAt:   movie.UpdatedAt,
@@ -23,7 +23,7 @@ func MapToMovieDto(movie *models.Movie) *dto.MovieDto {
 	}
 }
 
-func MapToMovieDtoSlice(movieSlice []*models.Movie) []*dto.MovieDto {
+func MapToMovieDtoSlice(movieSlice []*model.Movie) []*dto.MovieDto {
 	var movieDtos []*dto.MovieDto
 	for _, m := range movieSlice {
 		movieDtos = append(movieDtos, MapToMovieDto(m))
@@ -31,7 +31,7 @@ func MapToMovieDtoSlice(movieSlice []*models.Movie) []*dto.MovieDto {
 	return movieDtos
 }
 
-func MapToGenreDto(genre *models.Genre) *dto.GenreDto {
+func MapToGenreDto(genre *model.Genre) *dto.GenreDto {
 	return &dto.GenreDto{
 		ID:       genre.ID,
 		Name:     genre.Name,
@@ -39,7 +39,7 @@ func MapToGenreDto(genre *models.Genre) *dto.GenreDto {
 	}
 }
 
-func MapToGenreDtoSlice(genreSlice []*models.Genre) []*dto.GenreDto {
+func MapToGenreDtoSlice(genreSlice []*model.Genre) []*dto.GenreDto {
 	var genreDtos []*dto.GenreDto
 	for _, g := range genreSlice {
 		genreDtos = append(genreDtos, MapToGenreDto(g))
@@ -47,7 +47,7 @@ func MapToGenreDtoSlice(genreSlice []*models.Genre) []*dto.GenreDto {
 	return genreDtos
 }
 
-func MapToSeasonDto(season *models.Season) *dto.SeasonDto {
+func MapToSeasonDto(season *model.Season) *dto.SeasonDto {
 	return &dto.SeasonDto{
 		ID:          season.ID,
 		Name:        season.Name,
@@ -58,7 +58,7 @@ func MapToSeasonDto(season *models.Season) *dto.SeasonDto {
 	}
 }
 
-func MapToSeasonDtoSlice(seasonSlice []*models.Season) []*dto.SeasonDto {
+func MapToSeasonDtoSlice(seasonSlice []*model.Season) []*dto.SeasonDto {
 	var seasonDtos []*dto.SeasonDto
 	for _, s := range seasonSlice {
 		seasonDtos = append(seasonDtos, MapToSeasonDto(s))
@@ -66,7 +66,7 @@ func MapToSeasonDtoSlice(seasonSlice []*models.Season) []*dto.SeasonDto {
 	return seasonDtos
 }
 
-func MapToEpisodeDto(episode *models.Episode) *dto.EpisodeDto {
+func MapToEpisodeDto(episode *model.Episode) *dto.EpisodeDto {
 	return &dto.EpisodeDto{
 		ID:        episode.ID,
 		Name:      episode.Name,
@@ -77,10 +77,26 @@ func MapToEpisodeDto(episode *models.Episode) *dto.EpisodeDto {
 	}
 }
 
-func MapToEpisodeDtoSlice(seasonSlice []*models.Episode) []*dto.EpisodeDto {
+func MapToEpisodeDtoSlice(seasonSlice []*model.Episode) []*dto.EpisodeDto {
 	var episodeDtos []*dto.EpisodeDto
 	for _, e := range seasonSlice {
 		episodeDtos = append(episodeDtos, MapToEpisodeDto(e))
 	}
 	return episodeDtos
+}
+
+func MapToRatingDto(rating *model.Rating) *dto.RatingDto {
+	return &dto.RatingDto{
+		ID:   rating.ID,
+		Code: rating.Code,
+		Name: rating.Name,
+	}
+}
+
+func MapToRatingDtoSlice(ratingSlice []*model.Rating) []*dto.RatingDto {
+	var ratingDtos []*dto.RatingDto
+	for _, r := range ratingSlice {
+		ratingDtos = append(ratingDtos, MapToRatingDto(r))
+	}
+	return ratingDtos
 }
