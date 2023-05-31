@@ -147,7 +147,7 @@ export const authOptions: AuthOptions = {
                         } else {    // Create pending user into the database
                             const registerPayload = {
                                 username: profile.preferred_username,
-                                first_name: profile.family_name,
+                                first_name: profile.given_name,
                                 last_name: profile.family_name,
                                 email: profile.email,
                                 is_new: true,
