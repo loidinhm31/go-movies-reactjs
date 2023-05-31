@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"movies-service/config"
+	"movies-service/internal/errors"
 	"movies-service/internal/model"
 	"movies-service/internal/search"
 	"movies-service/pkg/pagination"
@@ -130,14 +130,21 @@ func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, 
 		}
 		return nil
 	}
-	return errors.New("invalid input")
+	return errors.ErrInvalidInput
 }
 
 func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string, def model.TypeValue) error {
 	if len(def.Values) > 0 && def.Type != model.DATE {
 		var orBuild = sr.db
-		for _, val := range def.Values {
-			orBuild = orBuild.Or(field+" = ?", strings.ToLower(val))
+
+		if def.Type == model.NUMBER {
+			for _, val := range def.Values {
+				orBuild = orBuild.Or(field+" = ?", strings.ToLower(val))
+			}
+		} else {
+			for _, val := range def.Values {
+				orBuild = orBuild.Or("LOWER("+field+") = ?", strings.ToLower(val))
+			}
 		}
 
 		if strings.EqualFold(operator, model.AND) {
@@ -147,11 +154,15 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 		}
 		return nil
 	}
-	return errors.New("invalid input")
+	return errors.ErrInvalidInput
 }
 
 func buildDateQuery(tx *gorm.DB, field, operator string, def model.TypeValue) error {
 	if len(def.Values) == 2 && def.Type == model.DATE {
+		if def.Values[0] == "" || def.Values[1] == "" {
+			return errors.ErrInvalidInput
+		}
+
 		if strings.EqualFold(operator, model.AND) {
 			tx = tx.Where(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
 		} else if strings.EqualFold(operator, model.OR) {
@@ -159,5 +170,5 @@ func buildDateQuery(tx *gorm.DB, field, operator string, def model.TypeValue) er
 		}
 		return nil
 	}
-	return errors.New("invalid input")
+	return errors.ErrInvalidInput
 }
