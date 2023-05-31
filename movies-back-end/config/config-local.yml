@@ -26,7 +26,7 @@ cloudinary:
   CloudName: dln5uctjy
   ApiKey:
   ApiSecret:
-  FolderPath: shiftflix/files/
+  FolderPath: shiftflix
 
 tmdb:
   Url: https://api.themoviedb.org/3
