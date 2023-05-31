@@ -15,7 +15,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
         headers: headers,
     }
 
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/blob/videos/${objectKey}?fileType=${data.fileType}`,
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/blobs/file/${objectKey}?fileType=${data.fileType}`,
         requestOptions
     );
 

@@ -4,7 +4,7 @@ import httpProxyMiddleware from "next-http-proxy-middleware";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     httpProxyMiddleware(req, res, {
-        target: `${process.env.API_BASE_URL}/auth/blob/videos`,
+        target: `${process.env.API_BASE_URL}/auth/blobs/file`,
         pathRewrite: [{
             patternStr: req.url!,
             replaceStr: "",

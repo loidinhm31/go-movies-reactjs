@@ -16,7 +16,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/auth/integration/tmdb`,
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/references/tmdb`,
             requestOptions
         );
         res.status(response.status).json(await response.json());
