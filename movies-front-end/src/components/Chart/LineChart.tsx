@@ -72,8 +72,16 @@ export default function LineChart({movieType}) {
             setGenreOptions([]);
         } else {
             fetchGenres().then((data: GenreType[]) => {
-                    setGenreOptions(data);
-                }).catch((error) => console.log(error));
+                setGenreOptions(data);
+            }).catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error"
+                });
+            });
         }
     }, [selectedType]);
 
@@ -105,14 +113,14 @@ export default function LineChart({movieType}) {
 
         let currMoment: Date = new Date();
         let t1 = format(currMoment, "yyyy-M");
-        let t2 = format(currMoment,"MMM-yyyy");
+        let t2 = format(currMoment, "MMM-yyyy");
         timeArr.push(t1);
         labels.push(t2);
 
         for (let i = 0; i < 11; i++) {
             currMoment = subMonths(currMoment, 1);
             t1 = format(currMoment, "yyyy-M");
-            t2 = format(currMoment,"MMM-yyyy");
+            t2 = format(currMoment, "MMM-yyyy");
             timeArr.push(t1);
             labels.push(t2);
         }
