@@ -53,7 +53,7 @@ const ReferenceMovie = () => {
         release_date: null,
         runtime: 0,
         genres: [],
-        image_path: "",
+        image_url: "",
     });
 
     const videoFileRef = useRef<any>(null);
@@ -172,8 +172,8 @@ const ReferenceMovie = () => {
 
         // Set id to undefined value for adding new movie
         movie.id = undefined;
-        if (movie.image_path !== "") {
-            movie.image_path = `${process.env.NEXT_PUBLIC_TMDB_IMAGE_PATH}/${movie.image_path}`;
+        if (movie.image_url !== "") {
+            movie.image_url = `${process.env.NEXT_PUBLIC_TMDB_IMAGE_PATH}/${movie.image_url}`;
         }
         triggerMovie(movie).then((data) => {
             if (data.message === "ok") {
@@ -205,6 +205,9 @@ const ReferenceMovie = () => {
         let value: string | number = event.target.value;
         if (name === "runtime") {
             value = Number(value);
+        } else if (name === "release_date") {
+            if (Number.isNaN(new Date(event.target.value).getTime()))
+                return;
         }
         setMovie({
             ...movie,
@@ -474,8 +477,8 @@ const ReferenceMovie = () => {
                                     fullWidth
                                     label="Image Path"
                                     variant="outlined"
-                                    value={movie.image_path}
-                                    onChange={e => handleChange(e, "image_path")}
+                                    value={movie.image_url}
+                                    onChange={e => handleChange(e, "image_url")}
                                 />
                             </Grid>
 

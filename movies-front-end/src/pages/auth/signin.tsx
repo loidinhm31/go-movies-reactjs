@@ -4,14 +4,14 @@ import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import {Footer} from "src/components/Footer";
 import {Header} from "src/components/Header";
-import {AuthLayout} from "../../components/Layout/AuthLayout";
+import {AuthLayout} from "src/components/Layout/AuthLayout";
 import {ClientSafeProvider, getProviders, signIn} from "next-auth/react";
-import {Role, RoleSelect} from "../../components/RoleSelect";
+import {Role, RoleSelect} from "src/components/RoleSelect";
 import {GetServerSideProps} from "next";
 import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
-import {DrawerHeader} from "../../components/shared/drawer";
+import {DrawerHeader} from "src/components/shared/drawer";
 import {Key} from "@mui/icons-material";
 
 export type SignInErrorTypes =

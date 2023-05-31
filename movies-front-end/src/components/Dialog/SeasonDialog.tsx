@@ -4,16 +4,16 @@ import DialogContent from "@mui/material/DialogContent";
 import {Accordion, AccordionDetails, AccordionSummary, Grid, IconButton, Paper, Typography} from "@mui/material";
 import DialogTitle from "@mui/material/DialogTitle";
 import React, {useEffect, useState} from "react";
-import {MovieType} from "../../types/movies";
-import {get} from "../../libs/api";
-import {SeasonType} from "../../types/seasons";
+import {MovieType} from "src/types/movies";
+import {get} from "src/libs/api";
+import {SeasonType} from "src/types/seasons";
 import format from "date-fns/format";
 import AddIcon from "@mui/icons-material/Add";
 import useSWRMutation from "swr/mutation";
-import {NotifyState} from "../shared/snackbar";
+import {NotifyState} from "src/components/shared/snackbar";
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {EpisodesTable} from "../Tables/EpisodesTable";
+import {EpisodesTable} from "src/components/Tables/EpisodesTable";
 
 interface SeasonDialogProps {
     setNotifyState: (state: NotifyState) => void;
@@ -77,7 +77,7 @@ export default function SeasonDialog({
                         <Button
                             sx={{m: 2, p: 2}}
                             variant="contained"
-                            href={`/admin/movies/seasons?movieId=${selectedMovie?.id}`}
+                            href={`/admin/manage-catalogue/movies/seasons?movieId=${selectedMovie?.id}`}
                         >
                             Add Season <AddIcon/>
                         </Button>
@@ -96,7 +96,7 @@ export default function SeasonDialog({
                                     <Grid item xs={2}>
                                         <IconButton
                                             color="inherit"
-                                            href={`/admin/movies/seasons?id=${s.id}?movieId=${s.movie_id}`}
+                                            href={`/admin/manage-catalogue/movies/seasons?id=${s.id}?movieId=${s.movie_id}`}
                                         >
                                             <EditIcon/>
                                         </IconButton>

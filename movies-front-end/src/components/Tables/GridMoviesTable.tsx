@@ -13,8 +13,8 @@ import {
     Typography
 } from "@mui/material";
 import Link from "next/link";
-import {PageType} from "../../types/page";
-import {MovieType} from "../../types/movies";
+import {PageType} from "src/types/page";
+import {MovieType} from "src/types/movies";
 import {styled} from "@mui/material/styles";
 import format from "date-fns/format";
 
@@ -67,7 +67,7 @@ export function GridMovies({
                                     <CardMedia
                                         component="img"
                                         sx={{borderRadius: "16px"}}
-                                        src={`https://image.tmdb.org/t/p/w200/${movie.image_path}`}
+                                        src={movie.image_url}
                                     />
 
                                 </Grid>

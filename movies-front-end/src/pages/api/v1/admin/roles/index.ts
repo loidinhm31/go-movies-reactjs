@@ -1,4 +1,4 @@
-import {withRole} from "../../../../../libs/auth";
+import {withRole} from "src/libs/auth";
 
 const handler = withRole("admin", async (req, res, token) => {
     const headers = new Headers();

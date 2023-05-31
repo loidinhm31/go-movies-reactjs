@@ -1,14 +1,13 @@
 import {ArcElement, Chart as ChartJS, Legend, Tooltip} from "chart.js";
 import {Doughnut} from "react-chartjs-2";
-import useSWR from "swr";
-import {Result} from "../../types/dashboard";
-import {get} from "../../libs/api";
+import {Result} from "src/types/dashboard";
+import {get} from "src/libs/api";
 import Skeleton from "@mui/material/Skeleton";
 import {useEffect, useState} from "react";
-import NotifySnackbar, {NotifyState} from "../shared/snackbar";
+import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import {CircularProgress} from "@mui/material";
 import useSWRMutation from "swr/mutation";
-import {useMovieType} from "../../hooks/useMovieType";
+import {useMovieType} from "src/hooks/useMovieType";
 
 
 export default function DoughnutChart({movieType}) {
@@ -75,16 +74,13 @@ export default function DoughnutChart({movieType}) {
 
     const selectedType = useMovieType(movieType);
 
-    const {trigger: fetchData, error} = useSWRMutation<Result>(`../../api/v1/admin/dashboard/movies/genres?type=${selectedType}`, get);
+    const {trigger: fetchData, error} = useSWRMutation<Result>(`/api/v1/admin/dashboard/movies/genres?type=${selectedType}`, get);
 
 
     useEffect(() => {
-        console.log("trigger")
-        console.log(selectedType)
         if (selectedType !== undefined) {
             setIsLoading(true);
             fetchData().then((result) => {
-                console.log(result)
                 const labels = result!.data.map((d) => {
                     return `${d.name!} - ${d.type_code!}`;
                 });

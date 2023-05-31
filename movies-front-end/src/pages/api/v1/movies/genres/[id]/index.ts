@@ -1,5 +1,5 @@
-import {Direction, PageType} from "../../../../../../types/page";
-import {MovieType} from "../../../../../../types/movies";
+import {Direction, PageType} from "src/types/page";
+import {MovieType} from "src/types/movies";
 
 const handler = async (req, res) => {
     let {id} = req.query;

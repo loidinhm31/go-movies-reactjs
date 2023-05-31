@@ -13,12 +13,12 @@ import {
     TableSortLabel
 } from "@mui/material";
 import {format} from "date-fns";
-import {Direction, PageType} from "../../types/page";
+import {Direction, PageType} from "src/types/page";
 import {visuallyHidden} from "@mui/utils";
 import {useCallback, useEffect, useState} from "react";
-import {UserType} from "../../types/users";
-import RoleDialog from "../Dialog/RoleDialog";
-import {NotifyState} from "../shared/snackbar";
+import {UserType} from "src/types/users";
+import RoleDialog from "src/components/Dialog/RoleDialog";
+import {NotifyState} from "src/components/shared/snackbar";
 
 export interface UserData {
     username: string;

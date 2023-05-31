@@ -17,8 +17,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
 import {blue} from "@mui/material/colors";
-import {Drawer, DrawerHeader} from "../shared/drawer";
-import {useHasAnyRole} from "../../hooks/auth/useHasAnyRole";
+import {Drawer, DrawerHeader} from "src/components/shared/drawer";
+import {useHasAnyRole} from "src/hooks/auth/useHasAnyRole";
 
 function MiniDrawer(props: SideMenuLayoutProps) {
     const isPrivilege = useHasAnyRole(["admin", "moderator"]);

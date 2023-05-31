@@ -4,7 +4,7 @@ import {Avatar, Box, Divider, IconButton, Menu, MenuItem, MenuList, Tooltip, Typ
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import {useHasAnyRole} from "../../hooks/auth/useHasAnyRole";
+import {useHasAnyRole} from "src/hooks/auth/useHasAnyRole";
 import {useRouter} from "next/router";
 import {MilitaryTech} from "@mui/icons-material";
 

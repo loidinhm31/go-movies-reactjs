@@ -1,8 +1,8 @@
-import "../styles/global.css";
+import "src/styles/global.css";
 import {SWRConfig, SWRConfiguration} from "swr";
 import {SessionProvider} from "next-auth/react";
 import {AppProps} from "next/app";
-import {getDefaultLayout, NextPageWithLayout} from "../components/Layout/Layout";
+import {getDefaultLayout, NextPageWithLayout} from "src/components/Layout/Layout";
 import Head from "next/head";
 
 type AppPropsWithLayout = AppProps & {

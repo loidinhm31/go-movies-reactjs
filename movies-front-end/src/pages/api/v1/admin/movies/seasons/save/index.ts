@@ -1,5 +1,5 @@
 import {withAnyRole} from "src/libs/auth";
-import {SeasonType} from "../../../../../../../types/seasons";
+import {SeasonType} from "src/types/seasons";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     const data: SeasonType = req.body;

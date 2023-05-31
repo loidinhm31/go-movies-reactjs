@@ -1,8 +1,8 @@
 import {Stack} from "@mui/material";
 import {useRouter} from "next/router";
 import React, {useState} from "react";
-import WatchMovie from "../../../components/Movie/WatchMovie";
-import {useHasUsername} from "../../../hooks/auth/useHasUsername";
+import WatchMovie from "src/components/Movie/WatchMovie";
+import {useHasUsername} from "src/hooks/auth/useHasUsername";
 
 function Movie() {
     const router = useRouter();

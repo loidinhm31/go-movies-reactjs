@@ -9,11 +9,9 @@ export const useCheckTokenAndRole = (roles: Role[]) => {
     const [isInvalid, setIsInvalid] = useState(false);
 
     useEffect(() => {
-        console.log("check s")
         if (status === "loading") {
             return;
         }
-        console.log(session)
         if (session?.error === "RefreshAccessTokenError") {
             setIsInvalid(true); // Force sign in to hopefully resolve error
             return;

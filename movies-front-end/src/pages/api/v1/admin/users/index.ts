@@ -1,5 +1,5 @@
 import {withRole} from "src/libs/auth";
-import {Direction, PageType} from "../../../../../types/page";
+import {Direction, PageType} from "src/types/page";
 
 const handler = withRole("admin", async (req, res, token) => {
     const headers = new Headers();

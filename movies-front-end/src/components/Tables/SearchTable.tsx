@@ -13,8 +13,8 @@ import {
     TableSortLabel
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
-import {MovieType} from "../../types/movies";
-import {Direction, PageType} from "../../types/page";
+import {MovieType} from "src/types/movies";
+import {Direction, PageType} from "src/types/page";
 import format from "date-fns/format";
 
 export interface Data {

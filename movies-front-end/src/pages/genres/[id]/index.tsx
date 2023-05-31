@@ -1,12 +1,12 @@
 import {useRouter} from "next/router";
 import useSWR from "swr";
-import {get} from "../../../libs/api";
-import {GridMovies} from "../../../components/Tables/GridMoviesTable";
+import {get} from "src/libs/api";
+import {GridMovies} from "src/components/Tables/GridMoviesTable";
 import {useEffect, useState} from "react";
 import {Box, Stack, Typography} from "@mui/material";
 import Divider from "@mui/material/Divider";
-import {PageType} from "../../../types/page";
-import {MovieType} from "../../../types/movies";
+import {PageType} from "src/types/page";
+import {MovieType} from "src/types/movies";
 
 
 function OneGenre() {
@@ -22,7 +22,7 @@ function OneGenre() {
     const {genreName} = router.query;
 
     // Get list of Tables
-    const {data: page} = useSWR<PageType<MovieType>>(`../api/v1/movies/genres/${id}?pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
+    const {data: page} = useSWR<PageType<MovieType>>(`/api/v1/movies/genres/${id}?pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
 
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {

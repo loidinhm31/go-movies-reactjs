@@ -1,5 +1,5 @@
 import {forwardRef} from "react";
-import {ElementOf} from "../types/utils";
+import {ElementOf} from "src/types/utils";
 import {FormControl, InputLabel, MenuItem, Select, SelectProps} from "@mui/material";
 
 export const roles = ["general", "admin", "moderator", "banned"] as const;

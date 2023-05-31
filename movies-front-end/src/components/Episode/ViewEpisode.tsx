@@ -1,6 +1,6 @@
 import {Grid, Stack, Typography} from "@mui/material";
 import format from "date-fns/format";
-import {EpisodeType} from "../../types/seasons";
+import {EpisodeType} from "src/types/seasons";
 
 interface ViewEpisodeProps {
     episode: EpisodeType;

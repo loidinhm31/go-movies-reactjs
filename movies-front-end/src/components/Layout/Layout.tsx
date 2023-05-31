@@ -2,8 +2,8 @@
 
 import type {NextPage} from "next";
 import {SideMenuLayout} from "./SideMenuLayout";
-import {Header} from "../Header";
-import {Footer} from "../Footer";
+import {Header} from "src/components/Header";
+import {Footer} from "src/components/Footer";
 import {Box, Grid} from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";

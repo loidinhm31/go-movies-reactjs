@@ -1,9 +1,9 @@
 import Link from "next/link";
 import useSWR from "swr";
-import {get} from "../../libs/api";
+import {get} from "src/libs/api";
 import {Box, Chip, ListItem, Paper, Stack, Typography} from "@mui/material";
 import Divider from "@mui/material/Divider";
-import {GenreType} from "../../types/movies";
+import {GenreType} from "src/types/movies";
 import {useState} from "react";
 
 const GenrePaper = ({title, genres}) => {
@@ -47,7 +47,7 @@ function Genres() {
     const [tvGenres, setTvGenres] = useState<GenreType[]>([]);
 
 
-    const {} = useSWR<GenreType[]>(`../api/v1/genres`, get, {
+    const {} = useSWR<GenreType[]>(`/api/v1/genres`, get, {
         onSuccess: (data) => {
             const movies: GenreType[] = [];
             const tvs: GenreType[] = [];
@@ -62,7 +62,8 @@ function Genres() {
 
             setMovieGenres(movies);
             setTvGenres(tvs);
-        }
+        },
+        revalidateOnMount: true,
     });
 
     return (

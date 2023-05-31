@@ -4,7 +4,7 @@ import {useEffect, useRef, useState} from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import useSWRMutation from "swr/mutation";
-import {post} from "../../libs/api";
+import {post} from "src/libs/api";
 
 export interface VideoJsOption {
     autoplay: boolean;

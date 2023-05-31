@@ -3,7 +3,7 @@ import {useRouter} from "next/router";
 import React, {useState} from "react";
 import WatchMovie from "src/components/Movie/WatchMovie";
 import WatchEpisode from "src/components/Movie/WatchEpisode";
-import {useHasUsername} from "../../../../hooks/auth/useHasUsername";
+import {useHasUsername} from "src/hooks/auth/useHasUsername";
 
 function Episode() {
     const router = useRouter();

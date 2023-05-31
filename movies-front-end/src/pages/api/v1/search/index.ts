@@ -1,4 +1,4 @@
-import {SearchRequest} from "../../../../types/search";
+import {SearchRequest} from "src/types/search";
 
 const handler = async (req, res) => {
     let searchRequest: SearchRequest = req.body
