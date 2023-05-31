@@ -1,8 +1,8 @@
-import {Direction, PageType} from "../../../../types/page";
-import {MovieType} from "../../../../types/movies";
+import {Direction, PageType} from "src/types/page";
+import {MovieType} from "src/types/movies";
 
 const handler = async (req, res) => {
-    let {pageIndex, pageSize, type} = req.query;
+    let {pageIndex, pageSize, type, q} = req.query;
 
     let page: PageType<any> = {
         sort: {
@@ -31,11 +31,11 @@ const handler = async (req, res) => {
     try {
         let response;
         if (type) {
-            response = await fetch(`${process.env.API_BASE_URL}/movies?type=${type}&page=${pageIndex}&size=${pageSize}`,
+            response = await fetch(`${process.env.API_BASE_URL}/movies?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`,
                 requestOptions
             );
         } else {
-            response = await fetch(`${process.env.API_BASE_URL}/movies?page=${pageIndex}&size=${pageSize}`,
+            response = await fetch(`${process.env.API_BASE_URL}/movies?q=${q}&page=${pageIndex}&size=${pageSize}`,
                 requestOptions
             );
         }
