@@ -5,14 +5,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"movies-service/internal/model"
+	"movies-service/internal/test/helper"
 	"movies-service/pkg/pagination"
-	"movies-service/pkg/test_helper"
 	"testing"
 )
 
 func TestSearchMovie(t *testing.T) {
 	// Create a new instance of the mock search.Repository.
-	mockRepo := new(test_helper.MockSearchRepository)
+	mockRepo := new(helper.MockSearchRepository)
 
 	// Create an instance of the searchService using the mock repository.
 	service := NewSearchService(mockRepo)

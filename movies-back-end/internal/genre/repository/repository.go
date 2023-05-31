@@ -4,8 +4,8 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/genres"
-	"movies-service/internal/models"
+	"movies-service/internal/genre"
+	"movies-service/internal/model"
 )
 
 type genreRepository struct {
@@ -13,12 +13,12 @@ type genreRepository struct {
 	db  *gorm.DB
 }
 
-func NewGenreRepository(cfg *config.Config, db *gorm.DB) genres.GenreRepository {
+func NewGenreRepository(cfg *config.Config, db *gorm.DB) genre.Repository {
 	return &genreRepository{cfg: cfg, db: db}
 }
 
-func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, error) {
-	var allGenres []*models.Genre
+func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*model.Genre, error) {
+	var allGenres []*model.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
@@ -34,8 +34,8 @@ func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*models.Genre, 
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*models.Genre, error) {
-	var allGenres []*models.Genre
+func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*model.Genre, error) {
+	var allGenres []*model.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
@@ -52,21 +52,21 @@ func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieTyp
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *models.Genre) (*models.Genre, error) {
-	var result models.Genre
+func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *model.Genre) (*model.Genre, error) {
+	var result model.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&models.Genre{}).Where("name = ? AND type_code = ?", genre.Name, genre.TypeCode).Find(result).Error
+	err := tx.Model(&model.Genre{}).Where("name = ? AND type_code = ?", genre.Name, genre.TypeCode).Find(result).Error
 	if err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (gr *genreRepository) InsertGenres(ctx context.Context, genres []*models.Genre) error {
+func (gr *genreRepository) InsertGenres(ctx context.Context, genres []*model.Genre) error {
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()

@@ -6,34 +6,32 @@ import (
 	"github.com/stretchr/testify/mock"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
-	"movies-service/internal/models"
-	"movies-service/pkg/test_helper"
+	"movies-service/internal/genre"
+	"movies-service/internal/model"
+	"movies-service/internal/test/helper"
 	"testing"
 )
 
-func setupMock() (*test_helper.MockManagementCtrl, *test_helper.MockGenreRepository, *genreService) {
+func initMock() (*helper.MockManagementCtrl, *helper.MockGenreRepository, genre.Service) {
 	// Create a mock genre repository
-	mockRepo := new(test_helper.MockGenreRepository)
+	mockRepo := new(helper.MockGenreRepository)
 
 	// Create a mock management controller
-	mockCtrl := new(test_helper.MockManagementCtrl)
+	mockCtrl := new(helper.MockManagementCtrl)
 
 	// Create a genre service instance with the mock repository and controller
-	genreService := &genreService{
-		genreRepository: mockRepo,
-		mgmtCtrl:        mockCtrl,
-	}
+	genreService := NewGenreService(mockCtrl, mockRepo)
 	return mockCtrl, mockRepo, genreService
 }
 
 func TestGetAllGenresByTypeCode(t *testing.T) {
 
 	t.Run("Valid movie type (MOVIE)", func(t *testing.T) {
-		_, mockRepo, genreService := setupMock()
+		_, mockRepo, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockRepo.On("FindAllGenresByTypeCode", context.Background(), "MOVIE").
-			Return([]*models.Genre{
+			Return([]*model.Genre{
 				{Name: "Action1", TypeCode: "MOVIE"},
 				{Name: "Action2", TypeCode: "MOVIE"},
 			}, nil)
@@ -46,11 +44,11 @@ func TestGetAllGenresByTypeCode(t *testing.T) {
 	})
 
 	t.Run("Empty movie type", func(t *testing.T) {
-		_, mockRepo, genreService := setupMock()
+		_, mockRepo, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockRepo.On("FindAllGenres", context.Background()).
-			Return([]*models.Genre{
+			Return([]*model.Genre{
 				{Name: "Comedy1", TypeCode: "MOVIE"},
 				{Name: "Comedy2", TypeCode: "TV"},
 			}, nil)
@@ -67,8 +65,8 @@ func TestGetAllGenresByTypeCode(t *testing.T) {
 
 func TestAddGenres(t *testing.T) {
 
-	t.Run("Valid genres and privileged user", func(t *testing.T) {
-		mockCtrl, mockRepo, genreService := setupMock()
+	t.Run("Valid genre and privileged user", func(t *testing.T) {
+		mockCtrl, mockRepo, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
@@ -78,17 +76,17 @@ func TestAddGenres(t *testing.T) {
 			{Name: "Genre4", TypeCode: "TV"},
 		}
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &models.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
 			Name:     genreDtos[0].Name,
 			TypeCode: genreDtos[0].TypeCode,
 		}).
-			Return(&models.Genre{}, nil)
+			Return(&model.Genre{}, nil)
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &models.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
 			Name:     genreDtos[1].Name,
 			TypeCode: genreDtos[1].TypeCode,
 		}).
-			Return(&models.Genre{}, nil)
+			Return(&model.Genre{}, nil)
 
 		mockRepo.On("InsertGenres", context.Background(), mock.Anything).
 			Return(nil)
@@ -97,7 +95,7 @@ func TestAddGenres(t *testing.T) {
 	})
 
 	t.Run("Genre with existing name and type code", func(t *testing.T) {
-		mockCtrl, mockRepo, genreService := setupMock()
+		mockCtrl, mockRepo, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
@@ -107,17 +105,17 @@ func TestAddGenres(t *testing.T) {
 			{Name: "Genre2", TypeCode: "TV"},
 		}
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &models.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
 			Name:     genreDtos[0].Name,
 			TypeCode: genreDtos[0].TypeCode,
 		}).
-			Return(&models.Genre{}, nil)
+			Return(&model.Genre{}, nil)
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &models.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
 			Name:     genreDtos[1].Name,
 			TypeCode: genreDtos[1].TypeCode,
 		}).
-			Return(&models.Genre{Name: genreDtos[1].Name, TypeCode: genreDtos[1].TypeCode}, nil)
+			Return(&model.Genre{Name: genreDtos[1].Name, TypeCode: genreDtos[1].TypeCode}, nil)
 
 		err := genreService.AddGenres(context.Background(), genreDtos)
 		assert.Error(t, err)
@@ -125,13 +123,13 @@ func TestAddGenres(t *testing.T) {
 	})
 
 	t.Run("Invalid genre type code", func(t *testing.T) {
-		mockCtrl, mockRepo, genreService := setupMock()
+		mockCtrl, mockRepo, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), mock.Anything).
-			Return(&models.Genre{}, nil)
+			Return(&model.Genre{}, nil)
 
 		genreDtos := []dto.GenreDto{
 			{Name: "Genre1", TypeCode: "INVALID"},
@@ -142,7 +140,7 @@ func TestAddGenres(t *testing.T) {
 	})
 
 	t.Run("Unauthorized user", func(t *testing.T) {
-		mockCtrl, _, genreService := setupMock()
+		mockCtrl, _, genreService := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)

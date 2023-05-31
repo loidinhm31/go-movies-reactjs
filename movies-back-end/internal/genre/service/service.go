@@ -7,19 +7,19 @@ import (
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
-	"movies-service/internal/genres"
+	"movies-service/internal/genre"
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 	"time"
 )
 
 type genreService struct {
 	mgmtCtrl        control.Service
-	genreRepository genres.GenreRepository
+	genreRepository genre.Repository
 }
 
-func NewGenreService(mgmtCtrl control.Service, genreRepository genres.GenreRepository) genres.Service {
+func NewGenreService(mgmtCtrl control.Service, genreRepository genre.Repository) genre.Service {
 	return &genreService{
 		mgmtCtrl:        mgmtCtrl,
 		genreRepository: genreRepository,
@@ -28,7 +28,7 @@ func NewGenreService(mgmtCtrl control.Service, genreRepository genres.GenreRepos
 
 func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType string) ([]*dto.GenreDto, error) {
 	var err error
-	var allGenres []*models.Genre
+	var allGenres []*model.Genre
 
 	if movieType != "" {
 		allGenres, err = gs.genreRepository.FindAllGenresByTypeCode(ctx, movieType)
@@ -55,9 +55,9 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 		return errors.ErrUnAuthorized
 	}
 
-	var newGenres []*models.Genre
+	var newGenres []*model.Genre
 	for _, g := range genreDtos {
-		foundedGenre, err := gs.genreRepository.FindGenreByNameAndTypeCode(ctx, &models.Genre{
+		foundedGenre, err := gs.genreRepository.FindGenreByNameAndTypeCode(ctx, &model.Genre{
 			Name:     g.Name,
 			TypeCode: g.TypeCode,
 		})
@@ -73,7 +73,7 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 			return errors.ErrCannotExecuteAction
 		}
 
-		newGenres = append(newGenres, &models.Genre{
+		newGenres = append(newGenres, &model.Genre{
 			Name:      g.Name,
 			TypeCode:  g.TypeCode,
 			CreatedAt: time.Now(),

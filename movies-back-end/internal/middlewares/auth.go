@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/models"
+	"movies-service/internal/model"
 	"net/http"
 	"strings"
 )
@@ -66,7 +66,7 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 
 		jwtj, _ := json.Marshal(jwt)
 
-		var userToken models.UserToken
+		var userToken model.UserToken
 		err = json.Unmarshal(jwtj, &userToken)
 		if err != nil {
 			fmt.Printf(err.Error())

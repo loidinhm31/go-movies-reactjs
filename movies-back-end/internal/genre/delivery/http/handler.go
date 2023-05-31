@@ -4,16 +4,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/dto"
-	"movies-service/internal/genres"
-	"movies-service/pkg/utils"
+	"movies-service/internal/genre"
+	"movies-service/pkg/util"
 	"net/http"
 )
 
 type genreHandler struct {
-	genreService genres.Service
+	genreService genre.Service
 }
 
-func NewGenreHandler(genreService genres.Service) genres.GenreHandler {
+func NewGenreHandler(genreService genre.Service) genre.Handler {
 	return &genreHandler{
 		genreService: genreService,
 	}
@@ -38,7 +38,7 @@ func (mh *genreHandler) FetchGenres() gin.HandlerFunc {
 func (mh *genreHandler) PostGenres() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		request := &dto.GenreRequest{}
-		if err := utils.ReadRequest(c, request); err != nil {
+		if err := util.ReadRequest(c, request); err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "error",
