@@ -100,7 +100,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 			Title:       title,
 			ReleaseDate: releaseDate,
 			Description: m.Overview,
-			ImagePath:   m.PosterPath,
+			ImageUrl:    m.PosterPath,
 			VoteCount:   m.VoteCount,
 			VoteAverage: m.VoteAverage,
 		})
@@ -189,7 +189,7 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 		Title:       title,
 		ReleaseDate: releaseDate,
 		Description: responseObject.Overview,
-		ImagePath:   responseObject.PosterPath,
+		ImageUrl:    responseObject.PosterPath,
 		Runtime:     runtime,
 		Genres:      genres,
 	}, nil
