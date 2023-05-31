@@ -30,5 +30,5 @@ build_api_service:
 ## build_nextjs_fe: builds the nextjs website frontend jar as a linux executable
 build_nextjs_fe:
 	@echo "Building website frontend..."
-	cd ../movies-front-end && npm ci && npm run build
+	cd ../movies-front-end && npm i --force && npm run build
 	@echo "Done!"
