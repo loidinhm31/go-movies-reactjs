@@ -7,6 +7,6 @@ import (
 
 // MapIntegrationRoutes Map reference routes
 func MapIntegrationRoutes(integrationGroup *gin.RouterGroup, h blob.Handler) {
-	integrationGroup.POST("/videos", h.UploadVideo())
-	integrationGroup.DELETE("/videos/:key", h.DeleteVideo())
+	integrationGroup.POST("/file", h.UploadFile())
+	integrationGroup.DELETE("/file/:key", h.DeleteFile())
 }

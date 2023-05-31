@@ -17,7 +17,7 @@ func NewBlobHandler(blobService blob.Service) blob.Handler {
 	}
 }
 
-func (ih *blobHandler) UploadVideo() gin.HandlerFunc {
+func (ih *blobHandler) UploadFile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		file, _, err := c.Request.FormFile("file")
 		if err != nil {
@@ -46,7 +46,7 @@ func (ih *blobHandler) UploadVideo() gin.HandlerFunc {
 	}
 }
 
-func (ih *blobHandler) DeleteVideo() gin.HandlerFunc {
+func (ih *blobHandler) DeleteFile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fileKey := c.Param("key")
 		fileType := c.Query("fileType")

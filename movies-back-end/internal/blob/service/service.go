@@ -72,6 +72,7 @@ func (is *blobService) UploadFile(ctx context.Context, file multipart.File, file
 		)
 	}
 	log.Printf("complete upload file %s\n", fileKey)
+	log.Println(fileResult)
 	return fileResult, nil
 }
 
