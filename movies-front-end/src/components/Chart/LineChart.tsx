@@ -17,8 +17,8 @@ import {useEffect, useState} from "react";
 import {Analysis, AnalysisRequest, Result} from "src/types/dashboard";
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import Skeleton from "@mui/material/Skeleton";
-import {format} from "date-fns";
-import {useMovieType} from "../../hooks/useMovieType";
+import {format, subMonths} from "date-fns";
+import {useMovieType} from "src/hooks/useMovieType";
 
 export default function LineChart({movieType}) {
     ChartJS.register(
@@ -56,12 +56,12 @@ export default function LineChart({movieType}) {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`../../api/v1/genres?type=${selectedType}`, get);
-    const {trigger: triggerViews, error: viewErr} = useSWRMutation(`../../api/v1/admin/dashboard/views/genres`, post);
+    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, get);
+    const {trigger: triggerViews, error: viewErr} = useSWRMutation(`/api/v1/admin/dashboard/views/genres`, post);
     const {
         trigger: triggerMovies,
         error: movieErr
-    } = useSWRMutation(`../../api/v1/admin/dashboard/movies/genres/release-date`, post);
+    } = useSWRMutation(`/api/v1/admin/dashboard/movies/genres/release-date`, post);
 
     useEffect(() => {
         // Reset value
@@ -103,16 +103,16 @@ export default function LineChart({movieType}) {
         const timeArr: string[] = [];
         const timeMap: Map<string, string[]> = new Map();
 
-        let currMoment = new Date().getTime();
+        let currMoment: Date = new Date();
         let t1 = format(currMoment, "yyyy-M");
-        let t2 = format(currMoment, "yyyy-MMMM");
+        let t2 = format(currMoment,"MMM-yyyy");
         timeArr.push(t1);
         labels.push(t2);
 
         for (let i = 0; i < 11; i++) {
-            currMoment = currMoment - 30 * 24 * 60 * 60 * 1000 // subtract 1 month
+            currMoment = subMonths(currMoment, 1);
             t1 = format(currMoment, "yyyy-M");
-            t2 = format(currMoment, "MMM-yyyy");
+            t2 = format(currMoment,"MMM-yyyy");
             timeArr.push(t1);
             labels.push(t2);
         }
