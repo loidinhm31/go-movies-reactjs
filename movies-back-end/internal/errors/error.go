@@ -1,6 +1,9 @@
 package errors
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 var (
 	ErrResourceNotFound    = errors.New("resource not found")
@@ -10,4 +13,9 @@ var (
 	ErrUnAuthorized        = errors.New("unauthorized")
 	ErrInvalidInput        = errors.New("invalid input")
 	ErrCannotExecuteAction = errors.New("cannot execute this action")
+	ErrUserNotFound        = errors.New("user not found")
 )
+
+func ErrInvalidInputDetail(name string) error {
+	return errors.New(fmt.Sprintf("invalid input %s", name))
+}
