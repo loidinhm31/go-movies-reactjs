@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   postgres:
@@ -30,30 +30,30 @@ services:
       - ./keycloak:/opt/keycloak/data/import
     command: start-dev --import-realm
 
-#  go-api-service:
-#    build:
-#      context: ./../movies-back-end
-#      dockerfile: ./../project/docker/Dockerfile.go-api-service
-#    restart: always
-#    ports:
-#      - "9090:9090"
-#    environment:
-#      - profile=docker
-#    deploy:
-#      mode: replicated
-#      replicas: 1
-#
-#  nextjs-website:
-#    build:
-#      context: ./../movies-front-end
-#      dockerfile: ./../project/docker/Dockerfile.nextjs-website
-#    restart: always
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      - NEXTAUTH_SECRET=cXVzaGlmdGhlbGxv
-#      - NEXTAUTH_URL=http://localhost:3000
-#      - DEBUG_LOGIN=true
-#    deploy:
-#      mode: replicated
-#      replicas: 1
+  go-api-service:
+    build:
+      context: ./../movies-back-end
+      dockerfile: ./../project/docker/Dockerfile.go-api-service
+    restart: always
+    ports:
+      - "9090:9090"
+    environment:
+      - profile=docker
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  nextjs-website:
+    build:
+      context: ./../movies-front-end
+      dockerfile: ./../project/docker/Dockerfile.nextjs-website
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXTAUTH_SECRET=cXVzaGlmdGhlbGxv
+      - NEXTAUTH_URL=http://localhost:3000
+      # - DEBUG_LOGIN=true
+    deploy:
+      mode: replicated
+      replicas: 1
