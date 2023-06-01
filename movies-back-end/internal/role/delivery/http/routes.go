@@ -6,6 +6,6 @@ import (
 )
 
 // MapRoleRoutes Map role routes
-func MapRoleRoutes(movieGroup *gin.RouterGroup, h role.Handler) {
-	movieGroup.GET("/", h.FetchRoles())
+func MapRoleRoutes(roleGroup *gin.RouterGroup, h role.Handler) {
+	roleGroup.GET("/", h.FetchRoles())
 }
