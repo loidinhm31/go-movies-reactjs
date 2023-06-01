@@ -1,9 +1,9 @@
 package dto
 
 type TheMovieDBPage struct {
-	PageNumber int          `json:"page"`
+	PageNumber uint         `json:"page"`
 	Results    []TheMovieDB `json:"results"`
-	TotalPages int          `json:"total_pages"`
+	TotalPages uint         `json:"total_pages"`
 }
 
 type TheMovieDB struct {
@@ -13,12 +13,12 @@ type TheMovieDB struct {
 	ReleaseDate    string  `json:"release_date,omitempty"`
 	FirstAirDate   string  `json:"first_air_date,omitempty"`
 	PosterPath     string  `json:"poster_path,omitempty"`
-	Runtime        int     `json:"runtime,omitempty"`
-	EpisodeRuntime []int   `json:"episode_run_time,omitempty"`
+	Runtime        uint    `json:"runtime,omitempty"`
+	EpisodeRuntime []uint  `json:"episode_run_time,omitempty"`
 	VoteAverage    float32 `json:"vote_average,omitempty"`
-	VoteCount      int     `json:"vote_count,omitempty"`
+	VoteCount      uint    `json:"vote_count,omitempty"`
 	Genres         []struct {
-		ID   int    `json:"id"`
+		ID   uint   `json:"id"`
 		Name string `json:"name"`
 	} `json:"genres,omitempty"`
 	Overview string `json:"overview,omitempty"`

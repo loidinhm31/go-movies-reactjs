@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Genre struct {
-	ID        int `gorm:"primary_key"`
+	ID        uint `gorm:"primaryKey"`
 	Name      string
 	TypeCode  string
 	CreatedAt time.Time

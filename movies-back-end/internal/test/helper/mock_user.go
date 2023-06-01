@@ -11,7 +11,7 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) FindUserByID(ctx context.Context, userID int) (*model.User, error) {
+func (m *MockUserRepository) FindUserByID(ctx context.Context, userID uint) (*model.User, error) {
 	args := m.Called(ctx, userID)
 	result := args.Get(0)
 	if result != nil {
@@ -25,7 +25,7 @@ func (m *MockUserRepository) FindAllUsers(ctx context.Context, pageRequest *pagi
 	return args.Get(0).(*pagination.Page[*model.User]), args.Error(1)
 }
 
-func (m *MockUserRepository) UpdateUserRole(ctx context.Context, userID int, roleID int) error {
+func (m *MockUserRepository) UpdateUserRole(ctx context.Context, userID uint, roleID uint) error {
 	args := m.Called(ctx, userID, roleID)
 	return args.Error(0)
 }

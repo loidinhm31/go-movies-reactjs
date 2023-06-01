@@ -96,7 +96,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 		}
 
 		movieDtos = append(movieDtos, &dto.MovieDto{
-			ID:          int(m.ID),
+			ID:          uint(m.ID),
 			Title:       title,
 			ReleaseDate: releaseDate,
 			Description: m.Overview,
@@ -170,7 +170,7 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 
 	var title string
 	var releaseDate time.Time
-	var runtime int
+	var runtime uint
 	if movieType == "TV" {
 		title = responseObject.Name
 		releaseDate, err = time.Parse("2006-01-02", responseObject.FirstAirDate)
@@ -184,7 +184,7 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 	}
 
 	return &dto.MovieDto{
-		ID:          int(responseObject.ID),
+		ID:          uint(responseObject.ID),
 		TypeCode:    movieType,
 		Title:       title,
 		ReleaseDate: releaseDate,

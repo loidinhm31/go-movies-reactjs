@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Rating struct {
-	ID        int `gorm:"primary_key"`
+	ID        uint `gorm:"primaryKey"`
 	Code      string
 	Name      string
 	CreatedAt time.Time

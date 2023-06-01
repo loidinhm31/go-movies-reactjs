@@ -25,7 +25,7 @@ func (s seasonHandler) FetchSeasonsByID() gin.HandlerFunc {
 		id := c.Param("id")
 		seasonID, _ := strconv.Atoi(id)
 
-		allSeasons, err := s.seasonService.GetSeasonsByID(c, seasonID)
+		allSeasons, err := s.seasonService.GetSeasonsByID(c, uint(seasonID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -42,7 +42,7 @@ func (s seasonHandler) FetchSeasonsByMovieID() gin.HandlerFunc {
 		id := c.Query("movieID")
 		movieID, _ := strconv.Atoi(id)
 
-		allSeasons, err := s.seasonService.GetSeasonsByMovieID(c, movieID)
+		allSeasons, err := s.seasonService.GetSeasonsByMovieID(c, uint(movieID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -111,7 +111,7 @@ func (s seasonHandler) DeleteSeason() gin.HandlerFunc {
 			return
 		}
 
-		err = s.seasonService.RemoveSeasonByID(c, seasonID)
+		err = s.seasonService.RemoveSeasonByID(c, uint(seasonID))
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{

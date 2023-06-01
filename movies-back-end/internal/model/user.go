@@ -5,13 +5,13 @@ import (
 )
 
 type User struct {
-	ID        int `gorm:"primary_key"`
+	ID        uint `gorm:"primaryKey"`
 	Username  string
 	Email     string
 	FirstName string
 	LastName  string
 	IsNew     bool
-	RoleID    int
+	RoleID    uint
 	Role      *Role `gorm:"foreignKey:RoleID"`
 	CreatedAt time.Time
 	CreatedBy string
@@ -20,11 +20,18 @@ type User struct {
 }
 
 type Role struct {
-	ID        int `gorm:"primary_key"`
+	ID        uint `gorm:"primaryKey"`
 	RoleName  string
 	RoleCode  string
 	CreatedAt time.Time
 	CreatedBy string
 	UpdatedAt time.Time
 	UpdatedBy string
+}
+
+type Collection struct {
+	Username  string `gorm:"primaryKey"`
+	MovieID   uint   `gorm:"primaryKey"`
+	CreatedAt time.Time
+	CreatedBy string
 }

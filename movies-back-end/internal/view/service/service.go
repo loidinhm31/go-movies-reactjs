@@ -41,7 +41,7 @@ func (vs viewService) RecognizeViewForMovie(ctx context.Context, viewer *dto.Vie
 	return nil
 }
 
-func (vs viewService) GetNumberOfViewsByMovieId(ctx context.Context, movieId int) (int64, error) {
+func (vs viewService) GetNumberOfViewsByMovieId(ctx context.Context, movieId uint) (int64, error) {
 	totalViews, err := vs.viewRepository.CountViewsByMovieId(ctx, movieId)
 	if err != nil {
 		return 0, err

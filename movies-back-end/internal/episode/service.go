@@ -6,9 +6,9 @@ import (
 )
 
 type Service interface {
-	GetEpisodesByID(ctx context.Context, id int) (*dto.EpisodeDto, error)
-	GetEpisodesBySeasonID(ctx context.Context, seasonID int) ([]*dto.EpisodeDto, error)
+	GetEpisodesByID(ctx context.Context, id uint) (*dto.EpisodeDto, error)
+	GetEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*dto.EpisodeDto, error)
 	AddEpisode(ctx context.Context, episode *dto.EpisodeDto) error
 	UpdateEpisode(ctx context.Context, episode *dto.EpisodeDto) error
-	RemoveEpisodeByID(ctx context.Context, id int) error
+	RemoveEpisodeByID(ctx context.Context, id uint) error
 }

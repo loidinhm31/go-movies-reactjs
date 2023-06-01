@@ -3,7 +3,7 @@ package dto
 import "time"
 
 type UserDto struct {
-	ID        int       `json:"user_id,omitempty"`
+	ID        uint      `json:"user_id,omitempty"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	FirstName string    `json:"first_name,omitempty"`
@@ -15,7 +15,7 @@ type UserDto struct {
 }
 
 type RoleDto struct {
-	ID        int       `json:"role_id,omitempty"`
+	ID        uint      `json:"role_id,omitempty"`
 	RoleName  string    `json:"role_name,omitempty"`
 	RoleCode  string    `json:"role_code"`
 	CreatedAt time.Time `json:"created_at,omitempty"`
@@ -23,6 +23,11 @@ type RoleDto struct {
 }
 
 type Viewer struct {
-	MovieId int    `json:"movie_id"`
+	MovieId uint   `json:"movie_id"`
 	Viewer  string `json:"viewer"`
+}
+
+type CollectionDto struct {
+	Username string `json:"username,omitempty"`
+	MovieID  uint   `json:"movie_id,omitempty"`
 }

@@ -85,7 +85,7 @@ func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, mov
 	return page, nil
 }
 
-func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*model.Movie, error) {
+func (mr *movieRepository) FindMovieById(ctx context.Context, id uint) (*model.Movie, error) {
 	var result model.Movie
 
 	tx := mr.db.WithContext(ctx)
@@ -103,7 +103,7 @@ func (mr *movieRepository) FindMovieById(ctx context.Context, id int) (*model.Mo
 func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 	pageRequest *pagination.PageRequest,
 	page *pagination.Page[*model.Movie],
-	genreId int) (*pagination.Page[*model.Movie], error) {
+	genreId uint) (*pagination.Page[*model.Movie], error) {
 	var movieResults []*model.Movie
 	var totalRows int64
 
@@ -150,7 +150,7 @@ func (mr *movieRepository) UpdateMovieGenres(ctx context.Context, movie *model.M
 	return nil
 }
 
-func (mr *movieRepository) DeleteMovieById(ctx context.Context, id int) error {
+func (mr *movieRepository) DeleteMovieById(ctx context.Context, id uint) error {
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()

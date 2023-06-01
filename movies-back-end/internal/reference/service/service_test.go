@@ -261,7 +261,7 @@ func TestGetMovieById(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, movie)
-		assert.Equal(t, int(movieId), movie.ID)
+		assert.Equal(t, uint(movieId), movie.ID)
 		assert.Equal(t, movieType, movie.TypeCode)
 		assert.Equal(t, "Test Movie", movie.Title)
 		assert.Equal(t, "1974-05-21", movie.ReleaseDate.Format("2006-01-02"))
@@ -303,7 +303,7 @@ func TestGetMovieById(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.NotNil(t, movie)
-		assert.Equal(t, int(movieId), movie.ID)
+		assert.Equal(t, uint(movieId), movie.ID)
 		assert.Equal(t, movieType, movie.TypeCode)
 		assert.Equal(t, "Test Movie", movie.Title)
 		assert.Equal(t, "1974-05-21", movie.ReleaseDate.Format("2006-01-02"))

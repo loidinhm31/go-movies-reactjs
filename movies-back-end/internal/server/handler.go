@@ -56,6 +56,10 @@ import (
 	blobHttp "movies-service/internal/blob/delivery/http"
 	blobService "movies-service/internal/blob/service"
 
+	collectionHttp "movies-service/internal/collection/delivery/http"
+	collectionRepository "movies-service/internal/collection/repository"
+	collectionService "movies-service/internal/collection/service"
+
 	"net/http"
 	"time"
 )
@@ -74,6 +78,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iAnalysisRepo := analysisRepository.NewAnalysisRepository(s.cfg, s.db)
 	iViewRepo := viewRepository.NewViewRepository(s.cfg, s.db)
 	iRatingRepo := ratingRepository.NewRatingRepository(s.cfg, s.db)
+	iCollectionRepo := collectionRepository.NewCollectionRepository(s.cfg, s.db)
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(iUserRepo)
@@ -90,6 +95,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iReferenceService := integrationService.NewReferenceService(s.cfg, managementCtrl)
 	iUserService := userService.NewUserService(managementCtrl, iRoleRepo, iUserRepo)
 	iRatingService := ratingService.NewRatingService(iRatingRepo)
+	iCollectionService := collectionService.NewCollectionService(managementCtrl, iCollectionRepo)
 
 	// Init handler
 	iAuthHandler := authHttp.NewAuthHandler(iAuthService, s.cfg.Keycloak, s.cloak)
@@ -105,6 +111,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iBlobHandler := blobHttp.NewBlobHandler(iBlobService)
 	iUserHandler := userHttp.NewUserHandler(iUserService)
 	iRatingHandler := ratingHttp.NewRatingHandler(iRatingService)
+	iCollectionHandler := collectionHttp.NewCollectionHandler(iCollectionService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, iAuthService)
@@ -153,6 +160,10 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	authBlobGroup.Use(mw.JWTValidation())
 	blobHttp.MapIntegrationRoutes(authBlobGroup, iBlobHandler)
 
+	authCollectionGroup := authGroup.Group("/collections")
+	authCollectionGroup.Use(mw.JWTValidation())
+	collectionHttp.MapAuthCollectionRoutes(authCollectionGroup, iCollectionHandler)
+
 	movieGroup := apiV1.Group("/movies")
 
 	seasonGroup := apiV1.Group("/seasons")
@@ -167,6 +178,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	ratingGroup := apiV1.Group("/ratings")
 
+	collectionGroup := apiV1.Group("/collections")
+
 	// Map public routes
 	movieHttp.MapMovieRoutes(movieGroup, iMovieHandler)
 	seasonHttp.MapSeasonRoutes(seasonGroup, iSeasonHandler)
@@ -175,6 +188,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	searchHttp.MapGraphRoutes(searchGroup, iSearchHandler)
 	viewHttp.MapViewRoutes(viewGroup, iViewHandler)
 	ratingHttp.MapRatingRoutes(ratingGroup, iRatingHandler)
+	collectionHttp.MapCollectionRoutes(collectionGroup, iCollectionHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())

@@ -3,19 +3,19 @@ package model
 type GenreCount struct {
 	Name      string
 	TypeCode  string
-	NumMovies int
+	NumMovies uint
 }
 
 type MovieCount struct {
 	Year       string
 	Month      string
-	NumMovies  int
-	Cumulative int
+	NumMovies  uint
+	Cumulative uint
 }
 
 type ViewCount struct {
 	Year       string
 	Month      string
-	NumViewers int
-	Cumulative int
+	NumViewers uint
+	Cumulative uint
 }

@@ -28,7 +28,7 @@ func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Reposit
 	}
 }
 
-func (e episodeService) GetEpisodesByID(ctx context.Context, id int) (*dto.EpisodeDto, error) {
+func (e episodeService) GetEpisodesByID(ctx context.Context, id uint) (*dto.EpisodeDto, error) {
 	result, err := e.episodeRepository.FindEpisodeByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (e episodeService) GetEpisodesByID(ctx context.Context, id int) (*dto.Episo
 	return mapper.MapToEpisodeDto(result), nil
 }
 
-func (e episodeService) GetEpisodesBySeasonID(ctx context.Context, seasonID int) ([]*dto.EpisodeDto, error) {
+func (e episodeService) GetEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*dto.EpisodeDto, error) {
 	result, err := e.episodeRepository.FindEpisodesBySeasonID(ctx, seasonID)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (e episodeService) UpdateEpisode(ctx context.Context, episode *dto.EpisodeD
 	return nil
 }
 
-func (e episodeService) RemoveEpisodeByID(ctx context.Context, id int) error {
+func (e episodeService) RemoveEpisodeByID(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}

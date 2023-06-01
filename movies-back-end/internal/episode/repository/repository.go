@@ -17,7 +17,7 @@ func NewEpisodeRepository(cfg *config.Config, db *gorm.DB) episode.Repository {
 	return &episodeRepository{cfg: cfg, db: db}
 }
 
-func (e episodeRepository) FindEpisodeByID(ctx context.Context, id int) (*model.Episode, error) {
+func (e episodeRepository) FindEpisodeByID(ctx context.Context, id uint) (*model.Episode, error) {
 	var episodeObject *model.Episode
 
 	tx := e.db.WithContext(ctx)
@@ -32,7 +32,7 @@ func (e episodeRepository) FindEpisodeByID(ctx context.Context, id int) (*model.
 	return episodeObject, nil
 }
 
-func (e episodeRepository) FindEpisodesBySeasonID(ctx context.Context, seasonID int) ([]*model.Episode, error) {
+func (e episodeRepository) FindEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*model.Episode, error) {
 	var episodeObjects []*model.Episode
 
 	tx := e.db.WithContext(ctx)
@@ -74,7 +74,7 @@ func (e episodeRepository) UpdateEpisode(ctx context.Context, episode *model.Epi
 	return nil
 }
 
-func (e episodeRepository) DeleteEpisodeByID(ctx context.Context, id int) error {
+func (e episodeRepository) DeleteEpisodeByID(ctx context.Context, id uint) error {
 	tx := e.db.WithContext(ctx)
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -86,7 +86,7 @@ func (e episodeRepository) DeleteEpisodeByID(ctx context.Context, id int) error 
 	return nil
 }
 
-func (e episodeRepository) DeleteEpisodeBySeasonID(ctx context.Context, seasonID int) error {
+func (e episodeRepository) DeleteEpisodeBySeasonID(ctx context.Context, seasonID uint) error {
 	tx := e.db.WithContext(ctx)
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()

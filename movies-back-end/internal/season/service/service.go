@@ -32,7 +32,7 @@ func NewSeasonService(mgmtCtrl control.Service, movieRepository movie.Repository
 	}
 }
 
-func (s seasonService) GetSeasonsByID(ctx *gin.Context, id int) (*dto.SeasonDto, error) {
+func (s seasonService) GetSeasonsByID(ctx *gin.Context, id uint) (*dto.SeasonDto, error) {
 	result, err := s.seasonRepository.FindSeasonByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s seasonService) GetSeasonsByID(ctx *gin.Context, id int) (*dto.SeasonDto,
 	return mapper.MapToSeasonDto(result), nil
 }
 
-func (s seasonService) GetSeasonsByMovieID(ctx context.Context, movieID int) ([]*dto.SeasonDto, error) {
+func (s seasonService) GetSeasonsByMovieID(ctx context.Context, movieID uint) ([]*dto.SeasonDto, error) {
 	result, err := s.seasonRepository.FindSeasonsByMovieID(ctx, movieID)
 	if err != nil {
 		return nil, err
@@ -131,7 +131,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 	return nil
 }
 
-func (s seasonService) RemoveSeasonByID(ctx context.Context, id int) error {
+func (s seasonService) RemoveSeasonByID(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}

@@ -15,7 +15,7 @@ func (m *MockViewRepository) InsertView(ctx context.Context, viewer *dto.Viewer)
 	return args.Error(0)
 }
 
-func (m *MockViewRepository) CountViewsByMovieId(ctx context.Context, movieId int) (int64, error) {
+func (m *MockViewRepository) CountViewsByMovieId(ctx context.Context, movieId uint) (int64, error) {
 	args := m.Called(ctx, movieId)
 	return args.Get(0).(int64), args.Error(1)
 }

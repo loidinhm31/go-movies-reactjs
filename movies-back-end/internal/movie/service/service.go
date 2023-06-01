@@ -62,7 +62,7 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 	}, nil
 }
 
-func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto, error) {
+func (ms *movieService) GetMovieById(ctx context.Context, id uint) (*dto.MovieDto, error) {
 	result, err := ms.movieRepository.FindMovieById(ctx, id)
 	if err != nil {
 		log.Println(err)
@@ -73,7 +73,7 @@ func (ms *movieService) GetMovieById(ctx context.Context, id int) (*dto.MovieDto
 	return movieDto, nil
 }
 
-func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId int) (*pagination.Page[*dto.MovieDto], error) {
+func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId uint) (*pagination.Page[*dto.MovieDto], error) {
 	page := &pagination.Page[*model.Movie]{}
 
 	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
@@ -192,7 +192,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	return nil
 }
 
-func (ms *movieService) DeleteMovieById(ctx context.Context, id int) error {
+func (ms *movieService) DeleteMovieById(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}

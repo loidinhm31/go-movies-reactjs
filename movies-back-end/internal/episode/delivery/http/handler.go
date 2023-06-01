@@ -25,7 +25,7 @@ func (e episodeHandler) FetchEpisodesByID() gin.HandlerFunc {
 		id := c.Param("id")
 		episodeID, _ := strconv.Atoi(id)
 
-		allEpisodes, err := e.episodeService.GetEpisodesByID(c, episodeID)
+		allEpisodes, err := e.episodeService.GetEpisodesByID(c, uint(episodeID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -42,7 +42,7 @@ func (e episodeHandler) FetchEpisodesBySeasonID() gin.HandlerFunc {
 		id := c.Query("seasonID")
 		seasonID, _ := strconv.Atoi(id)
 
-		allEpisodes, err := e.episodeService.GetEpisodesBySeasonID(c, seasonID)
+		allEpisodes, err := e.episodeService.GetEpisodesBySeasonID(c, uint(seasonID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -111,7 +111,7 @@ func (e episodeHandler) DeleteEpisode() gin.HandlerFunc {
 			return
 		}
 
-		err = e.episodeService.RemoveEpisodeByID(c, seasonID)
+		err = e.episodeService.RemoveEpisodeByID(c, uint(seasonID))
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusInternalServerError, gin.H{

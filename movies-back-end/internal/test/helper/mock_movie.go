@@ -27,7 +27,7 @@ func (m *MockMovieRepository) FindAllMoviesByType(ctx context.Context, keyword, 
 	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
 
-func (m *MockMovieRepository) FindMovieById(ctx context.Context, id int) (*model.Movie, error) {
+func (m *MockMovieRepository) FindMovieById(ctx context.Context, id uint) (*model.Movie, error) {
 	args := m.Called(ctx, id)
 	return args.Get(0).(*model.Movie), args.Error(1)
 }
@@ -35,7 +35,7 @@ func (m *MockMovieRepository) FindMovieById(ctx context.Context, id int) (*model
 func (m *MockMovieRepository) FindMoviesByGenre(ctx context.Context,
 	pageRequest *pagination.PageRequest,
 	page *pagination.Page[*model.Movie],
-	genreId int) (*pagination.Page[*model.Movie], error) {
+	genreId uint) (*pagination.Page[*model.Movie], error) {
 	args := m.Called(ctx, pageRequest, page, genreId)
 	return args.Get(0).(*pagination.Page[*model.Movie]), args.Error(1)
 }
@@ -50,7 +50,7 @@ func (m *MockMovieRepository) UpdateMovieGenres(ctx context.Context, movie *mode
 	return args.Error(0)
 }
 
-func (m *MockMovieRepository) DeleteMovieById(ctx context.Context, id int) error {
+func (m *MockMovieRepository) DeleteMovieById(ctx context.Context, id uint) error {
 	args := m.Called(ctx, id)
 	return args.Error(0)
 }

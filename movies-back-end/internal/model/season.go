@@ -5,11 +5,11 @@ import (
 )
 
 type Season struct {
-	ID          int `gorm:"primary_key"`
+	ID          uint `gorm:"primaryKey"`
 	Name        string
 	AirDate     time.Time
 	Description string
-	MovieID     int
+	MovieID     uint
 	Movie       *Movie `gorm:"foreignKey:MovieID"`
 	CreatedAt   time.Time
 	CreatedBy   string
@@ -18,12 +18,12 @@ type Season struct {
 }
 
 type Episode struct {
-	ID        int `gorm:"primary_key"`
+	ID        uint `gorm:"primaryKey"`
 	Name      string
 	AirDate   time.Time
-	Runtime   int
+	Runtime   uint
 	VideoPath string
-	SeasonID  int
+	SeasonID  uint
 	Season    *Season `gorm:"foreignKey:SeasonID"`
 	CreatedAt time.Time
 	CreatedBy string

@@ -36,7 +36,7 @@ func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) er
 	return nil
 }
 
-func (vr *viewRepository) CountViewsByMovieId(ctx context.Context, movieId int) (int64, error) {
+func (vr *viewRepository) CountViewsByMovieId(ctx context.Context, movieId uint) (int64, error) {
 	var totalViews int64
 
 	tx := vr.db.WithContext(ctx)

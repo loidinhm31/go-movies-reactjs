@@ -7,15 +7,16 @@ import (
 )
 
 type Movie struct {
-	ID          int `gorm:"primary_key"`
+	ID          uint `gorm:"primaryKey"`
 	Title       string
 	TypeCode    string
 	ReleaseDate time.Time
-	Runtime     int
+	Runtime     uint
 	MpaaRating  string
 	Description string
-	ImageUrl    sql.NullString `gorm:"type:varchar(255), default:null"`
-	VideoPath   sql.NullString `gorm:"type:varchar(255), default:null"`
+	ImageUrl    sql.NullString  `gorm:"type:varchar(255), default:null"`
+	VideoPath   sql.NullString  `gorm:"type:varchar(255), default:null"`
+	Price       sql.NullFloat64 `gorm:"type:float, default:nunll"`
 	CreatedAt   time.Time
 	CreatedBy   string
 	UpdatedAt   time.Time

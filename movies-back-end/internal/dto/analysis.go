@@ -14,8 +14,8 @@ type DataDto struct {
 	Month      string `json:"month,omitempty"`
 	Name       string `json:"name,omitempty"`
 	TypeCode   string `json:"type_code,omitempty"`
-	Count      int    `json:"count,omitempty"`
-	Cumulative int    `json:"cumulative,omitempty"`
+	Count      uint   `json:"count,omitempty"`
+	Cumulative uint   `json:"cumulative,omitempty"`
 }
 
 type RequestData struct {

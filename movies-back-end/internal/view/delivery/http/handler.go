@@ -49,7 +49,7 @@ func (h *viewHandler) FetchNumberOfViewsByMovieId() gin.HandlerFunc {
 		movieKey := c.Param("movieId")
 		movieId, _ := strconv.Atoi(movieKey)
 
-		totalViews, err := h.viewService.GetNumberOfViewsByMovieId(c, movieId)
+		totalViews, err := h.viewService.GetNumberOfViewsByMovieId(c, uint(movieId))
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": err.Error(),

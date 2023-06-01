@@ -39,15 +39,15 @@ func (ur *userRepository) FindUserByUsername(ctx context.Context, user *model.Us
 	return user, nil
 }
 
-func (ur *userRepository) FindUserByID(ctx context.Context, userID int) (*model.User, error) {
-	var user model.User
-	err := ur.db.WithContext(ctx).Where("id = ?", userID).First(&user).Error
+func (ur *userRepository) FindUserByID(ctx context.Context, userID uint) (*model.User, error) {
+	var theUser model.User
+	err := ur.db.WithContext(ctx).Where("id = ?", userID).First(&theUser).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &user, nil
+	return &theUser, nil
 }
 
 func (ur *userRepository) FindAllUsers(ctx context.Context, pageRequest *pagination.PageRequest, page *pagination.Page[*model.User], key string, isNew bool) (*pagination.Page[*model.User], error) {
@@ -78,7 +78,7 @@ func (ur *userRepository) FindAllUsers(ctx context.Context, pageRequest *paginat
 	return page, nil
 }
 
-func (ur *userRepository) UpdateUserRole(ctx context.Context, userID int, roleID int) error {
+func (ur *userRepository) UpdateUserRole(ctx context.Context, userID uint, roleID uint) error {
 	tx := ur.db.WithContext(ctx)
 	if ur.cfg.Server.Debug {
 		tx = tx.Debug()

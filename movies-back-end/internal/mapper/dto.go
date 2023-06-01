@@ -17,6 +17,7 @@ func MapToMovieDto(movie *model.Movie) *dto.MovieDto {
 		Description: movie.Description,
 		ImageUrl:    movie.ImageUrl.String,
 		VideoPath:   movie.VideoPath.String,
+		Price:       movie.Price.Float64,
 		CreatedAt:   movie.CreatedAt,
 		UpdatedAt:   movie.UpdatedAt,
 		Genres:      genreDtos,
@@ -99,4 +100,11 @@ func MapToRatingDtoSlice(ratingSlice []*model.Rating) []*dto.RatingDto {
 		ratingDtos = append(ratingDtos, MapToRatingDto(r))
 	}
 	return ratingDtos
+}
+
+func MapToCollectionDto(collection *model.Collection) *dto.CollectionDto {
+	return &dto.CollectionDto{
+		Username: collection.Username,
+		MovieID:  collection.MovieID,
+	}
 }

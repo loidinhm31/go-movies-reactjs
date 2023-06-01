@@ -3,8 +3,8 @@ package model
 import "time"
 
 type View struct {
-	ID       int `gorm:"primary_key"`
+	ID       uint64 `gorm:"primaryKey"`
 	ViewedBy string
 	ViewedAt time.Time
-	MovieId  int
+	MovieId  uint
 }
