@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"movies-service/internal/blob"
+	"movies-service/internal/collection"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
@@ -18,16 +19,18 @@ import (
 )
 
 type movieService struct {
-	mgmtCtrl        control.Service
-	movieRepository movie.Repository
-	blobService     blob.Service
+	mgmtCtrl             control.Service
+	movieRepository      movie.Repository
+	collectionRepository collection.Repository
+	blobService          blob.Service
 }
 
-func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, blobService blob.Service) movie.Service {
+func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, collectionRepository collection.Repository, blobService blob.Service) movie.Service {
 	return &movieService{
-		mgmtCtrl:        mgmtCtrl,
-		movieRepository: movieRepository,
-		blobService:     blobService,
+		mgmtCtrl:             mgmtCtrl,
+		movieRepository:      movieRepository,
+		collectionRepository: collectionRepository,
+		blobService:          blobService,
 	}
 }
 
@@ -195,6 +198,17 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 func (ms *movieService) DeleteMovieById(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
+	}
+
+	// Check collection
+	log.Println("checking collection before deleting...")
+	collections, err := ms.collectionRepository.FindCollectionsByMovieID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if len(collections) > 0 {
+		return errors.ErrCannotExecuteAction
 	}
 
 	// Get author

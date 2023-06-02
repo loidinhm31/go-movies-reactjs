@@ -108,3 +108,24 @@ func MapToCollectionDto(collection *model.Collection) *dto.CollectionDto {
 		MovieID:  collection.MovieID,
 	}
 }
+
+func MapToCollectionDetailDto(collection *model.CollectionDetail) *dto.CollectionDto {
+	return &dto.CollectionDto{
+		Username:    collection.Username,
+		MovieID:     collection.MovieID,
+		Title:       collection.Title,
+		ReleaseDate: collection.ReleaseDate,
+		ImageUrl:    collection.ImageUrl,
+		Description: collection.Description,
+		Price:       collection.Amount,
+		CreatedAt:   collection.CreatedAt,
+	}
+}
+
+func MapToCollectionDetailDtoSlice(collections []*model.CollectionDetail) []*dto.CollectionDto {
+	var collectioDtos []*dto.CollectionDto
+	for _, c := range collections {
+		collectioDtos = append(collectioDtos, MapToCollectionDetailDto(c))
+	}
+	return collectioDtos
+}

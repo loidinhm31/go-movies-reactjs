@@ -16,7 +16,7 @@ type Movie struct {
 	Description string
 	ImageUrl    sql.NullString  `gorm:"type:varchar(255), default:null"`
 	VideoPath   sql.NullString  `gorm:"type:varchar(255), default:null"`
-	Price       sql.NullFloat64 `gorm:"type:float, default:nunll"`
+	Price       sql.NullFloat64 `gorm:"type:float, default:null"`
 	CreatedAt   time.Time
 	CreatedBy   string
 	UpdatedAt   time.Time

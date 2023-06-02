@@ -28,10 +28,3 @@ type Role struct {
 	UpdatedAt time.Time
 	UpdatedBy string
 }
-
-type Collection struct {
-	Username  string `gorm:"primaryKey"`
-	MovieID   uint   `gorm:"primaryKey"`
-	CreatedAt time.Time
-	CreatedBy string
-}
