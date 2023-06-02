@@ -81,13 +81,13 @@ func TestViewService_GetNumberOfViewsByMovieId(t *testing.T) {
 		_, mockRepo, viewService := initMock()
 
 		ctx := context.Background()
-		movieID := 123
+		movieID := uint(123)
 		totalViews := int64(42)
 
 		mockRepo.On("CountViewsByMovieId", ctx, movieID).Return(totalViews, nil)
 
 		// Act
-		result, err := viewService.GetNumberOfViewsByMovieId(ctx, movieID)
+		result, err := viewService.GetNumberOfViewsByMovieId(ctx, uint(movieID))
 
 		// Assert
 		assert.NoError(t, err)
@@ -99,13 +99,13 @@ func TestViewService_GetNumberOfViewsByMovieId(t *testing.T) {
 		_, mockRepo, viewService := initMock()
 
 		ctx := context.Background()
-		movieID := 123
+		movieID := uint(123)
 		expectedError := errors.ErrResourceNotFound
 
 		mockRepo.On("CountViewsByMovieId", ctx, movieID).Return(int64(0), expectedError)
 
 		// Act
-		result, err := viewService.GetNumberOfViewsByMovieId(ctx, movieID)
+		result, err := viewService.GetNumberOfViewsByMovieId(ctx, uint(movieID))
 
 		// Assert
 		assert.EqualError(t, err, expectedError.Error())

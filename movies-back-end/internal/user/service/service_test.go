@@ -100,7 +100,7 @@ func TestUserService_GetUsers(t *testing.T) {
 		assert.Equal(t, "A", result.Content[0].FirstName)
 		assert.Equal(t, "AA", result.Content[0].LastName)
 		assert.Equal(t, true, result.Content[0].IsNew)
-		assert.Equal(t, 1, result.Content[0].Role.ID)
+		assert.Equal(t, uint(1), result.Content[0].Role.ID)
 		assert.Equal(t, "BANNED", result.Content[0].Role.RoleCode)
 
 	})

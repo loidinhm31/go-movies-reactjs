@@ -56,9 +56,9 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 		assert.NotNil(t, result)
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "Action", result.Data[0].Name)
-		assert.Equal(t, 10, result.Data[0].Count)
+		assert.Equal(t, uint(10), result.Data[0].Count)
 		assert.Equal(t, "Adventure", result.Data[1].Name)
-		assert.Equal(t, 5, result.Data[1].Count)
+		assert.Equal(t, uint(5), result.Data[1].Count)
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
@@ -113,10 +113,10 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2022", result.Data[0].Year)
 		assert.Equal(t, "6", result.Data[0].Month)
-		assert.Equal(t, 10, result.Data[0].Count)
+		assert.Equal(t, uint(10), result.Data[0].Count)
 		assert.Equal(t, "2022", result.Data[1].Year)
 		assert.Equal(t, "8", result.Data[1].Month)
-		assert.Equal(t, 5, result.Data[1].Count)
+		assert.Equal(t, uint(5), result.Data[1].Count)
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
@@ -172,10 +172,10 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2022", result.Data[0].Year)
 		assert.Equal(t, "6", result.Data[0].Month)
-		assert.Equal(t, 10, result.Data[0].Count)
+		assert.Equal(t, uint(10), result.Data[0].Count)
 		assert.Equal(t, "2022", result.Data[1].Year)
 		assert.Equal(t, "8", result.Data[1].Month)
-		assert.Equal(t, 5, result.Data[1].Count)
+		assert.Equal(t, uint(5), result.Data[1].Count)
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
@@ -255,10 +255,10 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2023", result.Data[0].Year)
 		assert.Equal(t, "1", result.Data[0].Month)
-		assert.Equal(t, 100, result.Data[0].Count)
+		assert.Equal(t, uint(100), result.Data[0].Count)
 		assert.Equal(t, "2023", result.Data[1].Year)
 		assert.Equal(t, "2", result.Data[1].Month)
-		assert.Equal(t, 150, result.Data[1].Count)
+		assert.Equal(t, uint(150), result.Data[1].Count)
 	})
 }
 
@@ -322,11 +322,11 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2023", result.Data[0].Year)
 		assert.Equal(t, "1", result.Data[0].Month)
-		assert.Equal(t, 100, result.Data[0].Count)
-		assert.Equal(t, 100, result.Data[0].Cumulative)
+		assert.Equal(t, uint(100), result.Data[0].Count)
+		assert.Equal(t, uint(100), result.Data[0].Cumulative)
 		assert.Equal(t, "2023", result.Data[1].Year)
 		assert.Equal(t, "2", result.Data[1].Month)
-		assert.Equal(t, 150, result.Data[1].Count)
+		assert.Equal(t, uint(150), result.Data[1].Count)
 		assert.Equal(t, result.Data[0].Count+result.Data[1].Count, result.Data[1].Cumulative)
 	})
 }
@@ -373,10 +373,10 @@ func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2023", result.Data[0].Year)
 		assert.Equal(t, "1", result.Data[0].Month)
-		assert.Equal(t, 100, result.Data[0].Count)
+		assert.Equal(t, uint(100), result.Data[0].Count)
 		assert.Equal(t, "2023", result.Data[1].Year)
 		assert.Equal(t, "2", result.Data[1].Month)
-		assert.Equal(t, 150, result.Data[1].Count)
+		assert.Equal(t, uint(150), result.Data[1].Count)
 	})
 }
 
@@ -440,11 +440,11 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 		assert.Len(t, result.Data, 2)
 		assert.Equal(t, "2023", result.Data[0].Year)
 		assert.Equal(t, "1", result.Data[0].Month)
-		assert.Equal(t, 100, result.Data[0].Count)
-		assert.Equal(t, 100, result.Data[0].Cumulative)
+		assert.Equal(t, uint(100), result.Data[0].Count)
+		assert.Equal(t, uint(100), result.Data[0].Cumulative)
 		assert.Equal(t, "2023", result.Data[1].Year)
 		assert.Equal(t, "2", result.Data[1].Month)
-		assert.Equal(t, 150, result.Data[1].Count)
+		assert.Equal(t, uint(150), result.Data[1].Count)
 		assert.Equal(t, result.Data[0].Count+result.Data[1].Count, result.Data[1].Cumulative)
 	})
 }

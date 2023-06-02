@@ -29,14 +29,14 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 		_, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up expectations
-		episodeID := 1
+		episodeID := uint(1)
 		mockEpisode := &model.Episode{
 			ID:        episodeID,
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 			CreatedAt: time.Now(),
 			CreatedBy: "John",
 			UpdatedAt: time.Now(),
@@ -66,21 +66,21 @@ func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 		_, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up expectations
-		seasonID := 1
+		seasonID := uint(1)
 		mockEpisodes := []*model.Episode{
 			{
-				ID:        1,
+				ID:        uint(1),
 				Name:      "Episode 1",
 				AirDate:   time.Now(),
-				Runtime:   60,
+				Runtime:   uint(60),
 				VideoPath: "/path/to/episode1",
-				SeasonID:  seasonID,
+				SeasonID:  uint(seasonID),
 			},
 			{
-				ID:        2,
+				ID:        uint(2),
 				Name:      "Episode 2",
 				AirDate:   time.Now(),
-				Runtime:   45,
+				Runtime:   uint(45),
 				VideoPath: "/path/to/episode2",
 				SeasonID:  seasonID,
 			},
@@ -107,9 +107,9 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 			ID:        1,
 			Name:      "",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Call the service method
@@ -127,9 +127,9 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		episodeDto := &dto.EpisodeDto{
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -150,9 +150,9 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		episodeDto := &dto.EpisodeDto{
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -174,9 +174,9 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		episodeDto := &dto.EpisodeDto{
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -199,12 +199,12 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
-			ID:        0,
+			ID:        uint(0),
 			Name:      "",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Call the service method
@@ -220,17 +220,17 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
-			ID:        1,
+			ID:        uint(1),
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockEpisodeRepo.On("FindEpisodeByID", mock.Anything, 1).
+		mockEpisodeRepo.On("FindEpisodeByID", mock.Anything, uint(1)).
 			Return(nil, errors.ErrResourceNotFound)
 
 		// Call the service method
@@ -247,12 +247,12 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
-			ID:        1,
+			ID:        uint(1),
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -274,12 +274,12 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
-			ID:        1,
+			ID:        uint(1),
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -301,12 +301,12 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
-			ID:        1,
+			ID:        uint(1),
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
-			Runtime:   60,
+			Runtime:   uint(60),
 			VideoPath: "/path/to/episode1",
-			SeasonID:  1,
+			SeasonID:  uint(1),
 		}
 
 		// Set up expectations
@@ -329,7 +329,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		_, _, _, episodeService := initMock()
 
 		// Set up input parameters
-		episodeID := 0
+		episodeID := uint(0)
 
 		// Call the service method
 		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
@@ -343,7 +343,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		mockCtrl, _, _, episodeService := initMock()
 
 		// Set up input parameters
-		episodeID := 1
+		episodeID := uint(1)
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
@@ -360,7 +360,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		mockCtrl, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up input parameters
-		episodeID := 1
+		episodeID := uint(1)
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
@@ -378,7 +378,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		mockCtrl, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up input parameters
-		episodeID := 1
+		episodeID := uint(1)
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)

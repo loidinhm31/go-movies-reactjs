@@ -28,13 +28,13 @@ func TestSeasonService_GetSeasonsByID(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		_, _, mockSeasonRepo, _, seasonService := initMock()
 
-		mockSeason := &model.Season{ID: 1, Name: "Season 1"}
-		expectedSeasonDto := &dto.SeasonDto{ID: 1, Name: "Season 1"}
+		mockSeason := &model.Season{ID: uint(1), Name: "Season 1"}
+		expectedSeasonDto := &dto.SeasonDto{ID: uint(1), Name: "Season 1"}
 
 		// Set up expectations
-		mockSeasonRepo.On("FindSeasonByID", mock.Anything, 1).Return(mockSeason, nil)
+		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(mockSeason, nil)
 
-		result, err := seasonService.GetSeasonsByID(nil, 1)
+		result, err := seasonService.GetSeasonsByID(nil, uint(1))
 
 		// Assertions
 		assert.NoError(t, err)
@@ -46,19 +46,19 @@ func TestSeasonService_GetSeasonsByMovieID(t *testing.T) {
 	_, _, mockSeasonRepo, _, seasonService := initMock()
 
 	mockSeasons := []*model.Season{
-		{ID: 1, Name: "Season 1"},
-		{ID: 2, Name: "Season 2"},
+		{ID: uint(1), Name: "Season 1"},
+		{ID: uint(2), Name: "Season 2"},
 	}
 	expectedSeasonDtos := []*dto.SeasonDto{
-		{ID: 1, Name: "Season 1"},
-		{ID: 2, Name: "Season 2"},
+		{ID: uint(1), Name: "Season 1"},
+		{ID: uint(2), Name: "Season 2"},
 	}
 
 	// Set up expectations
-	mockSeasonRepo.On("FindSeasonsByMovieID", mock.Anything, 1).Return(mockSeasons, nil)
+	mockSeasonRepo.On("FindSeasonsByMovieID", mock.Anything, uint(1)).Return(mockSeasons, nil)
 
 	// Call the service method
-	result, err := seasonService.GetSeasonsByMovieID(context.Background(), 1)
+	result, err := seasonService.GetSeasonsByMovieID(context.Background(), uint(1))
 
 	// Assertions
 	assert.NoError(t, err)
@@ -70,11 +70,11 @@ func TestSeasonService_AddSeason(t *testing.T) {
 		_, _, _, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          1,
+			ID:          uint(1),
 			Name:        "",
 			Description: "",
 			AirDate:     time.Now(),
-			MovieID:     0,
+			MovieID:     uint(0),
 		}
 
 		// Call the service method
@@ -88,11 +88,11 @@ func TestSeasonService_AddSeason(t *testing.T) {
 		mockCtrl, _, _, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          0,
+			ID:          uint(0),
 			Name:        "Season 1",
 			Description: "Description",
 			AirDate:     time.Now(),
-			MovieID:     1,
+			MovieID:     uint(1),
 		}
 
 		// Set up expectations
@@ -109,17 +109,17 @@ func TestSeasonService_AddSeason(t *testing.T) {
 		mockCtrl, mockMovieRepo, mockSeasonRepo, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          0,
+			ID:          uint(0),
 			Name:        "Season 1",
 			Description: "Description",
 			AirDate:     time.Now(),
-			MovieID:     1,
+			MovieID:     uint(1),
 		}
-		movieObj := &model.Movie{ID: 1}
+		movieObj := &model.Movie{ID: uint(1)}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockMovieRepo.On("FindMovieById", mock.Anything, 1).Return(movieObj, nil)
+		mockMovieRepo.On("FindMovieById", mock.Anything, uint(1)).Return(movieObj, nil)
 		mockSeasonRepo.On("InsertSeason", mock.Anything, mock.AnythingOfType("*model.Season")).Return(nil)
 
 		// Call the service method
@@ -135,11 +135,11 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 		_, _, _, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          0,
+			ID:          uint(0),
 			Name:        "",
 			Description: "",
 			AirDate:     time.Now(),
-			MovieID:     0,
+			MovieID:     uint(0),
 		}
 
 		// Call the service method
@@ -153,16 +153,16 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 		mockCtrl, _, mockSeasonRepo, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          1,
+			ID:          uint(1),
 			Name:        "Season 2",
 			Description: "Updated description",
 			AirDate:     time.Now(),
-			MovieID:     1,
+			MovieID:     uint(1),
 		}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockSeasonRepo.On("FindSeasonByID", mock.Anything, 1).
+		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).
 			Return(nil, errors.ErrResourceNotFound)
 
 		// Call the service method
@@ -177,16 +177,16 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 		mockCtrl, _, mockSeasonRepo, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          1,
+			ID:          uint(1),
 			Name:        "Season 2",
 			Description: "Updated description",
 			AirDate:     time.Now(),
-			MovieID:     1,
+			MovieID:     uint(1),
 		}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
-		mockSeasonRepo.On("FindSeasonByID", mock.Anything, 1).Return(&model.Season{}, nil)
+		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(&model.Season{}, nil)
 
 		// Call the service method
 		err := seasonService.UpdateSeason(context.Background(), seasonDto)
@@ -200,24 +200,24 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 		mockCtrl, mockMovieRepo, mockSeasonRepo, _, seasonService := initMock()
 
 		seasonDto := &dto.SeasonDto{
-			ID:          1,
+			ID:          uint(1),
 			Name:        "Season 2",
 			Description: "Updated description",
 			AirDate:     time.Now(),
-			MovieID:     1,
+			MovieID:     uint(1),
 		}
 		mockSeason := &model.Season{
-			ID:          1,
+			ID:          uint(1),
 			Name:        "Season 1",
 			Description: "Description",
 			AirDate:     time.Now(),
-			Movie:       &model.Movie{ID: 1},
+			Movie:       &model.Movie{ID: uint(1)},
 		}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockSeasonRepo.On("FindSeasonByID", mock.Anything, 1).Return(mockSeason, nil)
-		mockMovieRepo.On("FindMovieById", mock.Anything, 1).Return(mockSeason.Movie, nil)
+		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(mockSeason, nil)
+		mockMovieRepo.On("FindMovieById", mock.Anything, uint(1)).Return(mockSeason.Movie, nil)
 		mockSeasonRepo.On("UpdateSeason", mock.Anything, mock.AnythingOfType("*model.Season")).Return(nil)
 
 		// Call the service method
@@ -233,7 +233,7 @@ func TestSeasonService_RemoveSeasonByID(t *testing.T) {
 		_, _, _, _, seasonService := initMock()
 
 		// Call the service method
-		err := seasonService.RemoveSeasonByID(context.Background(), 0)
+		err := seasonService.RemoveSeasonByID(context.Background(), uint(0))
 
 		// Assertions
 		assert.Equal(t, errors.ErrInvalidInput, err)
@@ -246,7 +246,7 @@ func TestSeasonService_RemoveSeasonByID(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the service method
-		err := seasonService.RemoveSeasonByID(context.Background(), 1)
+		err := seasonService.RemoveSeasonByID(context.Background(), uint(1))
 
 		// Assertions
 		assert.Equal(t, errors.ErrUnAuthorized, err)
@@ -258,11 +258,11 @@ func TestSeasonService_RemoveSeasonByID(t *testing.T) {
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, 1).
+		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, uint(1)).
 			Return(fmt.Errorf("failed to delete episodes"))
 
 		// Call the service method
-		err := seasonService.RemoveSeasonByID(context.Background(), 1)
+		err := seasonService.RemoveSeasonByID(context.Background(), uint(1))
 
 		// Assertions
 		assert.EqualError(t, err, "failed to delete episodes")
@@ -274,11 +274,11 @@ func TestSeasonService_RemoveSeasonByID(t *testing.T) {
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, 1).Return(nil)
-		mockSeasonRepo.On("DeleteSeasonByID", mock.Anything, 1).Return(fmt.Errorf("failed to delete season"))
+		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, uint(1)).Return(nil)
+		mockSeasonRepo.On("DeleteSeasonByID", mock.Anything, uint(1)).Return(fmt.Errorf("failed to delete season"))
 
 		// Call the service method
-		err := seasonService.RemoveSeasonByID(context.Background(), 1)
+		err := seasonService.RemoveSeasonByID(context.Background(), uint(1))
 
 		// Assertions
 		assert.EqualError(t, err, "failed to delete season")
@@ -290,11 +290,11 @@ func TestSeasonService_RemoveSeasonByID(t *testing.T) {
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, 1).Return(nil)
-		mockSeasonRepo.On("DeleteSeasonByID", mock.Anything, 1).Return(nil)
+		mockEpisodeRepo.On("DeleteEpisodeBySeasonID", mock.Anything, uint(1)).Return(nil)
+		mockSeasonRepo.On("DeleteSeasonByID", mock.Anything, uint(1)).Return(nil)
 
 		// Call the service method
-		err := seasonService.RemoveSeasonByID(context.Background(), 1)
+		err := seasonService.RemoveSeasonByID(context.Background(), uint(1))
 
 		// Assertions
 		assert.NoError(t, err)
