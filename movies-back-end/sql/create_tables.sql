@@ -50,8 +50,9 @@ CREATE TABLE public.movies
     runtime      INTEGER                  NOT NULL,
     mpaa_rating  VARCHAR(25)              NOT NULL,
     description  TEXT                     NOT NULL,
-    image_url   VARCHAR(255),
-    video_path   VARCHAR(255),
+    image_url    VARCHAR(255) DEFAULT NULL,
+    video_path   VARCHAR(255) DEFAULT NULL,
+    price        FLOAT        DEFAULT NULL,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL,
     created_by   TEXT                     NOT NULL,
     updated_at   TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -88,29 +89,54 @@ CREATE TABLE public.views
 CREATE TABLE public.seasons
 (
     id          SERIAL PRIMARY KEY,
-    name        VARCHAR(50)              NOT NULL,
-    air_date    TIMESTAMP                NOT NULL,
-    description TEXT                     NOT NULL,
-    movie_id    INTEGER REFERENCES movies (id),
-    created_at  TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_by  TEXT                     NOT NULL,
-    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_by  TEXT                     NOT NULL
+    name        VARCHAR(50)                    NOT NULL,
+    air_date    TIMESTAMP                      NOT NULL,
+    description TEXT                           NOT NULL,
+    movie_id    INTEGER REFERENCES movies (id) NOT NULL,
+    created_at  TIMESTAMP WITH TIME ZONE       NOT NULL,
+    created_by  TEXT                           NOT NULL,
+    updated_at  TIMESTAMP WITH TIME ZONE       NOT NULL,
+    updated_by  TEXT                           NOT NULL
 );
 
 CREATE TABLE public.episodes
 (
     id         SERIAL PRIMARY KEY,
-    name       VARCHAR(50)              NOT NULL,
-    air_date   TIMESTAMP                NOT NULL,
-    runtime    INTEGER                  NOT NULL,
+    name       VARCHAR(50)                     NOT NULL,
+    air_date   TIMESTAMP                       NOT NULL,
+    runtime    INTEGER                         NOT NULL,
     video_path VARCHAR(255),
-    season_id  INTEGER REFERENCES seasons (id),
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    created_by TEXT                     NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_by TEXT                     NOT NULL
+    season_id  INTEGER REFERENCES seasons (id) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE        NOT NULL,
+    created_by TEXT                            NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE        NOT NULL,
+    updated_by TEXT                            NOT NULL
 );
+
+CREATE TABLE public.payments
+(
+    id                  SERIAL PRIMARY KEY,
+    provider            VARCHAR(255)             NOT NULL,
+    provider_payment_id VARCHAR(255) DEFAULT NULL,
+    amount              FLOAT                    NOT NULL,
+    received            FLOAT                    NOT NULL,
+    currency            VARCHAR(10)              NOT NULL,
+    payment_method      VARCHAR(100)             NOT NULL,
+    status              VARCHAR(50)              NOT NULL,
+    created_at          TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by          TEXT                     NOT NULL
+);
+
+CREATE TABLE public.collections
+(
+    username   VARCHAR(50) REFERENCES users (username),
+    movie_id   INTEGER REFERENCES movies (id),
+    payment_id INTEGER REFERENCES payments (id) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE         NOT NULL,
+    created_by TEXT                             NOT NULL,
+    PRIMARY KEY (username, movie_id)
+);
+
 
 INSERT INTO public.ratings(code, name, created_at, created_by, updated_at, updated_by)
 VALUES ('G', 'G', now(), 'admin', now(), 'admin'),
@@ -150,24 +176,34 @@ VALUES ('Comedy', 'MOVIE', now(), 'admin', now(), 'admin'),
        ('Talk', 'TV', now(), 'admin', now(), 'admin'),
        ('War & Politics', 'TV', now(), 'admin', now(), 'admin');
 
-INSERT INTO public.movies (title, type_code, release_date, runtime, mpaa_rating, description, image_url, created_at,
+INSERT INTO public.movies (title, type_code, release_date, runtime, mpaa_rating, description, image_url, price, created_at,
                            created_by,
                            updated_at, updated_by)
 VALUES ('Highlander', 'MOVIE', '1986-03-07', 116, 'R',
         'He fought his first battle on the Scottish Highlands in 1536. He will fight his greatest battle on the streets of New York City in 1986. His name is Connor MacLeod. He is immortal.',
-        'https://image.tmdb.org/t/p/w200/8Z8dptJEypuLoOQro1WugD855YE.jpg', now(), 'admin', now(), 'admin'),
+        'https://image.tmdb.org/t/p/w200/8Z8dptJEypuLoOQro1WugD855YE.jpg',
+        199.0,
+        now(), 'admin', now(), 'admin'),
        ('Raiders of the Lost Ark', 'MOVIE', '1981-06-12', 115, 'PG-13',
         'Archaeology professor Indiana Jones ventures to seize a biblical artefact known as the Ark of the Covenant. While doing so, he puts up a fight against Renee and a troop of Nazis.',
-        'https://image.tmdb.org/t/p/w200/ceG9VzoRAVGwivFU403Wc3AHRys.jpg', now(), 'admin', now(), 'admin'),
+        'https://image.tmdb.org/t/p/w200/ceG9VzoRAVGwivFU403Wc3AHRys.jpg',
+        299.0,
+        now(), 'admin', now(), 'admin'),
        ('The Godfather', 'MOVIE', '1972-03-24', 175, '18A',
         'The aging patriarch of an organized crime dynasty in postwar New York City transfers control of his clandestine empire to his reluctant youngest son.',
-        'https://image.tmdb.org/t/p/w200/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', now(), 'admin', now(), 'admin'),
+        'https://image.tmdb.org/t/p/w200/3bhkrj58Vtu7enYsRolD1fZdja1.jpg',
+        null,
+        now(), 'admin', now(), 'admin'),
        ('Thor: Ragnarok', 'MOVIE', '2017-03-11', 131, 'PG-13',
         'Thor is imprisoned on the other side of the universe and finds himself in a race against time to get back to Asgard to stop Ragnarok, the destruction of his home-world and the end of Asgardian civilization, at the hands of a powerful new threat, the ruthless Hela.',
-        'https://image.tmdb.org/t/p/w200/rzRwTcFvttcN1ZpX2xv4j3tSdJu.jpg', now(), 'admin', now(), 'admin'),
+        'https://image.tmdb.org/t/p/w200/rzRwTcFvttcN1ZpX2xv4j3tSdJu.jpg',
+        null,
+        now(), 'admin', now(), 'admin'),
        ('Harry Maguire', 'TV', '2023-06-06', 11, 'R',
-        'I spent 13 hours to watch all defensive skills highlight videos on Harry Maguire Manchester United'' career',
-        'https://res.cloudinary.com/dln5uctjy/image/upload/c_scale,w_200,h_300/shiftflix/images/346637967_915526433037296_4038910118938564751_n_n0otyr.jpg', now(), 'admin', now(), 'admin');
+        'I spent 13 hours to watch all defensive skills highlight videos on Harry Maguire Manchester United\'' career',
+        'https://res.cloudinary.com/dln5uctjy/image/upload/c_scale,w_200,h_300/shiftflix/images/346637967_915526433037296_4038910118938564751_n_n0otyr.jpg',
+        null,
+        now(), 'admin', now(), 'admin');
 
 INSERT INTO public.movies_genres (movie_id, genre_id)
 VALUES ((SELECT m.id FROM movies m WHERE m.title = 'Highlander'),
