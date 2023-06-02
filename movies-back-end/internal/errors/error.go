@@ -14,6 +14,8 @@ var (
 	ErrInvalidInput        = errors.New("invalid input")
 	ErrCannotExecuteAction = errors.New("cannot execute this action")
 	ErrUserNotFound        = errors.New("user not found")
+	ErrObjectExisted       = errors.New("object existed")
+	ErrPaymentNotFound     = errors.New("payment not found")
 )
 
 func ErrInvalidInputDetail(name string) error {

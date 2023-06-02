@@ -17,7 +17,7 @@ func (mw *MiddlewareManager) JWTValidation() gin.HandlerFunc {
 		authHeader := c.Request.Header["Authorization"]
 
 		if len(authHeader) == 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusUnauthorized, gin.H{
 				"message": "Unauthorized",
 			})
 			c.Abort()

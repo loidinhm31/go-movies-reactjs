@@ -15,6 +15,7 @@ type Config struct {
 	Keycloak   KeycloakConfig
 	Cloudinary CloudinaryConfig
 	Tmdb       TmdbConfig
+	Stripe     StripeConfig
 }
 
 // ServerConfig Server config struct
@@ -56,6 +57,11 @@ type CloudinaryConfig struct {
 type TmdbConfig struct {
 	Url    string
 	ApiKey string
+}
+
+type StripeConfig struct {
+	PublishableKey string
+	SecretKey      string
 }
 
 // LoadConfig Load config file from given path

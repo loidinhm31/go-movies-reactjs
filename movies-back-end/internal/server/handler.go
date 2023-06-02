@@ -60,6 +60,10 @@ import (
 	collectionRepository "movies-service/internal/collection/repository"
 	collectionService "movies-service/internal/collection/service"
 
+	paymentHttp "movies-service/internal/payment/delivery/http"
+	paymentRepository "movies-service/internal/payment/repository"
+	paymentService "movies-service/internal/payment/service"
+
 	"net/http"
 	"time"
 )
@@ -79,13 +83,14 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iViewRepo := viewRepository.NewViewRepository(s.cfg, s.db)
 	iRatingRepo := ratingRepository.NewRatingRepository(s.cfg, s.db)
 	iCollectionRepo := collectionRepository.NewCollectionRepository(s.cfg, s.db)
+	iPaymentRepo := paymentRepository.NewPaymentRepository(s.cfg, s.db)
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(iUserRepo)
 	iAuthService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, managementCtrl, iRoleRepo, iUserRepo)
 	iRoleService := roleService.NewRoleService(iRoleRepo)
 	iBlobService := blobService.NewBlobService(s.cfg, managementCtrl)
-	iMovieService := movieService.NewMovieService(managementCtrl, iMovieRepo, iBlobService)
+	iMovieService := movieService.NewMovieService(managementCtrl, iMovieRepo, iCollectionRepo, iBlobService)
 	iSeasonService := seasonService.NewSeasonService(managementCtrl, iMovieRepo, iSeasonRepo, iEpisodeRepo)
 	iEpisodeService := episodeService.NewEpisodeService(managementCtrl, iSeasonRepo, iEpisodeRepo)
 	iGenreService := genreService.NewGenreService(managementCtrl, iGenreRepo)
@@ -96,6 +101,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iUserService := userService.NewUserService(managementCtrl, iRoleRepo, iUserRepo)
 	iRatingService := ratingService.NewRatingService(iRatingRepo)
 	iCollectionService := collectionService.NewCollectionService(managementCtrl, iCollectionRepo)
+	iPaymentService := paymentService.NewPaymentService(s.cfg, managementCtrl, iMovieRepo, iPaymentRepo, iCollectionRepo)
 
 	// Init handler
 	iAuthHandler := authHttp.NewAuthHandler(iAuthService, s.cfg.Keycloak, s.cloak)
@@ -112,6 +118,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iUserHandler := userHttp.NewUserHandler(iUserService)
 	iRatingHandler := ratingHttp.NewRatingHandler(iRatingService)
 	iCollectionHandler := collectionHttp.NewCollectionHandler(iCollectionService)
+	iPaymentHandler := paymentHttp.NewPaymentHandler(iPaymentService)
 
 	// Init middlewares
 	mw := middlewares.NewMiddlewareManager(s.cfg.Keycloak, s.cloak, iAuthService)
@@ -180,6 +187,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	collectionGroup := apiV1.Group("/collections")
 
+	paymentGroup := apiV1.Group("/payments")
+
 	// Map public routes
 	movieHttp.MapMovieRoutes(movieGroup, iMovieHandler)
 	seasonHttp.MapSeasonRoutes(seasonGroup, iSeasonHandler)
@@ -189,6 +198,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	viewHttp.MapViewRoutes(viewGroup, iViewHandler)
 	ratingHttp.MapRatingRoutes(ratingGroup, iRatingHandler)
 	collectionHttp.MapCollectionRoutes(collectionGroup, iCollectionHandler)
+	paymentHttp.MapPaymentRoutes(paymentGroup, iPaymentHandler)
 
 	health.GET("", func(c *gin.Context) {
 		log.Printf("Health check: %d", time.Now().Unix())
