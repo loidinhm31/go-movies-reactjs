@@ -1,8 +1,14 @@
-const handler = async (req, res) => {
+import {withOptionalRole} from "src/libs/auth";
+
+const handler = withOptionalRole("banned", async (req, res, token) => {
     let {id} = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
+
+    if (token !== null) {
+        headers.append("Authorization", `Bearer ${token.accessToken}`);
+    }
 
     const requestOptions = {
         method: "GET",
@@ -18,6 +24,6 @@ const handler = async (req, res) => {
     } else {
         res.status(response.status);
     }
-};
+});
 
 export default handler;

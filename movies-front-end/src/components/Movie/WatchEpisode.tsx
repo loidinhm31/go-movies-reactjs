@@ -35,14 +35,16 @@ export default function WatchEpisode({setMutateView, author, movieId, episodeId}
 
     return (
         <>
-            <VideoPlayer
-                options={videoJsOptions}
-                movieId={movieId}
-                author={author}
-                title={episode?.name!}
-                duration={episode?.runtime!}
-                setMutateView={setMutateView}
-            />
+            {videoJsOptions.sources && videoJsOptions.sources.length > 0 &&
+                <VideoPlayer
+                    options={videoJsOptions}
+                    movieId={movieId}
+                    author={author}
+                    title={episode?.name!}
+                    duration={episode?.runtime!}
+                    setMutateView={setMutateView}
+                />
+            }
         </>
     );
 

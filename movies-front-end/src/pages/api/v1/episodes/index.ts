@@ -1,8 +1,14 @@
-const handler = async (req, res) => {
+import {withOptionalRole} from "../../../../libs/auth";
+
+const handler = withOptionalRole("banned", async (req, res, token) => {
     const {seasonId} = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
+
+    if (token !== null) {
+        headers.append("Authorization", `Bearer ${token.accessToken}`);
+    }
 
     const requestOptions = {
         method: "GET",
@@ -17,6 +23,6 @@ const handler = async (req, res) => {
     } catch (error) {
         res.status(500).json({message: "server error"});
     }
-};
+});
 
 export default handler;

@@ -46,4 +46,16 @@ const withAnyRole = (
     };
 };
 
-export {withoutRole, withRole, withAnyRole};
+const withOptionalRole = (role: Role, handler: (arg0: NextApiRequest, arg1: NextApiResponse, arg2: JWT) => void) => {
+    return async (req: NextApiRequest, res: NextApiResponse) => {
+        const token = await getToken({req});
+        if (token?.role === role) {
+            res.status(403).end();
+            return;
+        }
+        return handler(req, res, token!);
+    };
+};
+
+
+export {withoutRole, withRole, withAnyRole, withOptionalRole};
