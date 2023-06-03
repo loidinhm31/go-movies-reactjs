@@ -3,6 +3,7 @@ import React, {useEffect} from "react";
 import {Chip} from "@mui/material";
 import MovieIcon from "@mui/icons-material/Movie";
 import {get} from "src/libs/api";
+
 interface View {
     message: string;
     views: number;

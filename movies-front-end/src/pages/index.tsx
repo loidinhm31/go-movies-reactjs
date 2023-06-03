@@ -1,5 +1,5 @@
 import {getDefaultLayout} from "src/components/Layout/Layout";
-import Home from "./home";
+import Home from "src/pages/home";
 
 
 function App() {

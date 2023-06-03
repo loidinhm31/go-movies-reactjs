@@ -6,7 +6,8 @@ import {del, get, post, postForm} from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
     Box,
-    Button, CardMedia,
+    Button,
+    CardMedia,
     Checkbox,
     Divider,
     FormControl,
@@ -48,6 +49,7 @@ const EditMovie = () => {
         description: "",
         release_date: null,
         runtime: 0,
+        price: 0,
         genres: [],
         image_url: "",
     });
@@ -88,6 +90,7 @@ const EditMovie = () => {
                 description: "",
                 release_date: format(new Date(), "yyyy-MM-dd"),
                 runtime: 0,
+                price: 0,
                 mpaa_rating: "",
                 genres: [],
             });
@@ -234,7 +237,7 @@ const EditMovie = () => {
 
     const handleChange = (event, name: string) => {
         let value: string | number = event.target.value;
-        if (name === "runtime") {
+        if (name === "runtime" || name === "price") {
             value = Number(value);
         } else if (name === "release_date") {
             if (Number.isNaN(new Date(event.target.value).getTime()))
@@ -460,7 +463,22 @@ const EditMovie = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={4}>
+                            <Grid item xs={2}>
+                                <TextField
+                                    fullWidth
+                                    label="Price"
+                                    variant="outlined"
+                                    type="number"
+                                    name="price"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                    }}
+                                    value={movie.price}
+                                    onChange={e => handleChange(e, "price")}
+                                />
+                            </Grid>
+
+                            <Grid item xs={2}>
                                 <FormControl>
                                     <FormLabel>Movie Type</FormLabel>
                                     <RadioGroup

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {ClientError} from "./api_client";
+import {ClientError} from "src/libs/api_client";
 
 const headers = {
     "Content-Type": "application/json",

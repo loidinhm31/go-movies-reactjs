@@ -1,5 +1,4 @@
 import {Box, CardMedia, Chip, Grid, Paper, Stack, Typography} from "@mui/material";
-import {styled} from "@mui/material/styles";
 import format from "date-fns/format";
 import Link from "next/link";
 import {MovieType} from "src/types/movies";

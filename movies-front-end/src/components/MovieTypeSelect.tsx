@@ -1,5 +1,4 @@
-import {Box, FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup} from "@mui/material";
-import {useState} from "react";
+import {FormControl, FormControlLabel, FormLabel, Paper, Radio, RadioGroup} from "@mui/material";
 
 export const movieTypes = ["MOVIE", "TV"] as const;
 

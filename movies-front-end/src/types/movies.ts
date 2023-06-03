@@ -13,6 +13,7 @@ export type MovieType = {
     mpaa_rating?: string,
     image_url?: string,
     video_path?: string,
+    price?: number,
     genres: GenreType[],
     vote_average?: number,
     vote_count?: number,
@@ -29,4 +30,9 @@ export type RatingType = {
     id: number,
     code: string,
     name: string,
+}
+
+export type CollectionType = {
+    username: string,
+    movie_id: number,
 }

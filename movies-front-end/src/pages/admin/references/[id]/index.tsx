@@ -203,8 +203,8 @@ const ReferenceMovie = () => {
 
     const handleChange = (event, name: string) => {
         let value: string | number = event.target.value;
-        if (name === "runtime") {
-            value = Number(value);
+        if (name === "runtime" || name === "price") {
+             value = Number(value);
         } else if (name === "release_date") {
             if (Number.isNaN(new Date(event.target.value).getTime()))
                 return;
@@ -399,7 +399,22 @@ const ReferenceMovie = () => {
                                 />
                             </Grid>
 
-                            <Grid item xs={4}>
+                            <Grid item xs={2}>
+                                <TextField
+                                    fullWidth
+                                    label="Price"
+                                    variant="outlined"
+                                    type="number"
+                                    name="price"
+                                    InputProps={{
+                                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                    }}
+                                    value={movie.price}
+                                    onChange={e => handleChange(e, "price")}
+                                />
+                            </Grid>
+
+                            <Grid item xs={2}>
                                 <FormControl>
                                     <FormLabel>Movie Type</FormLabel>
                                     <RadioGroup

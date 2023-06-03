@@ -14,7 +14,7 @@ import {post} from "src/libs/api";
 import {GenreType} from "src/types/movies";
 import useSWRMutation from "swr/mutation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {useMovieType} from "../../../hooks/useMovieType";
+import {useMovieType} from "src/hooks/useMovieType";
 
 interface SearchGenreProps {
     movieType: string;

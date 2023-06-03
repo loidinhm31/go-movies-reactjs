@@ -1,13 +1,14 @@
-import {withRole} from "src/libs/auth";
+import {withoutRole} from "src/libs/auth";
+import {CollectionType, MovieType} from "src/types/movies";
 import {Direction, PageType} from "src/types/page";
 
-const handler = withRole("admin", async (req, res, token) => {
+const handler = withoutRole("banned", async (req, res, token) => {
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
     headers.append("Authorization", `Bearer ${token.accessToken}`);
 
-    if (req.method === "POST") {
-        let {pageIndex, pageSize, isNew, query} = req.query;
+    if (req.method === "GET") {
+        let {pageIndex, pageSize, type, q} = req.query;
 
         let page: PageType<any> = {
             sort: {
@@ -19,7 +20,7 @@ const handler = withRole("admin", async (req, res, token) => {
                 ]
             }
         }
-        const data: PageType<any> = req.body;
+        const data: PageType<MovieType> = req.body;
         if (data.sort) {
             page = data;
         }
@@ -31,26 +32,22 @@ const handler = withRole("admin", async (req, res, token) => {
         }
 
         try {
-            const response = await fetch(`${process.env.API_BASE_URL}/auth/users?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
-                requestOptions
-            );
+            const response = await fetch(`${process.env.API_BASE_URL}/auth/collections?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`, requestOptions);
             res.status(response.status).json(await response.json());
         } catch (error) {
             res.status(500).json({message: "server error"});
         }
-    } else if (req.method === "PATCH") {
-        const data = req.body;
+    } else if (req.method === "PUT") {
+        const data: CollectionType = req.body;
 
         const requestOptions = {
-            method: "PATCH",
+            method: "PUT",
             headers: headers,
-            body: JSON.stringify(data),
-        }
+            body: JSON.stringify(data)
+        };
 
         try {
-            const response = await fetch(`${process.env.API_BASE_URL}/auth/users/role`,
-                requestOptions
-            );
+            const response = await fetch(`${process.env.API_BASE_URL}/auth/collections`, requestOptions);
             res.status(response.status).json(await response.json());
         } catch (error) {
             res.status(500).json({message: "server error"});

@@ -1,7 +1,7 @@
+import {MovieType} from "src/types/movies";
 import {
     Button,
     CardMedia,
-    Chip,
     FormControl,
     Grid,
     InputLabel,
@@ -14,20 +14,10 @@ import {
     Typography
 } from "@mui/material";
 import Link from "next/link";
-import {PageType} from "src/types/page";
-import {MovieType} from "src/types/movies";
-import {styled} from "@mui/material/styles";
 import format from "date-fns/format";
+import {PageType} from "src/types/page";
 
-const Img = styled("img")({
-    margin: "auto",
-    display: "block",
-    maxWidth: "100%",
-    maxHeight: "100%",
-});
-
-
-interface GridTableProps {
+interface CollectionTableProps {
     page: PageType<MovieType>;
     pageIndex: number;
     setPageIndex: (value: number) => void;
@@ -35,13 +25,14 @@ interface GridTableProps {
     setPageSize: (value: number) => void;
 }
 
-export function GridMovies({
-                               page,
-                               pageIndex,
-                               pageSize,
-                               setPageIndex,
-                               setPageSize
-                           }: GridTableProps) {
+export function CollectionTable({
+                                    page,
+                                    pageIndex,
+                                    pageSize,
+                                    setPageIndex,
+                                    setPageSize
+                                }: CollectionTableProps) {
+
     const handlePageIndexChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPageIndex(value - 1);
     };
@@ -52,9 +43,9 @@ export function GridMovies({
     };
 
     return (
-        <Grid container spacing={2}>
+        <Grid container spacing={1}>
             {page && page.content && page.content.map((movie) => (
-                <Grid key={movie.id} item xs={4}>
+                <Grid key={movie.id} item xs={3}>
                     <Link href={`/movies/${movie.id}`} style={{textDecoration: "none"}}>
                         <Paper
                             sx={{
@@ -63,32 +54,37 @@ export function GridMovies({
                                 flexGrow: 1,
                             }}
                         >
-                            <Grid container spacing={2}>
-                                <Grid item>
-                                    <CardMedia
-                                        component="img"
-                                        sx={{borderRadius: "16px"}}
-                                        src={movie.image_url}
-                                    />
-
+                            <Stack spacing={3}>
+                                <Grid item xs>
+                                    <Stack direction="row" justifyContent="space-between">
+                                        <Typography gutterBottom variant="subtitle1" component="div" sx={{m: 1}}>
+                                            <b>{movie.title}</b>
+                                        </Typography>
+                                        <Button color="error" sx={{m: 1}}>
+                                            <b>{`${movie.price ? movie.price + " USD" : "FREE"}`}</b>
+                                        </Button>
+                                    </Stack>
                                 </Grid>
-                                <Grid item xs container direction="column" spacing={2}>
-                                    <Grid item xs>
-                                        <Stack direction="row" justifyContent="space-between">
-                                            <Typography gutterBottom variant="subtitle1" component="div">
-                                                <b>{movie.title}</b>
-                                            </Typography>
-                                            <Button color="error">
-                                                <b>{`${movie.price ? movie.price + " USD" : "FREE"}`}</b>
-                                            </Button>
-                                        </Stack>
+                                <Grid item container spacing={1}>
+                                    <Grid item xs={6}>
+                                        <CardMedia
+                                            sx={{borderRadius: "16px"}}
+                                            component="img"
+                                            src={movie.image_url}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
                                         <Typography variant="body2" gutterBottom>
                                             {format(new Date(movie.release_date!), "MMMM do, yyyy")}
                                         </Typography>
-                                        <Chip label={movie.mpaa_rating} color="error"/>
+                                        <Typography gutterBottom variant="inherit" component="div">
+                                            {movie.description}
+                                        </Typography>
+
                                     </Grid>
                                 </Grid>
-                            </Grid>
+                            </Stack>
+
                         </Paper>
                     </Link>
 

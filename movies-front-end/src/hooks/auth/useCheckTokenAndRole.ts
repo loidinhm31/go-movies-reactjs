@@ -2,6 +2,7 @@ import {useRouter} from "next/router";
 import {useSession} from "next-auth/react";
 import {useEffect, useState} from "react";
 import {Role} from "src/components/RoleSelect";
+
 export const useCheckTokenAndRole = (roles: Role[]) => {
     const router = useRouter();
     const {data: session, status} = useSession();

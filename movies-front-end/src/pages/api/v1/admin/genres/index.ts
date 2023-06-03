@@ -6,7 +6,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
-    headers.append("Authorization", `Bearer ${token.accessToken}`)
+    headers.append("Authorization", `Bearer ${token.accessToken}`);
 
     const requestOptions = {
         method: "POST",

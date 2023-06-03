@@ -1,4 +1,4 @@
-import {useCallback} from "react";
+import React, {useCallback} from "react";
 import {
     Box,
     Chip,
@@ -45,6 +45,12 @@ const headCells: readonly HeadCell[] = [
         numeric: false,
         disablePadding: false,
         label: "Type",
+    },
+    {
+        id: "price",
+        numeric: true,
+        disablePadding: true,
+        label: "Price (USD)",
     },
     {
         id: "release_date",
@@ -198,6 +204,9 @@ export default function SearchTable({
                                                 </TableCell>
                                                 <TableCell>
                                                     {row.type_code}
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    {`${row.price ? row.price : "FREE"}`}
                                                 </TableCell>
                                                 <TableCell>
                                                     {format(new Date(row.release_date!), "yyyy-MM-dd")}

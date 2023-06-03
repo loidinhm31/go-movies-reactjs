@@ -25,10 +25,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import useSWRMutation from "swr/mutation";
 import {del, post} from "src/libs/api";
 import {NotifyState} from "src/components/shared/snackbar";
-import SearchKey from "../Search/SearchKey";
+import SearchKey from "src/components/Search/SearchKey";
 
 export interface Data {
     title: string;
+    price: number;
     type_code: string;
     release_date: Date;
     rating: number;
@@ -53,6 +54,12 @@ const headCells: readonly HeadCell[] = [
         numeric: false,
         disablePadding: false,
         label: "Type",
+    },
+    {
+        id: "price",
+        numeric: true,
+        disablePadding: true,
+        label: "Price (USD)",
     },
     {
         id: "release_date",
@@ -163,9 +170,6 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                             severity: "info"
                         });
 
-                        setIsConfirmDelete(false);
-                        setDeleteId(null);
-
                         handeRequestPage();
                     }
                 })
@@ -180,9 +184,11 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                 })
                 .finally(() => {
                     setSelectedMovie(null);
+                    setIsConfirmDelete(false);
+                    setDeleteId(null);
                 });
         }
-    }, [deleteId]);
+    }, [deleteId, isConfirmDelete]);
 
     useEffect(() => {
         if (isConfirmDelete) {
@@ -304,6 +310,9 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                                                     </TableCell>
                                                     <TableCell>
                                                         {row.type_code}
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {`${row.price ? row.price : "FREE"}`}
                                                     </TableCell>
                                                     <TableCell>
                                                         {format(new Date(row.release_date!), "yyyy-MM-dd")}

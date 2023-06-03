@@ -1,7 +1,7 @@
 // https://nextjs.org/docs/basic-features/layouts
 
 import type {NextPage} from "next";
-import {SideMenuLayout} from "./SideMenuLayout";
+import {SideMenuLayout} from "src/components/Layout/SideMenuLayout";
 import {Header} from "src/components/Header";
 import {Footer} from "src/components/Footer";
 import {Box, Grid} from "@mui/material";

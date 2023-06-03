@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {UserMenu} from "./UserMenu";
+import {UserMenu} from "src/components/Header/UserMenu";
 import {useSession} from "next-auth/react";
 import {AppBarProps, Box, Button, Toolbar, Typography} from "@mui/material";
 import {styled} from "@mui/material/styles";

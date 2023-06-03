@@ -1,7 +1,6 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {Accordion, AccordionDetails, AccordionSummary, MenuItem, Stack, TextField, Typography} from "@mui/material";
 import {useEffect, useState} from "react";
-import {format} from "date-fns";
 
 interface SearchDateProps {
     label: string;

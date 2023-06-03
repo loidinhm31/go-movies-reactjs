@@ -5,11 +5,12 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import VideoPlayer, {VideoJsOption} from "src/components/Player/VideoPlayer";
 import {Views} from "src/components/Views";
-import SeasonInformation from "./SeasonInformation";
+import SeasonInformation from "src/components/Movie/SeasonInformation";
 import React, {useState} from "react";
 import {get} from "src/libs/api";
 import useSWR from "swr";
 import {MovieType} from "src/types/movies";
+import {BuyCollection} from "src/components/Payment/BuyCollection";
 
 interface WatchMovieProps {
     mutateView: boolean;
@@ -62,6 +63,7 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                         <Typography
                             variant="h4">{movie.type_code === "TV" ? "TV Series" : "Movie"} - {movie.title}</Typography>
                     </Box>
+
                     <Box sx={{p: 1, m: 1}}>
                         <Typography>
                             <small><em>{format(new Date(movie.release_date!), "MMMM do, yyyy")} | </em></small>
@@ -69,12 +71,19 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                             <small><em>Rated {movie.mpaa_rating}</em></small>
                         </Typography>
                     </Box>
-                    <Stack direction="row" sx={{p: 1, m: 1}}>
-                        {movie.genres && movie.genres.map((g, index) => (
-                            <Box key={`${g.id}-${index}`} sx={{p: 1}}>
-                                <Chip key={`${g.id}-${index}`} label={g.name}/>
-                            </Box>
-                        ))}
+
+                    <Stack direction="row" justifyContent="space-between">
+                        <Stack direction="row" sx={{p: 1, m: 1}}>
+                            {movie.genres && movie.genres.map((g, index) => (
+                                <Box key={`${g.id}-${index}`} sx={{p: 1}}>
+                                    <Chip key={`${g.id}-${index}`} label={g.name}/>
+                                </Box>
+                            ))}
+                        </Stack>
+
+                        <BuyCollection
+                            movie={movie}
+                        />
                     </Stack>
                     <Divider/>
 

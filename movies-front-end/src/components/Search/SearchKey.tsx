@@ -1,5 +1,4 @@
 import {Box, TextField} from "@mui/material";
-import {useState} from "react";
 
 interface SearchKeyProps {
     keyword: string;

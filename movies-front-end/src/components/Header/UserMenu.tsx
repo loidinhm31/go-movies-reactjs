@@ -3,7 +3,7 @@ import {signOut, useSession} from "next-auth/react";
 import {Avatar, Box, Divider, IconButton, Menu, MenuItem, MenuList, Tooltip, Typography} from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
-import DashboardIcon from "@mui/icons-material/Dashboard";
+import CameraRollIcon from "@mui/icons-material/CameraRoll";
 import {useHasAnyRole} from "src/hooks/auth/useHasAnyRole";
 import {useRouter} from "next/router";
 import {MilitaryTech} from "@mui/icons-material";
@@ -25,6 +25,7 @@ export function UserMenu() {
     const handleSignOut = useCallback(() => {
         signOut({callbackUrl: "/"});
     }, []);
+
     const {data: session, status} = useSession();
     const isAdminOrMod = useHasAnyRole(["admin", "moderator"]);
 
@@ -34,17 +35,17 @@ export function UserMenu() {
 
     const options: MenuOption[] = [
         {
-            name: "Dashboard",
-            href: "/dashboard",
-            desc: "Dashboard",
-            icon: DashboardIcon,
-            isExternal: false
-        },
-        {
             name: "Account Settings",
             href: "/account",
             desc: "Account Settings",
             icon: SettingsIcon,
+            isExternal: false
+        },
+        {
+            name: "Your Collections",
+            href: "/collections",
+            desc: "Your Collections",
+            icon: CameraRollIcon,
             isExternal: false
         }
     ];
@@ -67,9 +68,9 @@ export function UserMenu() {
                     onClick={handleClick}
                     size="small"
                     sx={{ml: 2}}
-                    aria-controls={open ? 'account-menu' : undefined}
+                    aria-controls={open ? "account-menu" : undefined}
                     aria-haspopup="true"
-                    aria-expanded={open ? 'true' : undefined}
+                    aria-expanded={open ? "true" : undefined}
                 >
                     {session.user.name &&
                         <Avatar sx={{width: 32, height: 32}}>{session.user.name!.at(0)!.toUpperCase()}</Avatar>

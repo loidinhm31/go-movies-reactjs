@@ -5,20 +5,21 @@ import {
     AccordionSummary,
     Autocomplete,
     Box,
-    Button, Container,
+    Button,
+    Container,
     MenuItem,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
 import {FieldData, SearchRequest} from "src/types/search";
-import {SearchDate} from "./SearchDate";
-import {SearchGenre} from "./SearchGenre";
-import {SearchString} from "./SearchString";
+import {SearchDate} from "src/components/Search/SearchMovie/SearchDate";
+import {SearchGenre} from "src/components/Search/SearchMovie/SearchGenre";
+import {SearchString} from "src/components/Search/SearchMovie/SearchString";
 import useSWR from "swr";
 import {RatingType} from "src/types/movies";
 import {get} from "src/libs/api";
-import MovieTypeSelect, {movieTypes} from "../../MovieTypeSelect";
+import MovieTypeSelect from "src/components/MovieTypeSelect";
 import {useState} from "react";
 
 interface SearchFieldProps {

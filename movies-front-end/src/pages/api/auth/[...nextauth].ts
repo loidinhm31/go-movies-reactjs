@@ -6,8 +6,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import KeycloakProvider, {KeycloakProfile} from "next-auth/providers/keycloak";
 import {NextApiRequest} from "next";
 import {MimetypesKind} from "video.js/dist/types/utils/mimetypes";
-import oga = MimetypesKind.oga;
-import {JWT} from "next-auth/jwt";
 
 async function refreshAccessToken(token) {
     try {

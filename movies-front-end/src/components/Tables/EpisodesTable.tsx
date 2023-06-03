@@ -1,5 +1,4 @@
 import {Button, Grid, Paper, Stack, Typography} from "@mui/material";
-import Link from "next/link";
 import format from "date-fns/format";
 import {EpisodeType, SeasonType} from "src/types/seasons";
 import {get} from "src/libs/api";

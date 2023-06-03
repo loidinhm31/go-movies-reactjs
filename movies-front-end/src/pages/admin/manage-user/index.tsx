@@ -3,7 +3,7 @@ import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import {Box, Divider, Paper, Stack, Typography} from "@mui/material";
 import SearchUsers from "src/components/Search/SearchUser/SearchUsers";
 import SearchUsersOIDC from "src/components/Search/SearchUser/SearchUsersOIDC";
-import {useCheckTokenAndRole} from "../../../hooks/auth/useCheckTokenAndRole";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
 import {signIn} from "next-auth/react";
 
 export default function Users() {
