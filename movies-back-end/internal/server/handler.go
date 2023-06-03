@@ -172,10 +172,12 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	collectionHttp.MapAuthCollectionRoutes(authCollectionGroup, iCollectionHandler)
 
 	movieGroup := apiV1.Group("/movies")
+	movieGroup.Use(mw.JWTValidationOptional())
 
 	seasonGroup := apiV1.Group("/seasons")
 
 	episodeGroup := apiV1.Group("/episodes")
+	episodeGroup.Use(mw.JWTValidationOptional())
 
 	genreGroup := apiV1.Group("/genres")
 

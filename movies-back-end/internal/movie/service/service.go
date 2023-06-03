@@ -66,13 +66,16 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 }
 
 func (ms *movieService) GetMovieById(ctx context.Context, id uint) (*dto.MovieDto, error) {
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	isValidUser, isPrivilege := ms.mgmtCtrl.CheckUser(author)
+
 	result, err := ms.movieRepository.FindMovieById(ctx, id)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.ErrResourceNotFound
 	}
 
-	movieDto := mapper.MapToMovieDto(result)
+	movieDto := mapper.MapToMovieDto(result, !isValidUser, isPrivilege)
 	return movieDto, nil
 }
 

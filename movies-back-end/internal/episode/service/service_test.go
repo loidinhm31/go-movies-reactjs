@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -26,7 +27,7 @@ func initMock() (*helper.MockManagementCtrl, *helper.MockSeasonRepository, *help
 
 func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		_, _, mockEpisodeRepo, episodeService := initMock()
+		mockCrtl, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up expectations
 		episodeID := uint(1)
@@ -35,13 +36,16 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 			Name:      "Episode 1",
 			AirDate:   time.Now(),
 			Runtime:   uint(60),
-			VideoPath: "/path/to/episode1",
+			VideoPath: sql.NullString{String: "/path/to/episode1", Valid: true},
 			SeasonID:  uint(1),
 			CreatedAt: time.Now(),
 			CreatedBy: "John",
 			UpdatedAt: time.Now(),
 			UpdatedBy: "John",
 		}
+
+		mockCrtl.On("CheckUser", mock.Anything).Return(false, false)
+
 		mockEpisodeRepo.On("FindEpisodeByID", context.Background(), episodeID).
 			Return(mockEpisode, nil)
 
@@ -55,7 +59,7 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 		assert.Equal(t, mockEpisode.Name, result.Name)
 		assert.Equal(t, mockEpisode.AirDate, result.AirDate)
 		assert.Equal(t, mockEpisode.Runtime, result.Runtime)
-		assert.Equal(t, mockEpisode.VideoPath, result.VideoPath)
+		assert.Equal(t, "", result.VideoPath)
 		assert.Equal(t, mockEpisode.SeasonID, result.SeasonID)
 
 	})
@@ -63,7 +67,7 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 
 func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		_, _, mockEpisodeRepo, episodeService := initMock()
+		mockCrtl, _, mockEpisodeRepo, episodeService := initMock()
 
 		// Set up expectations
 		seasonID := uint(1)
@@ -73,18 +77,20 @@ func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 				Name:      "Episode 1",
 				AirDate:   time.Now(),
 				Runtime:   uint(60),
-				VideoPath: "/path/to/episode1",
-				SeasonID:  uint(seasonID),
+				VideoPath: sql.NullString{String: "/path/to/episode1", Valid: true},
+				SeasonID:  seasonID,
 			},
 			{
 				ID:        uint(2),
 				Name:      "Episode 2",
 				AirDate:   time.Now(),
 				Runtime:   uint(45),
-				VideoPath: "/path/to/episode2",
+				VideoPath: sql.NullString{String: "/path/to/episode2", Valid: true},
 				SeasonID:  seasonID,
 			},
 		}
+		mockCrtl.On("CheckUser", mock.Anything).Return(true, false)
+
 		mockEpisodeRepo.On("FindEpisodesBySeasonID", context.Background(), seasonID).Return(mockEpisodes, nil)
 
 		// Call the service method

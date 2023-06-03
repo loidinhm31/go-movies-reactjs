@@ -1,12 +1,21 @@
 package mapper
 
 import (
+	"database/sql"
 	"movies-service/internal/dto"
 	"movies-service/internal/model"
+	"time"
 )
 
-func MapToMovieDto(movie *model.Movie) *dto.MovieDto {
+func MapToMovieDto(movie *model.Movie, isRestrictResource bool, isPrivilege bool) *dto.MovieDto {
 	genreDtos := MapToGenreDtoSlice(movie.Genres)
+
+	// Filter video path for release date
+	if isRestrictResource ||
+		(!isPrivilege && time.Now().Before(movie.ReleaseDate)) {
+		movie.VideoPath = sql.NullString{}
+	}
+
 	return &dto.MovieDto{
 		ID:          movie.ID,
 		Title:       movie.Title,
@@ -27,7 +36,7 @@ func MapToMovieDto(movie *model.Movie) *dto.MovieDto {
 func MapToMovieDtoSlice(movieSlice []*model.Movie) []*dto.MovieDto {
 	var movieDtos []*dto.MovieDto
 	for _, m := range movieSlice {
-		movieDtos = append(movieDtos, MapToMovieDto(m))
+		movieDtos = append(movieDtos, MapToMovieDto(m, true, false))
 	}
 	return movieDtos
 }
@@ -67,21 +76,27 @@ func MapToSeasonDtoSlice(seasonSlice []*model.Season) []*dto.SeasonDto {
 	return seasonDtos
 }
 
-func MapToEpisodeDto(episode *model.Episode) *dto.EpisodeDto {
+func MapToEpisodeDto(episode *model.Episode, isRestrictResource, isPrivilege bool) *dto.EpisodeDto {
+	// Filter video path for release date
+	if isRestrictResource ||
+		(!isPrivilege && time.Now().Before(episode.AirDate)) {
+		episode.VideoPath = sql.NullString{}
+	}
+
 	return &dto.EpisodeDto{
 		ID:        episode.ID,
 		Name:      episode.Name,
 		AirDate:   episode.AirDate,
 		Runtime:   episode.Runtime,
-		VideoPath: episode.VideoPath,
+		VideoPath: episode.VideoPath.String,
 		SeasonID:  episode.SeasonID,
 	}
 }
 
-func MapToEpisodeDtoSlice(seasonSlice []*model.Episode) []*dto.EpisodeDto {
+func MapToEpisodeDtoSlice(seasonSlice []*model.Episode, isRestrictResource, isPrivilege bool) []*dto.EpisodeDto {
 	var episodeDtos []*dto.EpisodeDto
 	for _, e := range seasonSlice {
-		episodeDtos = append(episodeDtos, MapToEpisodeDto(e))
+		episodeDtos = append(episodeDtos, MapToEpisodeDto(e, isRestrictResource, isPrivilege))
 	}
 	return episodeDtos
 }

@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -22,7 +23,7 @@ type Episode struct {
 	Name      string
 	AirDate   time.Time
 	Runtime   uint
-	VideoPath string
+	VideoPath sql.NullString `gorm:"type:varchar(255), default:null"`
 	SeasonID  uint
 	Season    *Season `gorm:"foreignKey:SeasonID"`
 	CreatedAt time.Time

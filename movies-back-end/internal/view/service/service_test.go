@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/test/helper"
@@ -28,7 +29,7 @@ func TestViewService_RecognizeViewForMovie(t *testing.T) {
 			Viewer: "user123",
 		}
 
-		mockCtrl.On("CheckUser", viewer.Viewer).Return(true)
+		mockCtrl.On("CheckUser", mock.Anything).Return(true, false)
 		mockRepo.On("InsertView", ctx, viewer).Return(nil)
 
 		err := viewService.RecognizeViewForMovie(ctx, viewer)
@@ -64,7 +65,7 @@ func TestViewService_RecognizeViewForMovie(t *testing.T) {
 			Viewer: "user123",
 		}
 
-		mockCtrl.On("CheckUser", viewer.Viewer).Return(false)
+		mockCtrl.On("CheckUser", mock.Anything).Return(false, false)
 
 		err := viewService.RecognizeViewForMovie(ctx, viewer)
 

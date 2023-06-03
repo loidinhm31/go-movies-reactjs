@@ -37,7 +37,8 @@ func NewPaymentService(config *config.Config, managementCtrl control.Service, mo
 func (ps paymentService) VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, movieID uint) error {
 	// Check user
 	log.Printf("checking user...")
-	if !ps.managementCtrl.CheckUser(username) {
+	isValidUser, _ := ps.managementCtrl.CheckUser(username)
+	if !isValidUser {
 		return errors.ErrInvalidClient
 	}
 

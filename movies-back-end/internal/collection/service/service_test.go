@@ -37,7 +37,7 @@ func TestCollectionService_AddCollection(t *testing.T) {
 
 		movieID := uint(123)
 
-		mockCtrl.On("CheckUser", mock.Anything).Return(false)
+		mockCtrl.On("CheckUser", mock.Anything).Return(false, false)
 
 		err := collectionService.AddCollection(context.Background(), movieID)
 		assert.Error(t, err)
@@ -50,7 +50,7 @@ func TestCollectionService_AddCollection(t *testing.T) {
 
 		movieID := uint(123)
 
-		mockCtrl.On("CheckUser", mock.Anything).Return(true)
+		mockCtrl.On("CheckUser", mock.Anything).Return(true, false)
 
 		mockRepo.On("InsertCollection", mock.Anything, mock.Anything).Return(nil)
 
@@ -78,7 +78,7 @@ func TestCollectionService_GetCollectionByUsernameAndMovieID(t *testing.T) {
 
 		movieType := "TV"
 
-		mockCtrl.On("CheckUser", mock.Anything).Return(false)
+		mockCtrl.On("CheckUser", mock.Anything).Return(false, false)
 
 		_, err := collectionService.GetCollectionsByUsernameAndType(context.Background(), movieType,
 			mock.Anything, &pagination.PageRequest{})
@@ -91,7 +91,7 @@ func TestCollectionService_GetCollectionByUsernameAndMovieID(t *testing.T) {
 
 		movieType := "TV"
 
-		mockCtrl.On("CheckUser", mock.Anything).Return(true)
+		mockCtrl.On("CheckUser", mock.Anything).Return(true, false)
 
 		mockRepo.On("FindCollectionsByUsernameAndType", mock.Anything, mock.Anything,
 			mock.Anything, mock.Anything, mock.Anything, mock.Anything).

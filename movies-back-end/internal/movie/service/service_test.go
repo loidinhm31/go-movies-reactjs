@@ -88,9 +88,11 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 
 func TestMovieService_GetMovieById(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
-		_, mockMovieRepo, _, _, movieService := initMock()
+		mockCtrl, mockMovieRepo, _, _, movieService := initMock()
 
 		// Set up mock expectations and return values
+		mockCtrl.On("CheckUser", mock.Anything, mock.Anything).Return(true, false)
+
 		mockMovieRepo.On("FindMovieById", context.Background(), uint(1)).
 			Return(&model.Movie{
 				ID:       uint(1),

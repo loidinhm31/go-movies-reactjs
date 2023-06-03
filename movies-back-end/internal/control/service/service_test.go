@@ -134,7 +134,7 @@ func TestManagementCtrl_CheckAdminPrivilege(t *testing.T) {
 }
 
 func TestManagementCtrl_CheckUser(t *testing.T) {
-	t.Run("True", func(t *testing.T) {
+	t.Run("True User", func(t *testing.T) {
 		mockRepo, controlService := initMock()
 
 		expectedUser := &model.User{
@@ -147,10 +147,34 @@ func TestManagementCtrl_CheckUser(t *testing.T) {
 		mockRepo.On("FindUserByUsername", mock.Anything, mock.Anything).
 			Return(expectedUser, nil)
 
-		result := controlService.CheckUser("user1")
+		isValidUser, isPrivilege := controlService.CheckUser("user1")
 
 		// Assert
-		assert.True(t, result)
+		assert.True(t, isValidUser)
+		assert.False(t, isPrivilege)
+
+		mockRepo.AssertCalled(t, "FindUserByUsername", mock.Anything, &model.User{Username: "user1", IsNew: false})
+	})
+
+	t.Run("True Privilege", func(t *testing.T) {
+		mockRepo, controlService := initMock()
+
+		expectedUser := &model.User{
+			Username: "user1",
+			IsNew:    false,
+			Role: &model.Role{
+				RoleCode: "ADMIN",
+			},
+		}
+		mockRepo.On("FindUserByUsername", mock.Anything, mock.Anything).
+			Return(expectedUser, nil)
+
+		isValidUser, isPrivilege := controlService.CheckUser("user1")
+
+		// Assert
+		assert.True(t, isValidUser)
+		assert.True(t, isPrivilege)
+
 		mockRepo.AssertCalled(t, "FindUserByUsername", mock.Anything, &model.User{Username: "user1", IsNew: false})
 	})
 
@@ -167,10 +191,12 @@ func TestManagementCtrl_CheckUser(t *testing.T) {
 		mockRepo.On("FindUserByUsername", mock.Anything, mock.Anything).
 			Return(expectedUser, nil)
 
-		result := controlService.CheckUser("banneduser")
+		isValidUser, isPrivilege := controlService.CheckUser("banneduser")
 
 		// Assert
-		assert.False(t, result)
+		assert.False(t, isValidUser)
+		assert.False(t, isPrivilege)
+
 		mockRepo.AssertCalled(t, "FindUserByUsername", mock.Anything, &model.User{Username: "banneduser", IsNew: false})
 	})
 
@@ -181,10 +207,11 @@ func TestManagementCtrl_CheckUser(t *testing.T) {
 		mockRepo.On("FindUserByUsername", mock.Anything, mock.Anything).
 			Return(nil, expectedError)
 
-		result := controlService.CheckUser("user1")
+		isValidUser, isPrivilege := controlService.CheckUser("user1")
 
 		// Assert
-		assert.False(t, result)
+		assert.False(t, isValidUser)
+		assert.False(t, isPrivilege)
 		mockRepo.AssertCalled(t, "FindUserByUsername", mock.Anything, &model.User{Username: "user1", IsNew: false})
 	})
 }

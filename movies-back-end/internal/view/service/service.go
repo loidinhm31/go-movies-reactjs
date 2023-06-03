@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/errors"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/view"
 )
 
@@ -29,7 +31,9 @@ func (vs viewService) RecognizeViewForMovie(ctx context.Context, viewer *dto.Vie
 	}
 
 	if viewer.Viewer != "anonymous" {
-		if !vs.mgmtCtrl.CheckUser(viewer.Viewer) {
+		author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+		isValidUser, _ := vs.mgmtCtrl.CheckUser(author)
+		if !isValidUser {
 			return errors.ErrInvalidClient
 		}
 	}

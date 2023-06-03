@@ -33,7 +33,8 @@ func (fs collectionService) AddCollection(ctx context.Context, movieID uint) err
 
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !fs.mgmtCtrl.CheckUser(author) {
+	isValidUser, _ := fs.mgmtCtrl.CheckUser(author)
+	if !isValidUser {
 		return errors.ErrUnAuthorized
 	}
 
@@ -56,7 +57,8 @@ func (fs collectionService) GetCollectionsByUsernameAndType(ctx context.Context,
 
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !fs.mgmtCtrl.CheckUser(author) {
+	isValidUser, _ := fs.mgmtCtrl.CheckUser(author)
+	if !isValidUser {
 		return nil, errors.ErrUnAuthorized
 	}
 

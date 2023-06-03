@@ -105,7 +105,7 @@ CREATE TABLE public.episodes
     name       VARCHAR(50)                     NOT NULL,
     air_date   TIMESTAMP                       NOT NULL,
     runtime    INTEGER                         NOT NULL,
-    video_path VARCHAR(255),
+    video_path VARCHAR(255) DEFAULT NULL,
     season_id  INTEGER REFERENCES seasons (id) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE        NOT NULL,
     created_by TEXT                            NOT NULL,
@@ -176,7 +176,8 @@ VALUES ('Comedy', 'MOVIE', now(), 'admin', now(), 'admin'),
        ('Talk', 'TV', now(), 'admin', now(), 'admin'),
        ('War & Politics', 'TV', now(), 'admin', now(), 'admin');
 
-INSERT INTO public.movies (title, type_code, release_date, runtime, mpaa_rating, description, image_url, price, created_at,
+INSERT INTO public.movies (title, type_code, release_date, runtime, mpaa_rating, description, image_url, price,
+                           created_at,
                            created_by,
                            updated_at, updated_by)
 VALUES ('Highlander', 'MOVIE', '1986-03-07', 116, 'R',

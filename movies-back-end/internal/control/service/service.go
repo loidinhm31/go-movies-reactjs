@@ -45,16 +45,26 @@ func (mc *managementCtrl) CheckAdminPrivilege(username string) bool {
 	return false
 }
 
-func (mc *managementCtrl) CheckUser(username string) bool {
+func (mc *managementCtrl) CheckUser(username string) (bool, bool) {
 	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
 		Username: username,
 		IsNew:    false,
 	})
 	if err != nil {
-		return false
+		return false, false
 	}
+
+	isValidUser := false
+	isPrivilege := false
+
 	if theUser.Username == username && theUser.Role.RoleCode != "BANNED" {
-		return true
+		isValidUser = true
 	}
-	return false
+
+	if theUser.Username == username &&
+		(theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD") {
+		isPrivilege = true
+	}
+
+	return isValidUser, isPrivilege
 }
