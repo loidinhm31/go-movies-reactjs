@@ -9,6 +9,24 @@ const handler = async (req, res) => {
         headers: headers,
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     const response = await fetch(`${process.env.API_BASE_URL}/views/${movieId}`,
         requestOptions
     );

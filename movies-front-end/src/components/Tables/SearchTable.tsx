@@ -19,9 +19,10 @@ import format from "date-fns/format";
 
 export interface Data {
     title: string;
+    price: number;
     type_code: string;
     release_date: Date;
-    runtime: number
+    runtime: number;
     description: string;
     mpaa_rating: string;
 }
@@ -206,7 +207,7 @@ export default function SearchTable({
                                                     {row.type_code}
                                                 </TableCell>
                                                 <TableCell align="right">
-                                                    {`${row.price ? row.price : "FREE"}`}
+                                                    {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : ""}`}
                                                 </TableCell>
                                                 <TableCell>
                                                     {format(new Date(row.release_date!), "yyyy-MM-dd")}

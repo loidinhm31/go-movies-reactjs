@@ -1,6 +1,6 @@
 import {Stack} from "@mui/material";
 import {useRouter} from "next/router";
-import React, {useState} from "react";
+import React from "react";
 import WatchMovie from "src/components/Movie/WatchMovie";
 import {useHasUsername} from "src/hooks/auth/useHasUsername";
 
@@ -10,13 +10,9 @@ function Movie() {
 
     const author = useHasUsername();
 
-    const [mutateView, setMutateView] = useState(false);
-
     return (
         <Stack spacing={2}>
             <WatchMovie
-                mutateView={mutateView}
-                setMutateView={setMutateView}
                 author={author}
                 movieId={parseInt(id as string)}
             />

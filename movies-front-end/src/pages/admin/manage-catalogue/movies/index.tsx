@@ -464,18 +464,20 @@ const EditMovie = () => {
                             </Grid>
 
                             <Grid item xs={2}>
-                                <TextField
-                                    fullWidth
-                                    label="Price"
-                                    variant="outlined"
-                                    type="number"
-                                    name="price"
-                                    InputProps={{
-                                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
-                                    }}
-                                    value={movie.price}
-                                    onChange={e => handleChange(e, "price")}
-                                />
+                                {movie.type_code === "MOVIE" &&
+                                    <TextField
+                                        fullWidth
+                                        label="Price"
+                                        variant="outlined"
+                                        type="number"
+                                        name="price"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                        }}
+                                        value={movie.price}
+                                        onChange={e => handleChange(e, "price")}
+                                    />
+                                }
                             </Grid>
 
                             <Grid item xs={2}>

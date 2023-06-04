@@ -1,8 +1,11 @@
-const handler = async (req, res) => {
+import {withoutRole} from "src/libs/auth";
+
+const handler = withoutRole("banned", async (req, res, token) => {
     let data = req.body;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${token.accessToken}`);
 
     const requestOptions = {
         method: "POST",
@@ -11,7 +14,7 @@ const handler = async (req, res) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/views`,
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/views`,
             requestOptions
         );
 
@@ -20,6 +23,6 @@ const handler = async (req, res) => {
         console.log(error);
     }
 
-};
+});
 
 export default handler;

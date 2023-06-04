@@ -4,10 +4,12 @@ import {Box, Button, Container, Typography} from "@mui/material";
 
 interface CheckoutFormProps {
     paymentId: string;
-    movieId: number;
+    type: string;
+    movieId?: number;
+    episodeId?: number;
 }
 
-export default function CheckoutForm({paymentId, movieId}: CheckoutFormProps) {
+export default function CheckoutForm({paymentId, type, movieId, episodeId}: CheckoutFormProps) {
     const stripe = useStripe();
     const elements = useElements();
 
@@ -26,11 +28,18 @@ export default function CheckoutForm({paymentId, movieId}: CheckoutFormProps) {
 
         setIsProcessing(true);
 
+        let path;
+        if (type === "MOVIE") {
+            path = `checkout/verify?providerPaymentId=${paymentId}&type=${type}&movieId=${movieId}`
+        } else if (type === "TV") {
+            path = `checkout/verify?providerPaymentId=${paymentId}&type=${type}&movieId=${movieId}&episodeId=${episodeId}`;
+        }
+
         const {error} = await stripe.confirmPayment({
             elements,
             confirmParams: {
                 // Make sure to change this to your payment completion page
-                return_url: `${window.location.origin}/checkout/verify?providerPaymentId=${paymentId}&movieId=${movieId}`,
+                return_url: `${window.location.origin}/${path}`,
 
             },
         });

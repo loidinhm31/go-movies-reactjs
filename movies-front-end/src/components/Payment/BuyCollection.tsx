@@ -7,33 +7,55 @@ import {useHasUsername} from "src/hooks/auth/useHasUsername";
 import {useEffect, useState} from "react";
 import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck";
 import {useRouter} from "next/router";
+import {EpisodeType} from "src/types/seasons";
 
 interface CollectionProps {
+    wasAdded: boolean;
+    setWasAdded: (flag1: boolean) => void;
     movie: MovieType;
+    episode?: EpisodeType;
 }
 
-export function BuyCollection({movie}: CollectionProps) {
+export function BuyCollection({wasAdded, setWasAdded, movie, episode}: CollectionProps) {
     const username = useHasUsername();
 
     const router = useRouter();
 
-    const {trigger: addMovie} = useSWRMutation("/api/v1/collections", put);
+    const [refId, setRefId] = useState<number>();
 
-    const {trigger: checkBuy} = useSWRMutation(`/api/v1/collections/check?username=${username}&movieId=${movie.id!}`, get);
+    const {trigger: addCollection} = useSWRMutation("/api/v1/collections", put);
 
-    const [wasAdded, setWasAdded] = useState(false);
+    const {trigger: checkBuy} = useSWRMutation(`/api/v1/collections/check?type=${movie.type_code}&refId=${refId}`, get);
 
     useEffect(() => {
-        checkBuy().then((result) => {
-            if (result.movie_id === movie.id! && result.username === username) {
-                setWasAdded(true);
-            }
-        });
-    }, [username]);
+        if (movie.type_code === "MOVIE") {
+            setRefId(movie.id!);
+        } else if (movie.type_code === "TV") {
+            setRefId(episode?.id);
+        }
+    }, [movie, episode]);
+
+    useEffect(() => {
+        if (refId) {
+            checkBuy().then((result: CollectionType) => {
+                if (movie.type_code === "MOVIE") {
+                    if (result.movie_id === refId && result.username === username) {
+                        setWasAdded(true);
+                    }
+                } else if (movie.type_code === "TV") {
+                    if (result.episode_id === refId && result.username === username) {
+                        setWasAdded(true);
+                    }
+                }
+            });
+        }
+    }, [username, refId]);
 
     const handleClickAddToCollection = () => {
-        addMovie({
+        addCollection({
             movie_id: movie.id!,
+            episode_id: episode?.id!,
+            type_code: movie.type_code,
         } as CollectionType).then((result) => {
             if (result.message === "ok") {
                 setWasAdded(true);
@@ -42,7 +64,7 @@ export function BuyCollection({movie}: CollectionProps) {
     }
 
     const handleBuyCollection = () => {
-        router.push(`/checkout?movieId=${movie.id!}`);
+        router.push(`/checkout?type=${movie.type_code}&refId=${refId}`);
     }
 
 
@@ -57,13 +79,20 @@ export function BuyCollection({movie}: CollectionProps) {
                         <LibraryAddCheckIcon sx={{m: 1}}/> Collected
                     </Button>
                 </Box>
-            ) : movie.price ?
+            ) : (movie.type_code === "MOVIE" && movie.price) || (movie.type_code === "TV" && episode?.price) ?
                 (
                     <Stack>
                         <Button color="error">
-                            <Typography variant="overline">
-                                Price: <b>{movie.price}</b> USD
-                            </Typography>
+                            {movie.type_code === "MOVIE" ? (
+                                <Typography variant="overline">
+                                    Price: <b>{movie.price}</b> USD
+                                </Typography>
+                            ) : (
+                                <Typography variant="overline">
+                                    Price: <b>{episode?.price}</b> USD
+                                </Typography>
+                            )
+                            }
                         </Button>
                         <Button
                             variant="contained"
@@ -87,6 +116,5 @@ export function BuyCollection({movie}: CollectionProps) {
                 )
             }
         </>
-    )
-        ;
+    );
 }

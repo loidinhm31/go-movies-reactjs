@@ -1,4 +1,4 @@
-import {withOptionalRole} from "../../../../../libs/auth";
+import {withOptionalRole} from "src/libs/auth";
 
 const handler = withOptionalRole("banned", async (req, res, token) => {
     let {id} = req.query;

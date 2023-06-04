@@ -13,14 +13,16 @@ import {MovieType} from "src/types/movies";
 import {BuyCollection} from "src/components/Payment/BuyCollection";
 
 interface WatchMovieProps {
-    mutateView: boolean;
-    setMutateView: (flag: boolean) => void;
     author: string;
     movieId: number;
     episodeId?: number;
 }
 
-export default function WatchMovie({mutateView, setMutateView, author, movieId, episodeId}: WatchMovieProps) {
+export default function WatchMovie({author, movieId, episodeId}: WatchMovieProps) {
+    const [mutateView, setMutateView] = useState(false);
+
+    const [wasAdded, setWasAdded] = useState(false);
+
     const [open, setOpen] = useState(false);
 
     const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
@@ -81,9 +83,13 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                             ))}
                         </Stack>
 
-                        <BuyCollection
-                            movie={movie}
-                        />
+                        {movie.type_code === "MOVIE" &&
+                            <BuyCollection
+                                wasAdded={wasAdded}
+                                setWasAdded={setWasAdded}
+                                movie={movie}
+                            />
+                        }
                     </Stack>
                     <Divider/>
 
@@ -102,7 +108,7 @@ export default function WatchMovie({mutateView, setMutateView, author, movieId, 
                                         </Box>
                                     }
 
-                                    {movie.video_path && movie.video_path !== "" &&
+                                    {wasAdded && movie.video_path && movie.video_path !== "" &&
                                         <Box sx={{m: 1, p: 1}}>
                                             <Button variant="contained" color="secondary" onClick={handleClickOpen}>
                                                 Watch this movie

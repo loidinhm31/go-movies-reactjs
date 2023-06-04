@@ -1,5 +1,7 @@
-const handler = async (req, res) => {
-    const {username, movieId} = req.query;
+import {withOptionalRole} from "src/libs/auth";
+
+const handler = withOptionalRole("banned", async (req, res, token) => {
+    const {refId, type} = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -10,7 +12,7 @@ const handler = async (req, res) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/collections?username=${username}&movieId=${movieId}`,
+        const response = await fetch(`${process.env.API_BASE_URL}/collections?username=${token.id}&type=${type}&refId=${refId}`,
             requestOptions
         );
 
@@ -19,6 +21,6 @@ const handler = async (req, res) => {
         res.status(500).json({message: "server error"});
     }
 
-};
+});
 
 export default handler;

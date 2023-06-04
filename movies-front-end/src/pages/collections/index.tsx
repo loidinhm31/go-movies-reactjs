@@ -1,28 +1,26 @@
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-import {Box, Divider, Grid, Stack, TextField, Typography} from "@mui/material";
-import MovieTypeSelect, {movieTypes} from "src/components/MovieTypeSelect";
-import {useEffect, useState} from "react";
-import {CollectionTable} from "src/components/Tables/CollectionTable";
-import {get} from "src/libs/api";
-import useSWR from "swr";
+import {Box, Divider, Paper, Stack, Tab, Tabs, Typography} from "@mui/material";
+import {movieTypes} from "src/components/MovieTypeSelect";
+import {useState} from "react";
+import {CollectionMovieTab} from "src/components/Tab/CollectionMovieTab";
+import {TabPanel} from "src/components/Tab/TabPanel";
+import TheatersIcon from "@mui/icons-material/Theaters";
+import TvIcon from "@mui/icons-material/Tv";
+import {CollectionEpisodeTab} from "src/components/Tab/CollectionEpisodeTab";
 
 export default function Collection() {
-    const [searchKey, setSearchKey] = useState<string>("");
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
     const [selectedType, setSelectedType] = useState<string>(movieTypes[0]);
 
-    const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(9);
 
 
-    const {data: page} =
-        useSWR(`/api/v1/collections?type=${selectedType}&q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`, get);
+    const [tabValue, setTabValue] = useState(0);
 
-    useEffect(() => {
-        setPageIndex(0);
-    }, [pageSize, searchKey]);
+    const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
+        setTabValue(newValue);
+    };
 
     return (
         <>
@@ -33,43 +31,27 @@ export default function Collection() {
                 </Box>
                 <Divider/>
 
-                <Grid container spacing={2}>
-                    <Grid item xs="auto">
-                        <Box sx={{m: 1}}>
-                            <MovieTypeSelect
-                                selectedType={selectedType}
-                                setSelectedType={setSelectedType}
-                            />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Box sx={{m: 1}}>
-                            <TextField
-                                fullWidth
-                                label="Keyword"
-                                variant="outlined"
-                                value={searchKey}
-                                onChange={e => setSearchKey(e.target.value)}
-                            />
+                <Paper
+                    elevation={3}
+                    sx={{p: 2}}
+                >
+                    <Tabs value={tabValue} onChange={handleChangeTab} aria-label="icon label tabs example">
+                        <Tab icon={<TheatersIcon/>} label="Movies"/>
+                        <Tab icon={<TvIcon/>} label="TV Series"/>
+                    </Tabs>
+                </Paper>
 
-                        </Box>
+                <Box component="span"
+                     sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
 
-                    </Grid>
+                    <TabPanel value={tabValue} index={0}>
+                        <CollectionMovieTab/>
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={1}>
+                        <CollectionEpisodeTab/>
+                    </TabPanel>
 
-
-                    {page &&
-                        <Box component="span"
-                             sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
-                            <CollectionTable
-                                page={page}
-                                pageIndex={pageIndex}
-                                pageSize={pageSize}
-                                setPageIndex={setPageIndex}
-                                setPageSize={setPageSize}
-                            />
-                        </Box>
-                    }
-                </Grid>
+                </Box>
             </Stack>
 
         </>

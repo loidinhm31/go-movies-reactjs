@@ -19,11 +19,19 @@ export default function ViewEpisode({episode}: ViewEpisodeProps) {
                     {format(new Date(episode.air_date!), "MMMM do, yyyy")}
                 </Typography>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
                 <Stack direction="row" spacing={2} sx={{display: "flex", alignItems: "center"}}>
                     <Typography variant="subtitle2">Runtime</Typography>
                     <Typography variant="subtitle2">
                         {episode.runtime} minutes
+                    </Typography>
+                </Stack>
+            </Grid>
+            <Grid item xs={6}>
+                <Stack direction="row" spacing={2} sx={{display: "flex", alignItems: "center"}}>
+                    <Typography variant="subtitle2">Price</Typography>
+                    <Typography variant="subtitle2">
+                        {`${episode.price ? `${episode.price} USD` : "FREE"}`}
                     </Typography>
                 </Stack>
             </Grid>

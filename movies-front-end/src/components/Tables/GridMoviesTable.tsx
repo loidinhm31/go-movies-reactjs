@@ -78,9 +78,11 @@ export function GridMovies({
                                             <Typography gutterBottom variant="subtitle1" component="div">
                                                 <b>{movie.title}</b>
                                             </Typography>
-                                            <Button color="error">
-                                                <b>{`${movie.price ? movie.price + " USD" : "FREE"}`}</b>
-                                            </Button>
+                                            {movie.type_code === "MOVIE" &&
+                                                <Button color="error">
+                                                    <b>{`${movie.price ? movie.price + " USD" : "FREE"}`}</b>
+                                                </Button>
+                                            }
                                         </Stack>
                                         <Typography variant="body2" gutterBottom>
                                             {format(new Date(movie.release_date!), "MMMM do, yyyy")}

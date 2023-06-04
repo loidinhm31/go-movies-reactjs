@@ -6,27 +6,41 @@ import {Box, Button, Typography} from "@mui/material";
 
 export default function CheckoutAuthorize() {
     const router = useRouter();
-    const {providerPaymentId, movieId} = router.query;
+    const {providerPaymentId, type, movieId, episodeId} = router.query;
 
     const [isProcessing, setIsProcessing] = useState(true);
 
     const [isError, setIsError] = useState(false);
 
-    const {trigger: verifyPayment} = useSWRMutation(`/api/v1/payments/${providerPaymentId}/verification?&movieId=${movieId}`, get);
+    const [refId, setRefId] = useState<number>();
+
+    const {trigger: verifyPayment} = useSWRMutation(`/api/v1/payments/${providerPaymentId}/verification?type=${type}&refId=${refId}`, get);
 
     useEffect(() => {
-        if (movieId) {
+        if (type === "MOVIE") {
+             setRefId(Number(movieId));
+        } else if (type === "TV") {
+            setRefId(Number(episodeId));
+        }
+    }, [type, movieId, episodeId]);
+
+    useEffect(() => {
+        if (refId) {
             setIsProcessing(true);
             verifyPayment().then((result) => {
                 if (result.message === "ok") {
-                    return router.replace(`/checkout/completion?movieId=${movieId}`);
+                   if (type === "MOVIE") {
+                       return router.replace(`/checkout/completion?type=${type}&movieId=${movieId}`);
+                   } else if (type === "TV") {
+                       return router.replace(`/checkout/completion?type=${type}&movieId=${movieId}&episodeId=${episodeId}`);
+                   }
                 }
             }).catch((error) => {
                 setIsError(true);
             });
             setIsProcessing(false);
         }
-    }, [movieId])
+    }, [refId])
 
     return (
         <Box sx={{display: "flex", justifyContent: "center", p: 5, m: 5}}>

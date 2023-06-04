@@ -47,20 +47,19 @@ export function EpisodesTable({season}: GridTableProps) {
                             </Grid>
                             <Grid item xs={12}>
                                 <Stack direction="row" spacing={2} sx={{display: "flex", alignItems: "center"}}>
-                                    <Typography variant="subtitle2">Video</Typography>
-
-                                    {e.video_path ? (
-                                        <Button
-                                            variant="contained"
-                                            href={`/movies/episodes/${e.id}?movieId=${season.movie_id}`}>
-                                            Watch Movie <VisibilityIcon/>
-                                        </Button>
-                                    ) : (
-                                        <Typography color="error" variant="subtitle2">
-                                            Unavailable
-                                        </Typography>
-                                    )
-                                    }
+                                    <Typography variant="subtitle2">Price</Typography>
+                                    <Typography color="error" variant="subtitle2">
+                                        {`${e.price ? `${e.price} USD` : "FREE"}`}
+                                    </Typography>
+                                </Stack>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Stack direction="row" spacing={2} sx={{display: "flex", alignItems: "center"}}>
+                                    <Button
+                                        variant="contained"
+                                        href={`/movies/episodes/${e.id}?movieId=${season.movie_id}`}>
+                                        Watch Movie <VisibilityIcon/>
+                                    </Button>
                                 </Stack>
                             </Grid>
                         </Grid>

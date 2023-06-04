@@ -312,7 +312,7 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                                                         {row.type_code}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {`${row.price ? row.price : "FREE"}`}
+                                                        {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : ""}`}
                                                     </TableCell>
                                                     <TableCell>
                                                         {format(new Date(row.release_date!), "yyyy-MM-dd")}

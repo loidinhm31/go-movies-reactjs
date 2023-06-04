@@ -1,16 +1,19 @@
 import {withoutRole} from "src/libs/auth";
 
 const handler = withoutRole("banned", async (req, res, token) => {
-    let {id, type, refId} = req.query;
+    let {episodeId} = req.query;
 
-    const username = token.id;
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${token.accessToken}`);
 
     const requestOptions = {
         method: "GET",
+        headers: headers,
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/payments/stripe/${id}/verification?username=${username}&type=${type}&refId=${refId}`,
+        const response = await fetch(`${process.env.API_BASE_URL}/auth/movies?episodeId=${episodeId}`,
             requestOptions
         );
 
@@ -18,7 +21,6 @@ const handler = withoutRole("banned", async (req, res, token) => {
     } catch (error) {
         res.status(500).json({message: "server error"});
     }
-
 });
 
 export default handler;

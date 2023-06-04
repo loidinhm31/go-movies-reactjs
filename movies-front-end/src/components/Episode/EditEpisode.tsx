@@ -43,6 +43,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         air_date: format(new Date(), "yyyy-MM-dd"),
         runtime: 0,
         season_id: seasonId,
+        price: 0,
     }
 
     const [episode, setEpisode] = useState<EpisodeType>(clearObj);
@@ -147,6 +148,9 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
 
                 // Clear form for adding new object
                 setEpisode(clearObj);
+                setVideoFile(null);
+                setVideoPath("");
+                setOpenEdit(false);
             }
         }).catch((error) => {
             setNotifyState({
@@ -161,7 +165,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
 
     const handleChange = (event, name: string) => {
         let value: string | number = event.target.value;
-        if (name === "runtime") {
+        if (name === "runtime" || name === "price") {
             value = Number(value);
         } else if (name === "air_date") {
             if (Number.isNaN(new Date(event.target.value).getTime()))
@@ -361,6 +365,21 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                         }}
                                         value={episode.runtime}
                                         onChange={e => handleChange(e, "runtime")}
+                                    />
+                                </Grid>
+
+                                <Grid item xs={3}>
+                                    <TextField
+                                        fullWidth
+                                        label="Price"
+                                        variant="outlined"
+                                        type="number"
+                                        name="price"
+                                        InputProps={{
+                                            endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                        }}
+                                        value={episode.price}
+                                        onChange={e => handleChange(e, "price")}
                                     />
                                 </Grid>
 

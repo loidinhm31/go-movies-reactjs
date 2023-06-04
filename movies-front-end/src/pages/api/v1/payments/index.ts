@@ -5,6 +5,7 @@ import {withoutRole} from "src/libs/auth";
 const handler = withoutRole("banned", async (req, res) => {
     try {
         const payment = req.body;
+        console.log(payment)
 
         const stripePromise = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`, {
             apiVersion: "2022-11-15"

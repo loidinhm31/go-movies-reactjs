@@ -3,10 +3,14 @@ import {Box, Button, Stack, Typography} from "@mui/material";
 
 export default function PaymentComplete() {
     const router = useRouter();
-    const {movieId} = router.query;
+    const {type, movieId, episodeId} = router.query;
 
     function handleGoTo() {
-        router.replace(`/movies/${movieId}`);
+        if (type === "MOVIE") {
+            router.replace(`/movies/${movieId}`);
+        } else if (type === "TV") {
+            router.replace(`/movies/episodes/${episodeId}?movieId=${movieId}`);
+        }
     }
 
     return (
