@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"movies-service/internal/blob"
@@ -13,6 +14,7 @@ import (
 	"movies-service/internal/middlewares"
 	"movies-service/internal/model"
 	"movies-service/internal/movie"
+	"movies-service/internal/payment"
 	"movies-service/pkg/pagination"
 	"strings"
 	"sync"
@@ -22,14 +24,16 @@ type movieService struct {
 	mgmtCtrl             control.Service
 	movieRepository      movie.Repository
 	collectionRepository collection.Repository
+	paymentRepository    payment.Repository
 	blobService          blob.Service
 }
 
-func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, collectionRepository collection.Repository, blobService blob.Service) movie.Service {
+func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, collectionRepository collection.Repository, paymentRepository payment.Repository, blobService blob.Service) movie.Service {
 	return &movieService{
 		mgmtCtrl:             mgmtCtrl,
 		movieRepository:      movieRepository,
 		collectionRepository: collectionRepository,
+		paymentRepository:    paymentRepository,
 		blobService:          blobService,
 	}
 }
@@ -65,14 +69,33 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 	}, nil
 }
 
-func (ms *movieService) GetMovieById(ctx context.Context, id uint) (*dto.MovieDto, error) {
+func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDto, error) {
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	isValidUser, isPrivilege := ms.mgmtCtrl.CheckUser(author)
 
-	result, err := ms.movieRepository.FindMovieById(ctx, id)
+	result, err := ms.movieRepository.FindMovieByID(ctx, id)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.ErrResourceNotFound
+	}
+
+	// Check valid video path
+	if result.Price.Valid {
+		thePayment, err := ms.paymentRepository.FindByTypeCodeAndRefID(ctx, result.TypeCode, result.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if !(thePayment.TypeCode == result.TypeCode && thePayment.RefID == result.ID) {
+			theCollection, err := ms.collectionRepository.FindCollectionByMovieID(ctx, result.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			if !(theCollection.TypeCode == result.TypeCode && uint(theCollection.MovieID.Int64) == result.ID) {
+				result.VideoPath = sql.NullString{}
+			}
+		}
 	}
 
 	movieDto := mapper.MapToMovieDto(result, !isValidUser, isPrivilege)
@@ -156,7 +179,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	}
 
 	// Check movie exists
-	movieObj, err := ms.movieRepository.FindMovieById(ctx, movie.ID)
+	movieObj, err := ms.movieRepository.FindMovieByID(ctx, movie.ID)
 	if err != nil {
 		return errors.ErrResourceNotFound
 	}
@@ -198,7 +221,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	return nil
 }
 
-func (ms *movieService) DeleteMovieById(ctx context.Context, id uint) error {
+func (ms *movieService) RemoveMovieByID(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
 	}
@@ -221,7 +244,7 @@ func (ms *movieService) DeleteMovieById(ctx context.Context, id uint) error {
 	}
 
 	// Get current movie
-	movieObj, err := ms.movieRepository.FindMovieById(ctx, id)
+	movieObj, err := ms.movieRepository.FindMovieByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -265,9 +288,23 @@ func (ms *movieService) DeleteMovieById(ctx context.Context, id uint) error {
 		wg.Wait()
 	}
 
-	err = ms.movieRepository.DeleteMovieById(ctx, id)
+	err = ms.movieRepository.DeleteMovieByID(ctx, id)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (ms *movieService) GetMovieByEpisodeID(ctx context.Context, episodeID uint) (*dto.MovieDto, error) {
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	isValidUser, isPrivilege := ms.mgmtCtrl.CheckUser(author)
+
+	result, err := ms.movieRepository.FindMovieByEpisodeID(ctx, episodeID)
+	if err != nil {
+		log.Println(err)
+		return nil, errors.ErrResourceNotFound
+	}
+
+	movieDto := mapper.MapToMovieDto(result, !isValidUser, isPrivilege)
+	return movieDto, nil
 }

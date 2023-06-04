@@ -41,3 +41,16 @@ func (pr paymentRepository) FindByProviderPaymentID(ctx context.Context, provide
 	}
 	return result, nil
 }
+
+func (pr paymentRepository) FindByTypeCodeAndRefID(ctx context.Context, typeCode string, refID uint) (*model.Payment, error) {
+	var result *model.Payment
+	tx := pr.db.WithContext(ctx)
+	if pr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("type_code = ? AND ref_id = ?", typeCode, refID).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

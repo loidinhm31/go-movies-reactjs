@@ -119,7 +119,7 @@ func TestSeasonService_AddSeason(t *testing.T) {
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
-		mockMovieRepo.On("FindMovieById", mock.Anything, uint(1)).Return(movieObj, nil)
+		mockMovieRepo.On("FindMovieByID", mock.Anything, uint(1)).Return(movieObj, nil)
 		mockSeasonRepo.On("InsertSeason", mock.Anything, mock.AnythingOfType("*model.Season")).Return(nil)
 
 		// Call the service method
@@ -217,7 +217,7 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(mockSeason, nil)
-		mockMovieRepo.On("FindMovieById", mock.Anything, uint(1)).Return(mockSeason.Movie, nil)
+		mockMovieRepo.On("FindMovieByID", mock.Anything, uint(1)).Return(mockSeason.Movie, nil)
 		mockSeasonRepo.On("UpdateSeason", mock.Anything, mock.AnythingOfType("*model.Season")).Return(nil)
 
 		// Call the service method

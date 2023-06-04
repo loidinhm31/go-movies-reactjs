@@ -6,5 +6,5 @@ import (
 )
 
 type Service interface {
-	VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, movieID uint) error
+	VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, typeCode string, refID uint) error
 }

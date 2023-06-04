@@ -90,9 +90,9 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iAuthService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, managementCtrl, iRoleRepo, iUserRepo)
 	iRoleService := roleService.NewRoleService(iRoleRepo)
 	iBlobService := blobService.NewBlobService(s.cfg, managementCtrl)
-	iMovieService := movieService.NewMovieService(managementCtrl, iMovieRepo, iCollectionRepo, iBlobService)
+	iMovieService := movieService.NewMovieService(managementCtrl, iMovieRepo, iCollectionRepo, iPaymentRepo, iBlobService)
 	iSeasonService := seasonService.NewSeasonService(managementCtrl, iMovieRepo, iSeasonRepo, iEpisodeRepo)
-	iEpisodeService := episodeService.NewEpisodeService(managementCtrl, iSeasonRepo, iEpisodeRepo)
+	iEpisodeService := episodeService.NewEpisodeService(managementCtrl, iSeasonRepo, iCollectionRepo, iPaymentRepo, iEpisodeRepo, iBlobService)
 	iGenreService := genreService.NewGenreService(managementCtrl, iGenreRepo)
 	iSearchService := searchService.NewSearchService(iSearchRepo)
 	iAnalysisService := analysisService.NewAnalysisService(managementCtrl, iAnalysisRepo)
@@ -100,7 +100,7 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iReferenceService := integrationService.NewReferenceService(s.cfg, managementCtrl)
 	iUserService := userService.NewUserService(managementCtrl, iRoleRepo, iUserRepo)
 	iRatingService := ratingService.NewRatingService(iRatingRepo)
-	iCollectionService := collectionService.NewCollectionService(managementCtrl, iCollectionRepo)
+	iCollectionService := collectionService.NewCollectionService(managementCtrl, iMovieRepo, iEpisodeRepo, iCollectionRepo)
 	iPaymentService := paymentService.NewPaymentService(s.cfg, managementCtrl, iMovieRepo, iPaymentRepo, iCollectionRepo)
 
 	// Init handler
@@ -170,6 +170,10 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	authCollectionGroup := authGroup.Group("/collections")
 	authCollectionGroup.Use(mw.JWTValidation())
 	collectionHttp.MapAuthCollectionRoutes(authCollectionGroup, iCollectionHandler)
+
+	authViewGroup := authGroup.Group("/views")
+	authViewGroup.Use(mw.JWTValidation())
+	viewHttp.MapAuthViewRoutes(authViewGroup, iViewHandler)
 
 	movieGroup := apiV1.Group("/movies")
 	movieGroup.Use(mw.JWTValidationOptional())

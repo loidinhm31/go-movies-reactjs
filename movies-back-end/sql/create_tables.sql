@@ -107,6 +107,7 @@ CREATE TABLE public.episodes
     runtime    INTEGER                         NOT NULL,
     video_path VARCHAR(255) DEFAULT NULL,
     season_id  INTEGER REFERENCES seasons (id) NOT NULL,
+    price      FLOAT        DEFAULT NULL,
     created_at TIMESTAMP WITH TIME ZONE        NOT NULL,
     created_by TEXT                            NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE        NOT NULL,
@@ -116,6 +117,8 @@ CREATE TABLE public.episodes
 CREATE TABLE public.payments
 (
     id                  SERIAL PRIMARY KEY,
+    ref_id              INTEGER                  NOT NULL,
+    type_code           VARCHAR(10)              NOT NULL,
     provider            VARCHAR(255)             NOT NULL,
     provider_payment_id VARCHAR(255) DEFAULT NULL,
     amount              FLOAT                    NOT NULL,
@@ -129,14 +132,15 @@ CREATE TABLE public.payments
 
 CREATE TABLE public.collections
 (
+    id         SERIAL PRIMARY KEY,
     username   VARCHAR(50) REFERENCES users (username),
-    movie_id   INTEGER REFERENCES movies (id),
-    payment_id INTEGER REFERENCES payments (id) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE         NOT NULL,
-    created_by TEXT                             NOT NULL,
-    PRIMARY KEY (username, movie_id)
+    movie_id   INTEGER DEFAULT NULL,
+    episode_id INTEGER DEFAULT NULL,
+    type_code  VARCHAR(10)              NOT NULL,
+    payment_id INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_by TEXT                     NOT NULL
 );
-
 
 INSERT INTO public.ratings(code, name, created_at, created_by, updated_at, updated_by)
 VALUES ('G', 'G', now(), 'admin', now(), 'admin'),

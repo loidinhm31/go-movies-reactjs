@@ -17,4 +17,5 @@ func MapAuthMovieRoutes(movieGroup *gin.RouterGroup, h movie.Handler) {
 	movieGroup.PUT("/", h.PutMovie())
 	movieGroup.DELETE("/:id", h.DeleteMovie())
 	movieGroup.PATCH("/", h.PatchMovie())
+	movieGroup.GET("/", h.FetchMovies())
 }

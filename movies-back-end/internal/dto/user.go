@@ -28,9 +28,20 @@ type Viewer struct {
 }
 
 type CollectionDto struct {
+	Username  string `json:"username,omitempty"`
+	MovieID   uint   `json:"movie_id,omitempty"`
+	EpisodeID uint   `json:"episode_id,omitempty"`
+	TypeCode  string `json:"type_code"`
+}
+
+type CollectionDetailDto struct {
 	Username    string    `json:"username,omitempty"`
-	MovieID     uint      `json:"movie_id,omitempty"`
+	MovieID     uint      `json:"id,omitempty"`
+	EpisodeID   uint      `json:"episode_id,omitempty"`
+	TypeCode    string    `json:"type_code,omitempty"`
 	Title       string    `json:"title,omitempty"`
+	SeasonName  string    `json:"season_name,omitempty"`
+	EpisodeName string    `json:"episode_name"`
 	ReleaseDate time.Time `json:"release_date"`
 	ImageUrl    string    `json:"image_url,omitempty"`
 	Description string    `json:"description,omitempty"`

@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"log"
+	"movies-service/internal/blob"
+	"movies-service/internal/collection"
 	"movies-service/internal/control"
 	"movies-service/internal/dto"
 	"movies-service/internal/episode"
@@ -10,22 +14,33 @@ import (
 	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/model"
+	"movies-service/internal/payment"
 	"movies-service/internal/season"
 	"movies-service/pkg/util"
+	"strings"
+	"sync"
 	"time"
 )
 
 type episodeService struct {
-	mgmtCtrl          control.Service
-	seasonRepository  season.Repository
-	episodeRepository episode.Repository
+	mgmtCtrl             control.Service
+	seasonRepository     season.Repository
+	collectionRepository collection.Repository
+	paymentRepository    payment.Repository
+	episodeRepository    episode.Repository
+	blobService          blob.Service
 }
 
-func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Repository, episodeRepository episode.Repository) episode.Service {
+func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Repository,
+	collectionRepository collection.Repository, paymentRepository payment.Repository,
+	episodeRepository episode.Repository, blobService blob.Service) episode.Service {
 	return &episodeService{
-		mgmtCtrl:          mgmtCtrl,
-		seasonRepository:  seasonRepository,
-		episodeRepository: episodeRepository,
+		mgmtCtrl:             mgmtCtrl,
+		seasonRepository:     seasonRepository,
+		collectionRepository: collectionRepository,
+		paymentRepository:    paymentRepository,
+		episodeRepository:    episodeRepository,
+		blobService:          blobService,
 	}
 }
 
@@ -37,6 +52,26 @@ func (es episodeService) GetEpisodesByID(ctx context.Context, id uint) (*dto.Epi
 	if err != nil {
 		return nil, err
 	}
+
+	// Check valid video path
+	if result.Price.Valid {
+		thePayment, err := es.paymentRepository.FindByTypeCodeAndRefID(ctx, "TV", result.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		if !(thePayment.TypeCode == "TV" && thePayment.RefID == result.ID) {
+			theCollection, err := es.collectionRepository.FindCollectionByEpisodeID(ctx, result.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			if !(theCollection.TypeCode == "TV" && uint(theCollection.MovieID.Int64) == result.ID) {
+				result.VideoPath = sql.NullString{}
+			}
+		}
+	}
+
 	return mapper.MapToEpisodeDto(result, !isValidUser, isPrivilege), nil
 }
 
@@ -77,6 +112,7 @@ func (es episodeService) AddEpisode(ctx context.Context, episode *dto.EpisodeDto
 		Runtime:   episode.Runtime,
 		VideoPath: util.StringToSQLNullString(episode.VideoPath),
 		Season:    seasonObj,
+		Price:     util.FloatToSQLNullFloat(episode.Price),
 		CreatedAt: time.Now(),
 		CreatedBy: author,
 		UpdatedAt: time.Now(),
@@ -123,6 +159,7 @@ func (es episodeService) UpdateEpisode(ctx context.Context, episode *dto.Episode
 		Runtime:   episode.Runtime,
 		VideoPath: util.StringToSQLNullString(episode.VideoPath),
 		Season:    seasonObj,
+		Price:     util.FloatToSQLNullFloat(episode.Price),
 		CreatedAt: time.Now(),
 		CreatedBy: author,
 		UpdatedAt: time.Now(),
@@ -147,7 +184,32 @@ func (es episodeService) RemoveEpisodeByID(ctx context.Context, id uint) error {
 		return errors.ErrUnAuthorized
 	}
 
-	err := es.episodeRepository.DeleteEpisodeByID(ctx, id)
+	// Get current episode
+	episodeObj, err := es.episodeRepository.FindEpisodeByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Delete video from blob concurrently
+	if episodeObj.VideoPath.Valid {
+		var wg sync.WaitGroup
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			videoPath := episodeObj.VideoPath.String
+			videoPathSplit := strings.Split(videoPath, "/")
+			videoKey := videoPathSplit[len(videoPathSplit)-1]
+			res, err := es.blobService.DeleteFile(ctx, videoKey, "video")
+			if err != nil {
+				log.Println("cannot delete video")
+			}
+			log.Println(res)
+		}()
+		wg.Wait()
+	}
+
+	err = es.episodeRepository.DeleteEpisodeByID(ctx, id)
 	if err != nil {
 		return err
 	}

@@ -41,11 +41,20 @@ func (fr collectionRepository) FindCollectionsByUsernameAndType(ctx context.Cont
 		tx = tx.Debug()
 	}
 
-	tx = tx.WithContext(ctx).Table("collections c").
-		Joins("JOIN movies m ON m.id = c.movie_id").
-		Joins("JOIN payments p ON p.id = c.payment_id").
-		Select("m.title, m.description, m.release_date, m.image_url, p.amount, c.created_at").
-		Where("c.username = ? AND m.type_code = ?", username, movieType)
+	tx = tx.WithContext(ctx).Table("collections c")
+	if movieType == "MOVIE" {
+		tx = tx.Joins("JOIN movies m ON m.id = c.movie_id AND c.type_code = ?", movieType).
+			Joins("LEFT JOIN payments p ON p.id = c.payment_id").
+			Select("c.id, m.id as movie_id, m.title, m.description, m.release_date, m.image_url, p.amount, c.created_at").
+			Where("c.username = ?", username)
+	} else if movieType == "TV" {
+		tx = tx.Joins("JOIN episodes e ON e.id = c.episode_id AND c.type_code = ?", movieType).
+			Joins("JOIN seasons s ON s.id = e.season_id").
+			Joins("JOIN movies m ON m.id = s.movie_id").
+			Joins("LEFT JOIN payments p ON p.id = c.payment_id").
+			Select("c.id, m.id as movie_id, e.id as episode_id, m.title, m.description, s.name as season_name, e.name as episode_name, e.air_date as release_date, m.image_url, p.amount, c.created_at").
+			Where("c.username = ?", username)
+	}
 
 	if keyword != "" {
 		lowerWord := fmt.Sprintf("%%%s%%", strings.ToLower(keyword))
@@ -76,6 +85,20 @@ func (fr collectionRepository) FindCollectionByUsernameAndMovieID(ctx context.Co
 	return result, nil
 }
 
+func (fr collectionRepository) FindCollectionByUsernameAndEpisodeID(ctx context.Context, username string, episodeID uint) (*model.Collection, error) {
+	var result *model.Collection
+	tx := fr.db.WithContext(ctx)
+	if fr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("username = ? AND episode_id = ?", username, episodeID).
+		Find(&result).Error
+	if err != nil {
+		return result, nil
+	}
+	return result, nil
+}
+
 func (fr collectionRepository) FindCollectionByPaymentID(ctx context.Context, paymentID uint) (*model.Collection, error) {
 	var result *model.Collection
 	tx := fr.db.WithContext(ctx)
@@ -97,6 +120,62 @@ func (fr collectionRepository) FindCollectionsByMovieID(ctx context.Context, mov
 		tx = tx.Debug()
 	}
 	err := tx.Where("movie_id = ?", movieID).
+		Find(&results).Error
+	if err != nil {
+		return results, nil
+	}
+	return results, nil
+}
+
+func (fr collectionRepository) FindCollectionByMovieID(ctx context.Context, episodeID uint) (*model.Collection, error) {
+	var results *model.Collection
+	tx := fr.db.WithContext(ctx)
+	if fr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("episode_id = ?", episodeID).
+		Find(&results).Error
+	if err != nil {
+		return results, nil
+	}
+	return results, nil
+}
+
+func (fr collectionRepository) FindCollectionsByEpisodeID(ctx context.Context, episodeID uint) ([]*model.Collection, error) {
+	var results []*model.Collection
+	tx := fr.db.WithContext(ctx)
+	if fr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("episode_id = ?", episodeID).
+		Find(&results).Error
+	if err != nil {
+		return results, nil
+	}
+	return results, nil
+}
+
+func (fr collectionRepository) FindCollectionByEpisodeID(ctx context.Context, episodeID uint) (*model.Collection, error) {
+	var results *model.Collection
+	tx := fr.db.WithContext(ctx)
+	if fr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("episode_id = ?", episodeID).
+		Find(&results).Error
+	if err != nil {
+		return results, nil
+	}
+	return results, nil
+}
+
+func (fr collectionRepository) FindCollectionsByID(ctx context.Context, id uint) (*model.Collection, error) {
+	var results *model.Collection
+	tx := fr.db.WithContext(ctx)
+	if fr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("id = ?", id).
 		Find(&results).Error
 	if err != nil {
 		return results, nil

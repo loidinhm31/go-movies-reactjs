@@ -7,7 +7,7 @@ import (
 )
 
 type Service interface {
-	AddCollection(ctx context.Context, movieID uint) error
-	GetCollectionsByUsernameAndType(ctx context.Context, movieType string, keyword string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.CollectionDto], error)
-	GetCollectionByUsernameAndMovieID(ctx context.Context, username string, movieID uint) (*dto.CollectionDto, error)
+	AddCollection(ctx context.Context, collection *dto.CollectionDto) error
+	GetCollectionsByUsernameAndType(ctx context.Context, movieType string, keyword string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.CollectionDetailDto], error)
+	GetCollectionByUsernameAndRefID(ctx context.Context, username string, typeCode string, refID uint) (*dto.CollectionDto, error)
 }

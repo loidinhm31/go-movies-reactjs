@@ -12,6 +12,21 @@ type MockMovieRepository struct {
 	mock.Mock
 }
 
+func (m *MockMovieRepository) FindMovieByID(ctx context.Context, id uint) (*model.Movie, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockMovieRepository) DeleteMovieByID(ctx context.Context, id uint) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockMovieRepository) FindMovieByEpisodeID(ctx context.Context, episdoeID uint) (*model.Movie, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockMovieRepository) InsertMovie(ctx context.Context, movie *model.Movie) error {
 	args := m.Called(ctx, movie)
 	return args.Error(0)

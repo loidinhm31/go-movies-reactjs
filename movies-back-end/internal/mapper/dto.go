@@ -83,6 +83,11 @@ func MapToEpisodeDto(episode *model.Episode, isRestrictResource, isPrivilege boo
 		episode.VideoPath = sql.NullString{}
 	}
 
+	var season *dto.SeasonDto
+	if episode.Season != nil {
+		season = MapToSeasonDto(episode.Season)
+	}
+
 	return &dto.EpisodeDto{
 		ID:        episode.ID,
 		Name:      episode.Name,
@@ -90,6 +95,8 @@ func MapToEpisodeDto(episode *model.Episode, isRestrictResource, isPrivilege boo
 		Runtime:   episode.Runtime,
 		VideoPath: episode.VideoPath.String,
 		SeasonID:  episode.SeasonID,
+		Price:     episode.Price.Float64,
+		Season:    season,
 	}
 }
 
@@ -119,16 +126,21 @@ func MapToRatingDtoSlice(ratingSlice []*model.Rating) []*dto.RatingDto {
 
 func MapToCollectionDto(collection *model.Collection) *dto.CollectionDto {
 	return &dto.CollectionDto{
-		Username: collection.Username,
-		MovieID:  collection.MovieID,
+		Username:  collection.Username,
+		MovieID:   uint(collection.MovieID.Int64),
+		EpisodeID: uint(collection.EpisodeID.Int64),
 	}
 }
 
-func MapToCollectionDetailDto(collection *model.CollectionDetail) *dto.CollectionDto {
-	return &dto.CollectionDto{
+func MapToCollectionDetailDto(collection *model.CollectionDetail) *dto.CollectionDetailDto {
+	return &dto.CollectionDetailDto{
 		Username:    collection.Username,
 		MovieID:     collection.MovieID,
+		EpisodeID:   collection.EpisodeID,
+		TypeCode:    collection.TypeCode,
 		Title:       collection.Title,
+		SeasonName:  collection.SeasonName,
+		EpisodeName: collection.EpisodeName,
 		ReleaseDate: collection.ReleaseDate,
 		ImageUrl:    collection.ImageUrl,
 		Description: collection.Description,
@@ -137,10 +149,10 @@ func MapToCollectionDetailDto(collection *model.CollectionDetail) *dto.Collectio
 	}
 }
 
-func MapToCollectionDetailDtoSlice(collections []*model.CollectionDetail) []*dto.CollectionDto {
-	var collectioDtos []*dto.CollectionDto
+func MapToCollectionDetailDtoSlice(collections []*model.CollectionDetail) []*dto.CollectionDetailDto {
+	var collectionDtos []*dto.CollectionDetailDto
 	for _, c := range collections {
-		collectioDtos = append(collectioDtos, MapToCollectionDetailDto(c))
+		collectionDtos = append(collectionDtos, MapToCollectionDetailDto(c))
 	}
-	return collectioDtos
+	return collectionDtos
 }

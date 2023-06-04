@@ -7,6 +7,9 @@ import (
 
 // MapViewRoutes Map view routes
 func MapViewRoutes(viewGroup *gin.RouterGroup, h view.Handler) {
-	viewGroup.POST("/", h.RecognizeViewForMovie())
 	viewGroup.GET("/:movieId", h.FetchNumberOfViewsByMovieId())
+}
+
+func MapAuthViewRoutes(viewGroup *gin.RouterGroup, h view.Handler) {
+	viewGroup.POST("/", h.RecognizeViewForMovie())
 }

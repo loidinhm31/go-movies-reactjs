@@ -34,7 +34,7 @@ func (r collectionHandler) PutCollection() gin.HandlerFunc {
 			return
 		}
 
-		err := r.collectionService.AddCollection(c, theCollection.MovieID)
+		err := r.collectionService.AddCollection(c, theCollection)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -75,13 +75,14 @@ func (r collectionHandler) FetchCollectionsByUsername() gin.HandlerFunc {
 	}
 }
 
-func (r collectionHandler) FetchCollectionByUsernameAndMovieID() gin.HandlerFunc {
+func (r collectionHandler) FetchCollectionByUsernameAndRefID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.Query("username")
-		movieIdStr := c.Query("movieId")
-		movieID, _ := strconv.Atoi(movieIdStr)
+		typeCode := c.Query("type")
+		refIdStr := c.Query("refId")
+		refID, _ := strconv.Atoi(refIdStr)
 
-		results, err := r.collectionService.GetCollectionByUsernameAndMovieID(c, username, uint(movieID))
+		results, err := r.collectionService.GetCollectionByUsernameAndRefID(c, username, typeCode, uint(refID))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),

@@ -63,7 +63,7 @@ func (s seasonService) AddSeason(ctx context.Context, season *dto.SeasonDto) err
 		return errors.ErrUnAuthorized
 	}
 
-	movieObj, err := s.movieRepository.FindMovieById(ctx, season.MovieID)
+	movieObj, err := s.movieRepository.FindMovieByID(ctx, season.MovieID)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 		return errors.ErrUnAuthorized
 	}
 
-	movieObj, err := s.movieRepository.FindMovieById(ctx, season.MovieID)
+	movieObj, err := s.movieRepository.FindMovieByID(ctx, season.MovieID)
 	if err != nil {
 		return err
 	}

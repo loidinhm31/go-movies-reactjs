@@ -21,3 +21,13 @@ func FloatToSQLNullFloat(s float64) sql.NullFloat64 {
 	}
 	return sql.NullFloat64{}
 }
+
+func IntToSQLNullInt(s int64) sql.NullInt64 {
+	if s != 0 {
+		return sql.NullInt64{
+			Int64: s,
+			Valid: true,
+		}
+	}
+	return sql.NullInt64{}
+}

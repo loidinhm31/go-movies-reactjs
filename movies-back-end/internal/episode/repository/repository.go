@@ -24,7 +24,7 @@ func (e episodeRepository) FindEpisodeByID(ctx context.Context, id uint) (*model
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("id = ?", id).First(&episodeObject).Error
+	err := tx.Where("id = ?", id).Preload("Season").First(&episodeObject).Error
 	if err != nil {
 		return nil, err
 	}

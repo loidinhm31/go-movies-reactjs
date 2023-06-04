@@ -22,10 +22,12 @@ func (r paymentHandler) VerifyStripePayment() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		paymentID := c.Param("id")
 		username := c.Query("username")
-		movieIdStr := c.Query("movieId")
-		movieID, _ := strconv.Atoi(movieIdStr)
+		typeCode := c.Query("type")
 
-		err := r.paymentService.VerifyPayment(c, model.STRIPE, paymentID, username, uint(movieID))
+		refIdStr := c.Query("refId")
+		refID, _ := strconv.Atoi(refIdStr)
+
+		err := r.paymentService.VerifyPayment(c, model.STRIPE, paymentID, username, typeCode, uint(refID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

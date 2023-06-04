@@ -126,7 +126,7 @@ func TestCollectionService_GetCollectionsByUsernameAndType(t *testing.T) {
 				MovieID:  uint(1),
 			}, nil)
 
-		result, err := collectionService.GetCollectionByUsernameAndMovieID(context.Background(), "testuser", uint(1))
+		result, err := collectionService.GetCollectionByUsernameAndRefID(context.Background(), "testuser", "", uint(1))
 
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), result.MovieID)

@@ -17,6 +17,7 @@ func MapToMovie(movieDto *dto.MovieDto, author string) *model.Movie {
 		Description: movieDto.Description,
 		ImageUrl:    util.StringToSQLNullString(movieDto.ImageUrl),
 		VideoPath:   util.StringToSQLNullString(movieDto.VideoPath),
+		Price:       util.FloatToSQLNullFloat(movieDto.Price),
 		CreatedAt:   time.Now(),
 		CreatedBy:   author,
 		UpdatedAt:   time.Now(),

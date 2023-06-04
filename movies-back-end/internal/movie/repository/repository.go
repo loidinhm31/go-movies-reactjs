@@ -85,7 +85,7 @@ func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, mov
 	return page, nil
 }
 
-func (mr *movieRepository) FindMovieById(ctx context.Context, id uint) (*model.Movie, error) {
+func (mr *movieRepository) FindMovieByID(ctx context.Context, id uint) (*model.Movie, error) {
 	var result model.Movie
 
 	tx := mr.db.WithContext(ctx)
@@ -150,7 +150,7 @@ func (mr *movieRepository) UpdateMovieGenres(ctx context.Context, movie *model.M
 	return nil
 }
 
-func (mr *movieRepository) DeleteMovieById(ctx context.Context, id uint) error {
+func (mr *movieRepository) DeleteMovieByID(ctx context.Context, id uint) error {
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -162,4 +162,24 @@ func (mr *movieRepository) DeleteMovieById(ctx context.Context, id uint) error {
 		return err
 	}
 	return nil
+}
+
+func (mr *movieRepository) FindMovieByEpisodeID(ctx context.Context, episdoeID uint) (*model.Movie, error) {
+	var result *model.Movie
+
+	tx := mr.db.WithContext(ctx)
+	if mr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Table("episodes e").
+		Joins("JOIN seasons s ON s.id = e.season_id").
+		Joins("JOIN movies m ON m.id = s.movie_id").
+		Where("e.id = ?", episdoeID).
+		Select("m.*").
+		Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

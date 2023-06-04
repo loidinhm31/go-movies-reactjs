@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
 	"log"
@@ -13,6 +12,7 @@ import (
 	"movies-service/internal/model"
 	"movies-service/internal/movie"
 	"movies-service/internal/payment"
+	"movies-service/pkg/util"
 	"time"
 )
 
@@ -34,7 +34,7 @@ func NewPaymentService(config *config.Config, managementCtrl control.Service, mo
 	}
 }
 
-func (ps paymentService) VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, movieID uint) error {
+func (ps paymentService) VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, typeCode string, refID uint) error {
 	// Check user
 	log.Printf("checking user...")
 	isValidUser, _ := ps.managementCtrl.CheckUser(username)
@@ -44,7 +44,7 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 
 	// Check movie
 	log.Printf("checking movie...")
-	theMovie, err := ps.movieRepository.FindMovieById(ctx, movieID)
+	theMovie, err := ps.movieRepository.FindMovieByID(ctx, refID)
 	if err != nil {
 		return err
 	}
@@ -64,8 +64,8 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 		return errors.ErrObjectExisted
 	}
 
-	log.Printf("verifying from provider...")
 	// Set Stripe secret key
+	log.Printf("verifying from provider...")
 	stripe.Key = ps.config.Stripe.SecretKey
 
 	params := &stripe.PaymentIntentParams{}
@@ -82,34 +82,42 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 		return errors.ErrPaymentNotFound
 	}
 
-	log.Printf("verified from provider...")
 	// Add payment
+	log.Printf("verified from provider...")
 	insertedPayment, err := ps.paymentRepository.InsertPayment(ctx, &model.Payment{
-		Provider: string(provider),
-		ProviderPaymentID: sql.NullString{
-			String: providerPaymentID,
-			Valid:  true,
-		},
-		Amount:        float64(paymentIntent.Amount),
-		Received:      float64(paymentIntent.Amount - paymentIntent.ApplicationFeeAmount),
-		Currency:      string(paymentIntent.Currency),
-		PaymentMethod: string(paymentIntent.PaymentMethod.Type),
-		Status:        string(paymentIntent.Status),
-		CreatedAt:     time.Now(),
-		CreatedBy:     "system",
+		RefID:             refID,
+		TypeCode:          typeCode,
+		Provider:          string(provider),
+		ProviderPaymentID: util.StringToSQLNullString(providerPaymentID),
+		Amount:            float64(paymentIntent.Amount),
+		Received:          float64(paymentIntent.Amount - paymentIntent.ApplicationFeeAmount),
+		Currency:          string(paymentIntent.Currency),
+		PaymentMethod:     string(paymentIntent.PaymentMethod.Type),
+		Status:            string(paymentIntent.Status),
+		CreatedAt:         time.Now(),
+		CreatedBy:         "system",
 	})
 	if err != nil {
 		return err
 	}
 
 	// Add collection
-	err = ps.collectionRepository.InsertCollection(ctx, &model.Collection{
-		Username:  username,
-		MovieID:   movieID,
-		Payment:   insertedPayment,
+	theCollection := &model.Collection{
+		Username: username,
+
+		TypeCode:  typeCode,
+		PaymentID: insertedPayment.ID,
 		CreatedAt: time.Now(),
 		CreatedBy: username,
-	})
+	}
+
+	if typeCode == "MOVIE" {
+		theCollection.MovieID = util.IntToSQLNullInt(int64(refID))
+	} else if typeCode == "TV" {
+		theCollection.EpisodeID = util.IntToSQLNullInt(int64(refID))
+	}
+
+	err = ps.collectionRepository.InsertCollection(ctx, theCollection)
 	if err != nil {
 		return err
 	}

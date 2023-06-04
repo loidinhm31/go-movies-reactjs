@@ -25,7 +25,8 @@ type Episode struct {
 	Runtime   uint
 	VideoPath sql.NullString `gorm:"type:varchar(255), default:null"`
 	SeasonID  uint
-	Season    *Season `gorm:"foreignKey:SeasonID"`
+	Season    *Season         `gorm:"foreignKey:SeasonID"`
+	Price     sql.NullFloat64 `gorm:"type:float, default:null"`
 	CreatedAt time.Time
 	CreatedBy string
 	UpdatedAt time.Time

@@ -12,10 +12,12 @@ type SeasonDto struct {
 }
 
 type EpisodeDto struct {
-	ID        uint      `json:"id"`
-	Name      string    `json:"name"`
-	AirDate   time.Time `json:"air_date"`
-	Runtime   uint      `json:"runtime"`
-	VideoPath string    `json:"video_path"`
-	SeasonID  uint      `json:"season_id"`
+	ID        uint       `json:"id"`
+	Name      string     `json:"name"`
+	AirDate   time.Time  `json:"air_date"`
+	Runtime   uint       `json:"runtime"`
+	VideoPath string     `json:"video_path"`
+	SeasonID  uint       `json:"season_id"`
+	Price     float64    `json:"price,omitempty"`
+	Season    *SeasonDto `json:"season,omitempty"`
 }

@@ -9,4 +9,5 @@ type Handler interface {
 	PutMovie() gin.HandlerFunc
 	DeleteMovie() gin.HandlerFunc
 	PatchMovie() gin.HandlerFunc
+	FetchMovies() gin.HandlerFunc
 }

@@ -58,7 +58,7 @@ func (mh *movieHandler) FetchMovieById() gin.HandlerFunc {
 			return
 		}
 
-		result, err := mh.movieService.GetMovieById(c, uint(movieId))
+		result, err := mh.movieService.GetMovieByID(c, uint(movieId))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -136,7 +136,7 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 			return
 		}
 
-		err = mh.movieService.DeleteMovieById(c, uint(movieId))
+		err = mh.movieService.RemoveMovieByID(c, uint(movieId))
 		if err != nil {
 			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -171,5 +171,22 @@ func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "ok"})
+	}
+}
+
+func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		episodeIdStr := c.Query("episodeId")
+		episodeID, _ := strconv.Atoi(episodeIdStr)
+
+		allMovies, err := mh.movieService.GetMovieByEpisodeID(c, uint(episodeID))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, allMovies)
 	}
 }

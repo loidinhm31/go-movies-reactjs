@@ -7,7 +7,7 @@ import (
 
 // MapCollectionRoutes Map collection routes
 func MapCollectionRoutes(collectionGroup *gin.RouterGroup, h collection.Handler) {
-	collectionGroup.GET("/", h.FetchCollectionByUsernameAndMovieID())
+	collectionGroup.GET("/", h.FetchCollectionByUsernameAndRefID())
 }
 
 func MapAuthCollectionRoutes(collectionGroup *gin.RouterGroup, h collection.Handler) {

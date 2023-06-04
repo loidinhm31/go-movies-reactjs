@@ -11,6 +11,16 @@ type MockCollectionRepository struct {
 	mock.Mock
 }
 
+func (m *MockCollectionRepository) FindCollectionByUsernameAndEpisodeID(ctx context.Context, username string, episodeID uint) (*model.Collection, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockCollectionRepository) FindCollectionsByID(ctx context.Context, id uint) (*model.Collection, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockCollectionRepository) InsertCollection(ctx context.Context, collection *model.Collection) error {
 	args := m.Called(ctx, collection)
 	return args.Error(0)
