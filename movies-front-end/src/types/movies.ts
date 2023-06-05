@@ -17,6 +17,8 @@ export type MovieType = {
     genres: GenreType[],
     vote_average?: number,
     vote_count?: number,
+    season_name?: string,
+    episode_name?: string,
 }
 
 export type GenreType = {
@@ -33,6 +35,19 @@ export type RatingType = {
 }
 
 export type CollectionType = {
-    username: string,
-    movie_id: number,
+    user_id: string,
+    movie_id?: number,
+    episode_id?: number,
+    type_code: string,
+}
+
+export type PaymentType = {
+    user_id: string,
+    ref_id: number,
+    type_code: string,
+    amount: number,
+    currency: string,
+    payment_method: string,
+    status: string,
+    created_at: number,
 }

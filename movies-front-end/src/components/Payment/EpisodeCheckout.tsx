@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {CollectionType, MovieType} from "src/types/movies";
+import {MovieType, PaymentType} from "src/types/movies";
 import {EpisodeType} from "src/types/seasons";
 import useSWRMutation from "swr/mutation";
 import {get, post} from "src/libs/api";
@@ -23,7 +23,7 @@ export default function EpisodeCheckout({refId, type}: MovieCheckoutProps) {
 
     const {trigger: getRootMovie} = useSWRMutation(`/api/v1/movies/checkout?episodeId=${refId}`, get);
     const {trigger: getEpisode} = useSWRMutation(`/api/v1/episodes/${refId}`, get);
-    const {trigger: checkBuy} = useSWRMutation(`/api/v1/collections/check?type=${type}&refId=${refId}`, get);
+    const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${type}&refId=${refId}`, get);
     const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments", post);
     const [paymentId, setPaymentId] = useState();
 
@@ -47,8 +47,8 @@ export default function EpisodeCheckout({refId, type}: MovieCheckoutProps) {
 
     useEffect(() => {
         if (episode && episode.price) {
-            checkBuy().then((result: CollectionType) => {
-                if (result && result.episode_id === episode.id! && result.username === username) {
+            checkBuy().then((result: PaymentType) => {
+                if (result && result.ref_id === episode.id! && result.status === "succeeded") {
                     setWasPaid(true);
                 }
             });
@@ -102,9 +102,11 @@ export default function EpisodeCheckout({refId, type}: MovieCheckoutProps) {
                                                 </Typography>
                                             </Box>
                                             <Box sx={{display: "flex", justifyItems: "center"}}>
-                                                <Typography variant="subtitle1">
-                                                    {format(new Date(episode?.air_date!), "MMMM do, yyyy")}
-                                                </Typography>
+                                                {episode &&
+                                                    <Typography variant="subtitle1">
+                                                        {format(new Date(episode?.air_date!), "MMMM do, yyyy")}
+                                                    </Typography>
+                                                }
                                             </Box>
 
                                         </Stack>

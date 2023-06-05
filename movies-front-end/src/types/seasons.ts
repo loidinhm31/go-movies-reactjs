@@ -13,4 +13,6 @@ export type EpisodeType = {
     runtime: number,
     video_path?: string,
     season_id?: number,
+    season?: SeasonType,
+    price?: number,
 }

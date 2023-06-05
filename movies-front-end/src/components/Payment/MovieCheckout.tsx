@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {CollectionType, MovieType} from "src/types/movies";
+import {MovieType, PaymentType} from "src/types/movies";
 import useSWRMutation from "swr/mutation";
 import {get, post} from "src/libs/api";
 import {useHasUsername} from "src/hooks/auth/useHasUsername";
@@ -26,7 +26,7 @@ export default function MovieCheckout({refId, type}: MovieCheckoutProps) {
     const [paymentId, setPaymentId] = useState();
 
     const {trigger: getMovie} = useSWRMutation(`/api/v1/movies/${refId}`, get);
-    const {trigger: checkBuy} = useSWRMutation(`/api/v1/collections/check?type=${type}&refId=${refId}`, get);
+    const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${type}&refId=${refId}`, get);
     const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments", post);
 
     useEffect(() => {
@@ -47,8 +47,8 @@ export default function MovieCheckout({refId, type}: MovieCheckoutProps) {
 
     useEffect(() => {
         if (movie && movie.price) {
-            checkBuy().then((result: CollectionType) => {
-                if (result && result.movie_id === movie.id! && result.username === username) {
+            checkBuy().then((result: PaymentType) => {
+                if (result && result.ref_id === movie.id! && result.status === "succeeded") {
                     setWasPaid(true);
                 }
             });

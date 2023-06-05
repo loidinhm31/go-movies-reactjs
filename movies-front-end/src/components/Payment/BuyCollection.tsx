@@ -1,8 +1,8 @@
 import useSWRMutation from "swr/mutation";
-import {get, put} from "src/libs/api";
+import {get, put, del} from "src/libs/api";
 import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
 import {Box, Button, Stack, Typography} from "@mui/material";
-import {CollectionType, MovieType} from "src/types/movies";
+import {CollectionType, MovieType, PaymentType} from "src/types/movies";
 import {useHasUsername} from "src/hooks/auth/useHasUsername";
 import {useEffect, useState} from "react";
 import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck";
@@ -10,22 +10,25 @@ import {useRouter} from "next/router";
 import {EpisodeType} from "src/types/seasons";
 
 interface CollectionProps {
-    wasAdded: boolean;
-    setWasAdded: (flag1: boolean) => void;
     movie: MovieType;
     episode?: EpisodeType;
 }
 
-export function BuyCollection({wasAdded, setWasAdded, movie, episode}: CollectionProps) {
+export function BuyCollection({movie, episode}: CollectionProps) {
     const username = useHasUsername();
 
     const router = useRouter();
 
     const [refId, setRefId] = useState<number>();
 
-    const {trigger: addCollection} = useSWRMutation("/api/v1/collections", put);
+    const [wasCollected, setWasCollected] = useState(false);
+    const [wasPaid, setWasPaid] = useState(false);
 
-    const {trigger: checkBuy} = useSWRMutation(`/api/v1/collections/check?type=${movie.type_code}&refId=${refId}`, get);
+    const {trigger: addCollection} = useSWRMutation("/api/v1/collections", put);
+    const {trigger: deleteCollection} = useSWRMutation(`/api/v1/collections?type=${movie.type_code}&refId=${refId}`, del);
+
+    const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${movie.type_code}&refId=${refId}`, get);
+    const {trigger: checkCollect} = useSWRMutation(`/api/v1/collections/check?type=${movie.type_code}&refId=${refId}`, get);
 
     useEffect(() => {
         if (movie.type_code === "MOVIE") {
@@ -37,17 +40,38 @@ export function BuyCollection({wasAdded, setWasAdded, movie, episode}: Collectio
 
     useEffect(() => {
         if (refId) {
-            checkBuy().then((result: CollectionType) => {
-                if (movie.type_code === "MOVIE") {
-                    if (result.movie_id === refId && result.username === username) {
-                        setWasAdded(true);
+            if ((movie.price && movie.price > 0) || (episode?.price && episode?.price > 0)) {
+                checkBuy().then((payment: PaymentType) => {
+                    if (payment.ref_id === refId && payment.type_code === movie.type_code) {
+                        setWasPaid(true);
+                        checkCollect().then((collection: CollectionType) => {
+                            if (movie.type_code === "MOVIE") {
+                                if (collection.movie_id === refId) {
+                                    setWasCollected(true);
+                                }
+                            } else if (movie.type_code === "TV") {
+                                if (collection.episode_id === refId) {
+                                    setWasCollected(true);
+                                }
+                            }
+                        });
                     }
-                } else if (movie.type_code === "TV") {
-                    if (result.episode_id === refId && result.username === username) {
-                        setWasAdded(true);
+                });
+            } else {
+                checkCollect().then((collection: CollectionType) => {
+                    if (movie.type_code === "MOVIE") {
+                        if (collection.movie_id === refId) {
+                            setWasCollected(true);
+                            setWasPaid(true);
+                        }
+                    } else if (movie.type_code === "TV") {
+                        if (collection.episode_id === refId) {
+                            setWasCollected(true);
+                            setWasPaid(true);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }, [username, refId]);
 
@@ -58,28 +82,37 @@ export function BuyCollection({wasAdded, setWasAdded, movie, episode}: Collectio
             type_code: movie.type_code,
         } as CollectionType).then((result) => {
             if (result.message === "ok") {
-                setWasAdded(true);
+                setWasPaid(true);
+                setWasCollected(true);
             }
         });
     }
 
-    const handleBuyCollection = () => {
+    const handleRemoveCollection = () => {
+        deleteCollection().then((result) => {
+            if (result.message === "ok") {
+                setWasCollected(false);
+            }
+        })
+    }
+
+    const handleBuy = () => {
         router.push(`/checkout?type=${movie.type_code}&refId=${refId}`);
     }
 
-
     return (
         <>
-            {wasAdded ? (
+            {wasPaid && wasCollected ? (
                 <Box>
                     <Button
                         variant="contained"
                         color="success"
+                        onClick={handleRemoveCollection}
                     >
                         <LibraryAddCheckIcon sx={{m: 1}}/> Collected
                     </Button>
                 </Box>
-            ) : (movie.type_code === "MOVIE" && movie.price) || (movie.type_code === "TV" && episode?.price) ?
+            ) : ((movie.type_code === "MOVIE" && movie.price) || (movie.type_code === "TV" && episode?.price)) && !wasPaid && !wasCollected ?
                 (
                     <Stack>
                         <Button color="error">
@@ -97,7 +130,7 @@ export function BuyCollection({wasAdded, setWasAdded, movie, episode}: Collectio
                         <Button
                             variant="contained"
                             color="secondary"
-                            onClick={handleBuyCollection}
+                            onClick={handleBuy}
                         >
                             <LibraryAddIcon sx={{m: 1}}/> Buy to Watch
                         </Button>

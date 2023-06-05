@@ -21,8 +21,6 @@ interface WatchMovieProps {
 export default function WatchMovie({author, movieId, episodeId}: WatchMovieProps) {
     const [mutateView, setMutateView] = useState(false);
 
-    const [wasAdded, setWasAdded] = useState(false);
-
     const [open, setOpen] = useState(false);
 
     const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
@@ -85,8 +83,6 @@ export default function WatchMovie({author, movieId, episodeId}: WatchMovieProps
 
                         {movie.type_code === "MOVIE" &&
                             <BuyCollection
-                                wasAdded={wasAdded}
-                                setWasAdded={setWasAdded}
                                 movie={movie}
                             />
                         }
@@ -108,7 +104,7 @@ export default function WatchMovie({author, movieId, episodeId}: WatchMovieProps
                                         </Box>
                                     }
 
-                                    {wasAdded && movie.video_path && movie.video_path !== "" &&
+                                    {movie.video_path && movie.video_path !== "" &&
                                         <Box sx={{m: 1, p: 1}}>
                                             <Button variant="contained" color="secondary" onClick={handleClickOpen}>
                                                 Watch this movie

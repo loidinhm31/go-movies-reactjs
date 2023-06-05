@@ -16,7 +16,7 @@ const handler = withOptionalRole("banned", async (req, res, token) => {
     }
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/collections?type=${type}&refId=${refId}`,
+        const response = await fetch(`${process.env.API_BASE_URL}/payments/refs/${refId}?type=${type}`,
             requestOptions
         );
 

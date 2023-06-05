@@ -18,8 +18,6 @@ interface WatchEpisodeProps {
 export default function WatchEpisode({author, movieId, episodeId}: WatchEpisodeProps) {
     const [mutateView, setMutateView] = useState(false);
 
-    const [wasAdded, setWasAdded] = useState(false);
-
     const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
         autoplay: false,
         controls: true,
@@ -50,13 +48,23 @@ export default function WatchEpisode({author, movieId, episodeId}: WatchEpisodeP
                 <>
                     <Box sx={{p: 1, m: 1}}>
                         <Typography
-                            variant="h4">{movie.type_code === "TV" ? "TV Series" : "Movie"} - {movie.title}</Typography>
+                            variant="h4"
+                        >
+                            {movie.type_code === "TV" ? "TV Series" : "Movie"} - {movie.title}
+                        </Typography>
+                    </Box>
+                    <Box sx={{p: 2, m: 2}}>
+                        <Typography
+                            variant="h5"
+                        >
+                            {episode?.season?.name} - {episode?.name}
+                        </Typography>
                     </Box>
 
                     <Box sx={{p: 1, m: 1}}>
                         <Typography>
-                            <small><em>{format(new Date(movie.release_date!), "MMMM do, yyyy")} | </em></small>
-                            <small><em>{movie.runtime} minutes | </em></small>
+                            <small><em>{format(new Date(episode?.air_date!), "MMMM do, yyyy")} | </em></small>
+                            <small><em>{episode?.runtime} minutes | </em></small>
                             <small><em>Rated {movie.mpaa_rating}</em></small>
                         </Typography>
                     </Box>
@@ -71,8 +79,6 @@ export default function WatchEpisode({author, movieId, episodeId}: WatchEpisodeP
                         </Stack>
 
                         <BuyCollection
-                            wasAdded={wasAdded}
-                            setWasAdded={setWasAdded}
                             movie={movie}
                             episode={episode}
                         />
