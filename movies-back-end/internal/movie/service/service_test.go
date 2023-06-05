@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/errors"
-	"movies-service/internal/model"
 	"movies-service/internal/movie"
 	"movies-service/internal/test/helper"
 	"movies-service/pkg/pagination"
@@ -40,16 +40,16 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 		_, mockMovieRepo, _, _, movieService := initMock()
 
 		// Set up mock expectations and return values
-		mockMovieRepo.On("FindAllMoviesByType", context.Background(), "title", "MOVIE", &pagination.PageRequest{}, &pagination.Page[*model.Movie]{}).
-			Return(&pagination.Page[*model.Movie]{
+		mockMovieRepo.On("FindAllMoviesByType", context.Background(), "title", "MOVIE", &pagination.PageRequest{}, &pagination.Page[*model2.Movie]{}).
+			Return(&pagination.Page[*model2.Movie]{
 				PageSize:      1,
 				PageNumber:    0,
 				Sort:          pagination.Sort{},
 				TotalElements: 2,
 				TotalPages:    1,
-				Content: []*model.Movie{
-					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
-					{Title: "Movie2", TypeCode: "MOVIE", Genres: []*model.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
+				Content: []*model2.Movie{
+					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model2.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
+					{Title: "Movie2", TypeCode: "MOVIE", Genres: []*model2.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
 				},
 			}, nil)
 
@@ -64,16 +64,16 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 		_, mockMovieRepo, _, _, movieService := initMock()
 
 		// Set up mock expectations and return values
-		mockMovieRepo.On("FindAllMovies", context.Background(), "title", &pagination.PageRequest{}, &pagination.Page[*model.Movie]{}).
-			Return(&pagination.Page[*model.Movie]{
+		mockMovieRepo.On("FindAllMovies", context.Background(), "title", &pagination.PageRequest{}, &pagination.Page[*model2.Movie]{}).
+			Return(&pagination.Page[*model2.Movie]{
 				PageSize:      1,
 				PageNumber:    0,
 				Sort:          pagination.Sort{},
 				TotalElements: 2,
 				TotalPages:    1,
-				Content: []*model.Movie{
-					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
-					{Title: "Movie2", TypeCode: "TV", Genres: []*model.Genre{{Name: "Action", TypeCode: "TV"}}},
+				Content: []*model2.Movie{
+					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model2.Genre{{Name: "Action", TypeCode: "MOVIE"}}},
+					{Title: "Movie2", TypeCode: "TV", Genres: []*model2.Genre{{Name: "Action", TypeCode: "TV"}}},
 				},
 			}, nil)
 
@@ -96,7 +96,7 @@ func TestMovieService_GetMovieById(t *testing.T) {
 		mockCtrl.On("CheckUser", mock.Anything, mock.Anything).Return(true, false)
 
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{
+			Return(&model2.Movie{
 				ID:       uint(1),
 				Title:    "Movie1",
 				TypeCode: "TV",
@@ -117,16 +117,16 @@ func TestMovieService_GetMoviesByGenre(t *testing.T) {
 		// Set up mock expectations and return values
 		genreId := uint(5)
 
-		mockMovieRepo.On("FindMoviesByGenre", context.Background(), &pagination.PageRequest{}, &pagination.Page[*model.Movie]{}, genreId).
-			Return(&pagination.Page[*model.Movie]{
+		mockMovieRepo.On("FindMoviesByGenre", context.Background(), &pagination.PageRequest{}, &pagination.Page[*model2.Movie]{}, genreId).
+			Return(&pagination.Page[*model2.Movie]{
 				PageSize:      1,
 				PageNumber:    0,
 				Sort:          pagination.Sort{},
 				TotalElements: 2,
 				TotalPages:    1,
-				Content: []*model.Movie{
-					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model.Genre{{ID: genreId, Name: "Action", TypeCode: "MOVIE"}}},
-					{Title: "Movie2", TypeCode: "MOVIE", Genres: []*model.Genre{{ID: genreId, Name: "Action", TypeCode: "MOVIE"}}},
+				Content: []*model2.Movie{
+					{Title: "Movie1", TypeCode: "MOVIE", Genres: []*model2.Genre{{ID: genreId, Name: "Action", TypeCode: "MOVIE"}}},
+					{Title: "Movie2", TypeCode: "MOVIE", Genres: []*model2.Genre{{ID: genreId, Name: "Action", TypeCode: "MOVIE"}}},
 				},
 			}, nil)
 
@@ -260,7 +260,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{}, errors.ErrResourceNotFound)
+			Return(&model2.Movie{}, errors.ErrResourceNotFound)
 
 		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
@@ -283,7 +283,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{}, nil)
+			Return(&model2.Movie{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
@@ -308,7 +308,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{}, nil)
+			Return(&model2.Movie{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -337,7 +337,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{}, nil)
+			Return(&model2.Movie{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -366,7 +366,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{}, nil)
+			Return(&model2.Movie{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -407,7 +407,7 @@ func TestMovieService_DeleteMovieById(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockCollectionRepo.On("FindCollectionsByMovieID", mock.Anything, uint(1)).
-			Return([]*model.Collection{}, nil)
+			Return([]*model2.Collection{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
@@ -421,12 +421,12 @@ func TestMovieService_DeleteMovieById(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockCollectionRepo.On("FindCollectionsByMovieID", mock.Anything, uint(1)).
-			Return([]*model.Collection{}, nil)
+			Return([]*model2.Collection{}, nil)
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
-			Return(&model.Movie{
+			Return(&model2.Movie{
 				VideoPath: sql.NullString{String: "path", Valid: true},
 				ImageUrl:  sql.NullString{String: "path", Valid: true},
 			}, nil)

@@ -2,7 +2,7 @@ package view
 
 import (
 	"context"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 )
 
 type Repository interface {

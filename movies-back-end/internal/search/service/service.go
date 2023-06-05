@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"movies-service/internal/dto"
-	"movies-service/internal/mapper"
-	"movies-service/internal/model"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/mapper"
+	"movies-service/internal/common/model"
 	"movies-service/internal/search"
 	"movies-service/pkg/pagination"
 )

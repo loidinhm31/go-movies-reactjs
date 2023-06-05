@@ -2,7 +2,7 @@ package genre
 
 import (
 	"context"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 )
 
 type Repository interface {

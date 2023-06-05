@@ -3,7 +3,7 @@ package season
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 )
 
 type Service interface {

@@ -2,8 +2,8 @@ package analysis
 
 import (
 	"context"
-	"movies-service/internal/dto"
-	"movies-service/internal/model"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 )
 
 type Repository interface {

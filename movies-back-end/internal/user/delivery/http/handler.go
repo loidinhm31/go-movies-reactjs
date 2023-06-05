@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
 	"movies-service/pkg/util"

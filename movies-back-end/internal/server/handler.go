@@ -100,8 +100,8 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	iReferenceService := integrationService.NewReferenceService(s.cfg, managementCtrl)
 	iUserService := userService.NewUserService(managementCtrl, iRoleRepo, iUserRepo)
 	iRatingService := ratingService.NewRatingService(iRatingRepo)
-	iCollectionService := collectionService.NewCollectionService(managementCtrl, iMovieRepo, iEpisodeRepo, iCollectionRepo)
-	iPaymentService := paymentService.NewPaymentService(s.cfg, managementCtrl, iMovieRepo, iPaymentRepo, iCollectionRepo)
+	iCollectionService := collectionService.NewCollectionService(iUserRepo, iMovieRepo, iEpisodeRepo, iPaymentRepo, iCollectionRepo)
+	iPaymentService := paymentService.NewPaymentService(s.cfg, iUserRepo, iMovieRepo, iPaymentRepo, iCollectionRepo)
 
 	// Init handler
 	iAuthHandler := authHttp.NewAuthHandler(iAuthService, s.cfg.Keycloak, s.cloak)
@@ -175,6 +175,10 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	authViewGroup.Use(mw.JWTValidation())
 	viewHttp.MapAuthViewRoutes(authViewGroup, iViewHandler)
 
+	authPaymentGroup := authGroup.Group("/payments")
+	authPaymentGroup.Use(mw.JWTValidation())
+	paymentHttp.MapAuthPaymentRoutes(authPaymentGroup, iPaymentHandler)
+
 	movieGroup := apiV1.Group("/movies")
 	movieGroup.Use(mw.JWTValidationOptional())
 
@@ -192,8 +196,10 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 	ratingGroup := apiV1.Group("/ratings")
 
 	collectionGroup := apiV1.Group("/collections")
+	collectionGroup.Use(mw.JWTValidationOptional())
 
 	paymentGroup := apiV1.Group("/payments")
+	paymentGroup.Use(mw.JWTValidationOptional())
 
 	// Map public routes
 	movieHttp.MapMovieRoutes(movieGroup, iMovieHandler)

@@ -2,7 +2,7 @@ package http
 
 import (
 	"log"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/internal/reference"
 	"movies-service/pkg/util"
 	"net/http"

@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"movies-service/internal/common/dto"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/view"

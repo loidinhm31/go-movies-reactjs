@@ -2,43 +2,51 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/paymentintent"
 	"log"
 	"movies-service/config"
 	"movies-service/internal/collection"
-	"movies-service/internal/control"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/mapper"
+	"movies-service/internal/common/model"
 	"movies-service/internal/errors"
-	"movies-service/internal/model"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/movie"
 	"movies-service/internal/payment"
+	"movies-service/internal/user"
 	"movies-service/pkg/util"
 	"time"
 )
 
 type paymentService struct {
 	config               *config.Config
-	managementCtrl       control.Service
+	userRepository       user.UserRepository
 	movieRepository      movie.Repository
 	paymentRepository    payment.Repository
 	collectionRepository collection.Repository
 }
 
-func NewPaymentService(config *config.Config, managementCtrl control.Service, movieRepository movie.Repository, paymentRepository payment.Repository, collectionRepository collection.Repository) payment.Service {
+func NewPaymentService(config *config.Config, userRepository user.UserRepository,
+	movieRepository movie.Repository, paymentRepository payment.Repository, collectionRepository collection.Repository) payment.Service {
 	return &paymentService{
 		config:               config,
-		managementCtrl:       managementCtrl,
+		userRepository:       userRepository,
 		movieRepository:      movieRepository,
 		paymentRepository:    paymentRepository,
 		collectionRepository: collectionRepository,
 	}
 }
 
-func (ps paymentService) VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, typeCode string, refID uint) error {
+func (ps *paymentService) VerifyPayment(ctx context.Context, provider model.PaymentProvider, providerPaymentID string, username string, typeCode string, refID uint) error {
 	// Check user
 	log.Printf("checking user...")
-	isValidUser, _ := ps.managementCtrl.CheckUser(username)
-	if !isValidUser {
+	theUser, err := ps.userRepository.FindUserByUsername(ctx, username)
+	if err != nil {
+		return err
+	}
+	if theUser.Role.RoleCode == "BANNED" {
 		return errors.ErrInvalidClient
 	}
 
@@ -55,7 +63,7 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 
 	// Check existed payment
 	log.Printf("checking existed payment...")
-	thePayment, err := ps.paymentRepository.FindByProviderPaymentID(ctx, provider, providerPaymentID)
+	thePayment, err := ps.paymentRepository.FindPaymentByProviderPaymentID(ctx, provider, providerPaymentID)
 	if err != nil {
 		return err
 	}
@@ -86,6 +94,7 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 	log.Printf("verified from provider...")
 	insertedPayment, err := ps.paymentRepository.InsertPayment(ctx, &model.Payment{
 		RefID:             refID,
+		UserID:            theUser.ID,
 		TypeCode:          typeCode,
 		Provider:          string(provider),
 		ProviderPaymentID: util.StringToSQLNullString(providerPaymentID),
@@ -103,8 +112,7 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 
 	// Add collection
 	theCollection := &model.Collection{
-		Username: username,
-
+		UserID:    theUser.ID,
 		TypeCode:  typeCode,
 		PaymentID: insertedPayment.ID,
 		CreatedAt: time.Now(),
@@ -123,4 +131,50 @@ func (ps paymentService) VerifyPayment(ctx context.Context, provider model.Payme
 	}
 
 	return nil
+}
+
+func (ps *paymentService) GetPaymentsByUserAndTypeCodeAndRefID(ctx context.Context, typeCode string, refID uint) (*dto.PaymentDto, error) {
+	if typeCode == "" {
+		return nil, errors.ErrInvalidInput
+	}
+
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	theUser, err := ps.userRepository.FindUserByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
+
+	result, err := ps.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, typeCode, refID)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.PaymentDto{
+		ID:       result.ID,
+		UserID:   result.UserID,
+		RefID:    result.RefID,
+		TypeCode: result.TypeCode,
+		Status:   result.Status,
+	}, nil
+}
+
+func (ps *paymentService) GetPaymentsByUser(ctx context.Context) ([]*dto.PaymentDto, error) {
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	theUser, err := ps.userRepository.FindUserByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
+
+	results, err := ps.paymentRepository.FindPaymentsByUserID(ctx, theUser.ID)
+	if err != nil {
+		return nil, err
+	}
+	return mapper.MapToPaymentDtoSlice(results), nil
 }

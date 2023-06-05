@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"testing"
 )
 

@@ -6,7 +6,7 @@ import (
 	"log"
 	"movies-service/config"
 	"movies-service/internal/auth"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/pkg/util"
 	"net/http"
 )

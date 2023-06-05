@@ -95,9 +95,9 @@ func (pr *PageRequest) GetSort() string {
 	for i, o := range pr.Sort.Orders {
 		var s string
 		if i != len(pr.Sort.Orders)-1 {
-			s = fmt.Sprintf("%s %s, ", o.Property, o.Direction)
+			s = fmt.Sprintf("%s %s, id, ", o.Property, o.Direction)
 		} else {
-			s = fmt.Sprintf("%s %s", o.Property, o.Direction)
+			s = fmt.Sprintf("%s %s, id", o.Property, o.Direction)
 		}
 		sortStr.WriteString(s)
 	}

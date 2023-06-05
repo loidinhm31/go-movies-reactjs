@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/analysis"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/pkg/util"
 	"net/http"
 )

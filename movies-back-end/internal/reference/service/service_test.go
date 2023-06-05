@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"movies-service/config"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/test/helper"
 	"net/http"

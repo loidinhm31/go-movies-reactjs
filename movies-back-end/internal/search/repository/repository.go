@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"movies-service/config"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/errors"
-	"movies-service/internal/model"
 	"movies-service/internal/search"
 	"movies-service/pkg/pagination"
 	"strings"
@@ -33,9 +33,9 @@ func NewSearchRepository(cfg *config.Config, db *gorm.DB) search.Repository {
 	return &searchRepository{cfg: cfg, db: db}
 }
 
-func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model.SearchParams) (*pagination.Page[*model.Movie], error) {
-	page := &pagination.Page[*model.Movie]{}
-	var movies []*model.Movie
+func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*model2.Movie], error) {
+	page := &pagination.Page[*model2.Movie]{}
+	var movies []*model2.Movie
 	var totalRows int64
 
 	tx := sr.db.WithContext(ctx)
@@ -98,9 +98,9 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 
 				subQuery = subQuery.Where(orBuild)
 
-				if strings.EqualFold(f.Operator, model.AND) {
+				if strings.EqualFold(f.Operator, model2.AND) {
 					tx.Where("id IN (?)", subQuery)
-				} else if strings.EqualFold(f.Operator, model.OR) {
+				} else if strings.EqualFold(f.Operator, model2.OR) {
 					tx.Or("id IN (?)", subQuery)
 				}
 			}
@@ -109,7 +109,7 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 	}
 
 	err := tx.Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*model.Movie](totalRows, searchParams.Page, page)).
+		Scopes(pagination.PageImplCountCriteria[*model2.Movie](totalRows, searchParams.Page, page)).
 		Preload("Genres").
 		Find(&movies).Error
 	if err != nil {
@@ -120,17 +120,17 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 	return page, nil
 }
 
-func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, def model.TypeValue) error {
-	if len(def.Values) > 0 && def.Type != model.DATE {
+func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, def model2.TypeValue) error {
+	if len(def.Values) > 0 && def.Type != model2.DATE {
 		var orBuild = sr.db
 		for _, val := range def.Values {
 			val = fmt.Sprintf("%%%s%%", strings.ToLower(val))
 			orBuild = orBuild.Or("LOWER("+field+") LIKE ?", val)
 		}
 
-		if strings.EqualFold(operator, model.AND) {
+		if strings.EqualFold(operator, model2.AND) {
 			tx.Where(orBuild)
-		} else if strings.EqualFold(operator, model.OR) {
+		} else if strings.EqualFold(operator, model2.OR) {
 			tx.Or(orBuild)
 		}
 		return nil
@@ -138,11 +138,11 @@ func (sr *searchRepository) buildLikeQuery(tx *gorm.DB, field, operator string, 
 	return errors.ErrInvalidInput
 }
 
-func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string, def model.TypeValue) error {
-	if len(def.Values) > 0 && def.Type != model.DATE {
+func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string, def model2.TypeValue) error {
+	if len(def.Values) > 0 && def.Type != model2.DATE {
 		var orBuild = sr.db
 
-		if def.Type == model.NUMBER {
+		if def.Type == model2.NUMBER {
 			for _, val := range def.Values {
 				orBuild = orBuild.Or(field+" = ?", strings.ToLower(val))
 			}
@@ -152,9 +152,9 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 			}
 		}
 
-		if strings.EqualFold(operator, model.AND) {
+		if strings.EqualFold(operator, model2.AND) {
 			tx.Where(orBuild)
-		} else if strings.EqualFold(operator, model.OR) {
+		} else if strings.EqualFold(operator, model2.OR) {
 			tx.Or(orBuild)
 		}
 		return nil
@@ -162,15 +162,15 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 	return errors.ErrInvalidInput
 }
 
-func buildDateQuery(tx *gorm.DB, field, operator string, def model.TypeValue) error {
-	if len(def.Values) == 2 && def.Type == model.DATE {
+func buildDateQuery(tx *gorm.DB, field, operator string, def model2.TypeValue) error {
+	if len(def.Values) == 2 && def.Type == model2.DATE {
 		if def.Values[0] == "" || def.Values[1] == "" {
 			return errors.ErrInvalidInput
 		}
 
-		if strings.EqualFold(operator, model.AND) {
+		if strings.EqualFold(operator, model2.AND) {
 			tx = tx.Where(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
-		} else if strings.EqualFold(operator, model.OR) {
+		} else if strings.EqualFold(operator, model2.OR) {
 			tx = tx.Or(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
 		}
 		return nil

@@ -14,7 +14,7 @@ const (
 
 type Collection struct {
 	ID        uint `gorm:"primaryKey"`
-	Username  string
+	UserID    uint
 	MovieID   sql.NullInt64 `gorm:"type:integer, default:null"`
 	EpisodeID sql.NullInt64 `gorm:"type:integer, default:null"`
 	PaymentID uint
@@ -36,19 +36,4 @@ type CollectionDetail struct {
 	Description string
 	Amount      float64
 	CreatedAt   time.Time
-}
-
-type Payment struct {
-	ID                uint `gorm:"primaryKey"`
-	RefID             uint
-	TypeCode          string
-	Provider          string
-	ProviderPaymentID sql.NullString `gorm:"type:varchar(255), default:null"`
-	Amount            float64        `gorm:"type:float"`
-	Received          float64        `gorm:"type:float"`
-	Currency          string
-	PaymentMethod     string
-	Status            string
-	CreatedAt         time.Time
-	CreatedBy         string
 }

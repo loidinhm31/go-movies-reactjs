@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/payment"
 )
 
@@ -29,7 +29,7 @@ func (pr paymentRepository) InsertPayment(ctx context.Context, payment *model.Pa
 	return payment, nil
 }
 
-func (pr paymentRepository) FindByProviderPaymentID(ctx context.Context, provider model.PaymentProvider, providerPaymentID string) (*model.Payment, error) {
+func (pr paymentRepository) FindPaymentByProviderPaymentID(ctx context.Context, provider model.PaymentProvider, providerPaymentID string) (*model.Payment, error) {
 	var result *model.Payment
 	tx := pr.db.WithContext(ctx)
 	if pr.cfg.Server.Debug {
@@ -42,7 +42,7 @@ func (pr paymentRepository) FindByProviderPaymentID(ctx context.Context, provide
 	return result, nil
 }
 
-func (pr paymentRepository) FindByTypeCodeAndRefID(ctx context.Context, typeCode string, refID uint) (*model.Payment, error) {
+func (pr paymentRepository) FindPaymentByTypeCodeAndRefID(ctx context.Context, typeCode string, refID uint) (*model.Payment, error) {
 	var result *model.Payment
 	tx := pr.db.WithContext(ctx)
 	if pr.cfg.Server.Debug {
@@ -53,4 +53,30 @@ func (pr paymentRepository) FindByTypeCodeAndRefID(ctx context.Context, typeCode
 		return nil, err
 	}
 	return result, nil
+}
+
+func (pr paymentRepository) FindPaymentByUserIDAndTypeCodeAndRefID(ctx context.Context, userID uint, typeCode string, refID uint) (*model.Payment, error) {
+	var result *model.Payment
+	tx := pr.db.WithContext(ctx)
+	if pr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("user_id = ? AND type_code = ? AND ref_id = ?", userID, typeCode, refID).Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (pr paymentRepository) FindPaymentsByUserID(ctx context.Context, userID uint) ([]*model.Payment, error) {
+	var results []*model.Payment
+	tx := pr.db.WithContext(ctx)
+	if pr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Where("user_id = ?", userID).Find(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
 }

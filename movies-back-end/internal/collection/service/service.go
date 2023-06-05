@@ -4,45 +4,48 @@ import (
 	"context"
 	"fmt"
 	"movies-service/internal/collection"
-	"movies-service/internal/control"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/mapper"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
-	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/model"
 	"movies-service/internal/movie"
+	"movies-service/internal/payment"
+	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
 	"movies-service/pkg/util"
 	"time"
 )
 
 type collectionService struct {
-	mgmtCtrl             control.Service
+	userRepository       user.UserRepository
 	movieRepository      movie.Repository
 	episodeRepository    episode.Repository
+	paymentRepository    payment.Repository
 	collectionRepository collection.Repository
 }
 
-func NewCollectionService(mgmtCtrl control.Service, movieRepository movie.Repository, episodeRepository episode.Repository, collectionRepository collection.Repository) collection.Service {
+func NewCollectionService(userRepository user.UserRepository, movieRepository movie.Repository, episodeRepository episode.Repository, paymentRepository payment.Repository, collectionRepository collection.Repository) collection.Service {
 	return &collectionService{
-		mgmtCtrl:             mgmtCtrl,
+		userRepository:       userRepository,
 		movieRepository:      movieRepository,
 		episodeRepository:    episodeRepository,
+		paymentRepository:    paymentRepository,
 		collectionRepository: collectionRepository,
 	}
 }
 
-func (fs collectionService) AddCollection(ctx context.Context, collection *dto.CollectionDto) error {
+func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.CollectionDto) error {
 	if collection.TypeCode == "" {
 		return errors.ErrInvalidInput
 	}
 
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	isValidUser, _ := fs.mgmtCtrl.CheckUser(author)
-	if !isValidUser {
-		return errors.ErrUnAuthorized
+	theUser, _ := fs.userRepository.FindUserByUsername(ctx, author)
+	if theUser.Role.RoleCode == "BANNED" {
+		return errors.ErrInvalidClient
 	}
 
 	// Check free movie
@@ -53,12 +56,19 @@ func (fs collectionService) AddCollection(ctx context.Context, collection *dto.C
 		}
 
 		if theMovie.Price.Valid {
-			return errors.ErrPaymentNotFound
+			thePayment, err := fs.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, collection.TypeCode, theMovie.ID)
+			if err != nil {
+				return err
+			}
+
+			if !(thePayment.RefID == theMovie.ID && thePayment.UserID == theUser.ID) {
+				return errors.ErrPaymentNotFound
+			}
 		}
 
-		err = fs.collectionRepository.InsertCollection(ctx, &model.Collection{
-			Username:  author,
-			EpisodeID: util.IntToSQLNullInt(int64(theMovie.ID)),
+		err = fs.collectionRepository.InsertCollection(ctx, &model2.Collection{
+			UserID:    theUser.ID,
+			MovieID:   util.IntToSQLNullInt(int64(theMovie.ID)),
 			TypeCode:  collection.TypeCode,
 			CreatedAt: time.Now(),
 			CreatedBy: author,
@@ -73,11 +83,18 @@ func (fs collectionService) AddCollection(ctx context.Context, collection *dto.C
 		}
 
 		if theEpisode.Price.Valid {
-			return errors.ErrPaymentNotFound
+			thePayment, err := fs.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, collection.TypeCode, theEpisode.ID)
+			if err != nil {
+				return err
+			}
+
+			if !(thePayment.RefID == theEpisode.ID && thePayment.UserID == theUser.ID) {
+				return errors.ErrPaymentNotFound
+			}
 		}
 
-		err = fs.collectionRepository.InsertCollection(ctx, &model.Collection{
-			Username:  author,
+		err = fs.collectionRepository.InsertCollection(ctx, &model2.Collection{
+			UserID:    theUser.ID,
 			EpisodeID: util.IntToSQLNullInt(int64(theEpisode.ID)),
 			TypeCode:  collection.TypeCode,
 			CreatedAt: time.Now(),
@@ -90,21 +107,25 @@ func (fs collectionService) AddCollection(ctx context.Context, collection *dto.C
 	return nil
 }
 
-func (fs collectionService) GetCollectionsByUsernameAndType(ctx context.Context, movieType string, keyword string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.CollectionDetailDto], error) {
+func (fs *collectionService) GetCollectionsByUserAndType(ctx context.Context, movieType string, keyword string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.CollectionDetailDto], error) {
 	if movieType == "" {
 		return nil, errors.ErrInvalidInput
 	}
 
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	isValidUser, _ := fs.mgmtCtrl.CheckUser(author)
-	if !isValidUser {
-		return nil, errors.ErrUnAuthorized
+	theUser, err := fs.userRepository.FindUserByUsername(ctx, author)
+	if err != nil {
+		return nil, err
 	}
 
-	page := &pagination.Page[*model.CollectionDetail]{}
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
 
-	results, err := fs.collectionRepository.FindCollectionsByUsernameAndType(ctx, author, movieType, keyword, pageRequest, page)
+	page := &pagination.Page[*model2.CollectionDetail]{}
+
+	results, err := fs.collectionRepository.FindCollectionsByUserIDAndType(ctx, theUser.ID, movieType, keyword, pageRequest, page)
 	if err != nil {
 		return nil, err
 	}
@@ -120,24 +141,56 @@ func (fs collectionService) GetCollectionsByUsernameAndType(ctx context.Context,
 	}, nil
 }
 
-func (fs collectionService) GetCollectionByUsernameAndRefID(ctx context.Context, username string, typeCode string, refID uint) (*dto.CollectionDto, error) {
+func (fs *collectionService) GetCollectionByUserAndRefID(ctx context.Context, typeCode string, refID uint) (*dto.CollectionDto, error) {
 	if typeCode == "" {
 		return nil, errors.ErrInvalidInput
 	}
 
-	var result *model.Collection
-	var err error
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	theUser, err := fs.userRepository.FindUserByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
+
+	var result *model2.Collection
 	if typeCode == "MOVIE" {
-		result, err = fs.collectionRepository.FindCollectionByUsernameAndMovieID(ctx, username, refID)
+		result, err = fs.collectionRepository.FindCollectionByUserIDAndMovieID(ctx, theUser.ID, refID)
 		if err != nil {
 			return nil, err
 		}
 	} else if typeCode == "TV" {
-		result, err = fs.collectionRepository.FindCollectionByUsernameAndEpisodeID(ctx, username, refID)
+		result, err = fs.collectionRepository.FindCollectionByUserIDAndEpisodeID(ctx, theUser.ID, refID)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	return mapper.MapToCollectionDto(result), nil
+}
+
+func (fs *collectionService) RemoveCollectionByRefID(ctx context.Context, typeCode string, refID uint) error {
+	if typeCode == "" {
+		return errors.ErrInvalidInput
+	}
+
+	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	theUser, err := fs.userRepository.FindUserByUsername(ctx, username)
+	if err != nil {
+		return err
+	}
+
+	if theUser.Role.RoleCode == "BANNED" {
+		return errors.ErrInvalidClient
+	}
+
+	if typeCode == "MOVIE" {
+		err = fs.collectionRepository.DeleteCollectionByTypeCodeAndMovieID(ctx, typeCode, refID)
+	} else if typeCode == "TV" {
+		err = fs.collectionRepository.DeleteCollectionByTypeCodeAndEpisodeID(ctx, typeCode, refID)
+	}
+	return nil
 }

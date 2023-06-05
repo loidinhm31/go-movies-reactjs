@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/internal/role"
 )
 

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/rating"
 	"movies-service/internal/test/helper"
 	"testing"

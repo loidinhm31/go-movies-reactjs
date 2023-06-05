@@ -7,13 +7,13 @@ import (
 	"log"
 	"movies-service/internal/blob"
 	"movies-service/internal/collection"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/mapper"
+	"movies-service/internal/common/model"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
-	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/model"
 	"movies-service/internal/payment"
 	"movies-service/internal/season"
 	"movies-service/pkg/util"
@@ -55,7 +55,7 @@ func (es episodeService) GetEpisodesByID(ctx context.Context, id uint) (*dto.Epi
 
 	// Check valid video path
 	if result.Price.Valid {
-		thePayment, err := es.paymentRepository.FindByTypeCodeAndRefID(ctx, "TV", result.ID)
+		thePayment, err := es.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, "TV", result.ID)
 		if err != nil {
 			return nil, err
 		}

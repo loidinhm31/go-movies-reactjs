@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
 	"strings"
@@ -28,15 +28,28 @@ func (ur *userRepository) InsertUser(ctx context.Context, user *model.User) erro
 	return nil
 }
 
-func (ur *userRepository) FindUserByUsername(ctx context.Context, user *model.User) (*model.User, error) {
-	err := ur.db.WithContext(ctx).Where("username = ?", user.Username).
-		Preload("Role").First(&user).Error
+func (ur *userRepository) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
+	var theUser *model.User
+	err := ur.db.WithContext(ctx).Where("username = ?", username).
+		Preload("Role").First(&theUser).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return theUser, nil
+}
+
+func (ur *userRepository) FindUserByUsernameAndIsNew(ctx context.Context, username string, isNew bool) (*model.User, error) {
+	var theUser *model.User
+	err := ur.db.WithContext(ctx).Where("username = ? AND is_new = ?", username, isNew).
+		Preload("Role").First(&theUser).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return theUser, nil
 }
 
 func (ur *userRepository) FindUserByID(ctx context.Context, userID uint) (*model.User, error) {

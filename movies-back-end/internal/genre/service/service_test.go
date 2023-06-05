@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 	"movies-service/internal/errors"
 	"movies-service/internal/genre"
-	"movies-service/internal/model"
 	"movies-service/internal/test/helper"
 	"testing"
 )

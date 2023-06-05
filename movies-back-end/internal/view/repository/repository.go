@@ -4,8 +4,8 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/dto"
-	"movies-service/internal/model"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 	"movies-service/internal/view"
 	"time"
 )
@@ -27,7 +27,7 @@ func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) er
 	result := tx.Create(&model.View{
 		ViewedBy: viewer.Viewer,
 		ViewedAt: time.Now(),
-		MovieId:  viewer.MovieId,
+		MovieId:  viewer.MovieID,
 	})
 
 	if result.Error != nil {

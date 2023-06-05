@@ -117,6 +117,7 @@ CREATE TABLE public.episodes
 CREATE TABLE public.payments
 (
     id                  SERIAL PRIMARY KEY,
+    user_id             INTEGER REFERENCES users (id),
     ref_id              INTEGER                  NOT NULL,
     type_code           VARCHAR(10)              NOT NULL,
     provider            VARCHAR(255)             NOT NULL,
@@ -133,7 +134,7 @@ CREATE TABLE public.payments
 CREATE TABLE public.collections
 (
     id         SERIAL PRIMARY KEY,
-    username   VARCHAR(50) REFERENCES users (username),
+    user_id    INTEGER REFERENCES users (id),
     movie_id   INTEGER DEFAULT NULL,
     episode_id INTEGER DEFAULT NULL,
     type_code  VARCHAR(10)              NOT NULL,

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"net/http"
 	"strings"
 )

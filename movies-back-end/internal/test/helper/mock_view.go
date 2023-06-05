@@ -3,7 +3,7 @@ package helper
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 )
 
 type MockViewRepository struct {

@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"movies-service/internal/control"
-	"movies-service/internal/model"
 	"movies-service/internal/user"
 )
 
@@ -18,10 +17,7 @@ func NewManagementCtrl(userRepository user.UserRepository) control.Service {
 }
 
 func (mc *managementCtrl) CheckPrivilege(username string) bool {
-	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
-		Username: username,
-		IsNew:    false,
-	})
+	theUser, err := mc.userRepository.FindUserByUsernameAndIsNew(context.Background(), username, false)
 	if err != nil {
 		return false
 	}
@@ -32,10 +28,7 @@ func (mc *managementCtrl) CheckPrivilege(username string) bool {
 }
 
 func (mc *managementCtrl) CheckAdminPrivilege(username string) bool {
-	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
-		Username: username,
-		IsNew:    false,
-	})
+	theUser, err := mc.userRepository.FindUserByUsernameAndIsNew(context.Background(), username, false)
 	if err != nil {
 		return false
 	}
@@ -46,10 +39,7 @@ func (mc *managementCtrl) CheckAdminPrivilege(username string) bool {
 }
 
 func (mc *managementCtrl) CheckUser(username string) (bool, bool) {
-	theUser, err := mc.userRepository.FindUserByUsername(context.Background(), &model.User{
-		Username: username,
-		IsNew:    false,
-	})
+	theUser, err := mc.userRepository.FindUserByUsernameAndIsNew(context.Background(), username, false)
 	if err != nil {
 		return false, false
 	}

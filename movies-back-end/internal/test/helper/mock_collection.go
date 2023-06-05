@@ -3,7 +3,7 @@ package helper
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/pkg/pagination"
 )
 
@@ -11,14 +11,14 @@ type MockCollectionRepository struct {
 	mock.Mock
 }
 
-func (m *MockCollectionRepository) FindCollectionByUsernameAndEpisodeID(ctx context.Context, username string, episodeID uint) (*model.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+func (m *MockCollectionRepository) FindCollectionByMovieID(ctx context.Context, movieID uint) (*model.Collection, error) {
+	args := m.Called(ctx, movieID)
+	return args.Get(0).(*model.Collection), args.Error(1)
 }
 
-func (m *MockCollectionRepository) FindCollectionsByID(ctx context.Context, id uint) (*model.Collection, error) {
-	//TODO implement me
-	panic("implement me")
+func (m *MockCollectionRepository) FindCollectionsByEpisodeID(ctx context.Context, episodeID uint) ([]*model.Collection, error) {
+	args := m.Called(ctx, episodeID)
+	return args.Get(0).([]*model.Collection), args.Error(1)
 }
 
 func (m *MockCollectionRepository) InsertCollection(ctx context.Context, collection *model.Collection) error {
@@ -31,7 +31,7 @@ func (m *MockCollectionRepository) FindCollectionsByUsernameAndType(ctx context.
 	return args.Get(0).(*pagination.Page[*model.CollectionDetail]), args.Error(1)
 }
 
-func (m *MockCollectionRepository) FindCollectionByUsernameAndMovieID(ctx context.Context, username string, movieID uint) (*model.Collection, error) {
+func (m *MockCollectionRepository) FindCollectionByUserIDAndMovieID(ctx context.Context, username string, movieID uint) (*model.Collection, error) {
 	args := m.Called(ctx, username, movieID)
 	return args.Get(0).(*model.Collection), args.Error(1)
 }
@@ -44,4 +44,19 @@ func (m *MockCollectionRepository) FindCollectionByPaymentID(ctx context.Context
 func (m *MockCollectionRepository) FindCollectionsByMovieID(ctx context.Context, movieID uint) ([]*model.Collection, error) {
 	args := m.Called(ctx, movieID)
 	return args.Get(0).([]*model.Collection), args.Error(1)
+}
+
+func (m *MockCollectionRepository) FindCollectionByEpisodeID(ctx context.Context, episodeID uint) (*model.Collection, error) {
+	args := m.Called(ctx, episodeID)
+	return args.Get(0).(*model.Collection), args.Error(1)
+}
+
+func (m *MockCollectionRepository) FindCollectionsByID(ctx context.Context, id uint) (*model.Collection, error) {
+	args := m.Called(ctx, id)
+	return args.Get(0).(*model.Collection), args.Error(1)
+}
+
+func (m *MockCollectionRepository) FindCollectionByUsernameAndEpisodeID(ctx context.Context, username string, episodeID uint) (*model.Collection, error) {
+	args := m.Called(ctx, username, episodeID)
+	return args.Get(0).(*model.Collection), args.Error(1)
 }

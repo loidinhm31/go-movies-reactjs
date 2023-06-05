@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/payment"
 	"net/http"
 	"strconv"
@@ -38,5 +38,37 @@ func (r paymentHandler) VerifyStripePayment() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "ok",
 		})
+	}
+}
+
+func (r paymentHandler) FetchPaymentsByUserAndRefID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		typeCode := c.Query("type")
+		refIdStr := c.Param("id")
+		refID, _ := strconv.Atoi(refIdStr)
+
+		result, err := r.paymentService.GetPaymentsByUserAndTypeCodeAndRefID(c, typeCode, uint(refID))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+func (r paymentHandler) FetchPaymentsByUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		results, err := r.paymentService.GetPaymentsByUser(c)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, results)
 	}
 }

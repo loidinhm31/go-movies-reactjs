@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/role"
 )
 

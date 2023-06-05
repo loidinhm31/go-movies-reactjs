@@ -2,7 +2,7 @@ package genre
 
 import (
 	"context"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 )
 
 type Service interface {

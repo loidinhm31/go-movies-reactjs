@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/model"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/test/helper"
 	"movies-service/pkg/pagination"
 	"testing"
@@ -18,12 +18,12 @@ func TestSearchMovie(t *testing.T) {
 	service := NewSearchService(mockRepo)
 
 	// Create test data for searchParams and expected results.
-	searchParams := &model.SearchParams{
-		Filters: []*model.FieldData{
+	searchParams := &model2.SearchParams{
+		Filters: []*model2.FieldData{
 			{
 				Operator: "and",
 				Field:    "title",
-				TypeValue: model.TypeValue{
+				TypeValue: model2.TypeValue{
 					Type:   "string",
 					Values: []string{"example"},
 				},
@@ -43,13 +43,13 @@ func TestSearchMovie(t *testing.T) {
 		},
 	}
 
-	expectedPage := &pagination.Page[*model.Movie]{
+	expectedPage := &pagination.Page[*model2.Movie]{
 		PageSize:      searchParams.Page.PageSize,
 		PageNumber:    searchParams.Page.PageNumber,
 		Sort:          searchParams.Page.Sort,
 		TotalElements: 2,
 		TotalPages:    1,
-		Content: []*model.Movie{
+		Content: []*model2.Movie{
 			{Title: "M1"},
 			{Title: "M2"},
 		},

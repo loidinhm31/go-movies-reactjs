@@ -7,8 +7,8 @@ import (
 	"io"
 	"log"
 	"movies-service/config"
+	dto2 "movies-service/internal/common/dto"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/reference"
@@ -29,7 +29,7 @@ func NewReferenceService(cfg *config.Config, ctrl control.Service) reference.Ser
 	}
 }
 
-func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.MovieDto) ([]*dto.MovieDto, error) {
+func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto2.MovieDto) ([]*dto2.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
@@ -73,7 +73,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 		return nil, err
 	}
 
-	var responseObject *dto.TheMovieDBPage
+	var responseObject *dto2.TheMovieDBPage
 
 	err = json.Unmarshal(bodyBytes, &responseObject)
 	if err != nil {
@@ -81,7 +81,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 	}
 	log.Println("got results from TMDB")
 
-	var movieDtos []*dto.MovieDto
+	var movieDtos []*dto2.MovieDto
 	var releaseDate time.Time
 
 	for _, m := range responseObject.Results {
@@ -95,7 +95,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 			releaseDate, err = time.Parse("2006-01-02", m.ReleaseDate)
 		}
 
-		movieDtos = append(movieDtos, &dto.MovieDto{
+		movieDtos = append(movieDtos, &dto2.MovieDto{
 			ID:          uint(m.ID),
 			Title:       title,
 			ReleaseDate: releaseDate,
@@ -108,7 +108,7 @@ func (is *referenceService) GetMoviesByType(ctx context.Context, movie *dto.Movi
 	return movieDtos, nil
 }
 
-func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, movieType string) (*dto.MovieDto, error) {
+func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, movieType string) (*dto2.MovieDto, error) {
 	log.Println("checking privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !is.ctrl.CheckPrivilege(username) {
@@ -152,7 +152,7 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 		return nil, err
 	}
 
-	var responseObject *dto.TheMovieDB
+	var responseObject *dto2.TheMovieDB
 
 	err = json.Unmarshal(bodyBytes, &responseObject)
 	if err != nil {
@@ -160,9 +160,9 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 	}
 	log.Println("got the result from TMDB")
 
-	var genres []*dto.GenreDto
+	var genres []*dto2.GenreDto
 	for _, g := range responseObject.Genres {
-		genres = append(genres, &dto.GenreDto{
+		genres = append(genres, &dto2.GenreDto{
 			ID:   g.ID,
 			Name: g.Name,
 		})
@@ -183,7 +183,7 @@ func (is *referenceService) GetMovieById(ctx context.Context, movieId int64, mov
 		runtime = responseObject.Runtime
 	}
 
-	return &dto.MovieDto{
+	return &dto2.MovieDto{
 		ID:          uint(responseObject.ID),
 		TypeCode:    movieType,
 		Title:       title,

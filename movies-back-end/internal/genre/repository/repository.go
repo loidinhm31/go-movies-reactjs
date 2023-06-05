@@ -4,8 +4,8 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
+	"movies-service/internal/common/model"
 	"movies-service/internal/genre"
-	"movies-service/internal/model"
 )
 
 type genreRepository struct {

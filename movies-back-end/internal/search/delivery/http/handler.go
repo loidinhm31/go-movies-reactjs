@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 	"movies-service/internal/search"
 	"movies-service/pkg/util"
 	"net/http"

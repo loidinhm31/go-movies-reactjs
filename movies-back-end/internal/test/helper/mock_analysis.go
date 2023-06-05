@@ -3,8 +3,8 @@ package helper
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/dto"
-	"movies-service/internal/model"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 )
 
 type MockAnalysisRepository struct {

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"movies-service/internal/collection"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
 	"movies-service/pkg/pagination"
 	"movies-service/pkg/util"
 	"net/http"
@@ -63,7 +63,7 @@ func (r collectionHandler) FetchCollectionsByUsername() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		results, err := r.collectionService.GetCollectionsByUsernameAndType(c, movieType, keyword, pageable)
+		results, err := r.collectionService.GetCollectionsByUserAndType(c, movieType, keyword, pageable)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -75,14 +75,13 @@ func (r collectionHandler) FetchCollectionsByUsername() gin.HandlerFunc {
 	}
 }
 
-func (r collectionHandler) FetchCollectionByUsernameAndRefID() gin.HandlerFunc {
+func (r collectionHandler) FetchCollectionByUserAndRefID() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		username := c.Query("username")
 		typeCode := c.Query("type")
 		refIdStr := c.Query("refId")
 		refID, _ := strconv.Atoi(refIdStr)
 
-		results, err := r.collectionService.GetCollectionByUsernameAndRefID(c, username, typeCode, uint(refID))
+		results, err := r.collectionService.GetCollectionByUserAndRefID(c, typeCode, uint(refID))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": err.Error(),
@@ -91,5 +90,25 @@ func (r collectionHandler) FetchCollectionByUsernameAndRefID() gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, results)
+	}
+}
+
+func (r collectionHandler) DeleteCollectionByTypeCodeAndRefID() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		typeCode := c.Query("type")
+		refIdStr := c.Param("id")
+		refID, _ := strconv.Atoi(refIdStr)
+
+		err := r.collectionService.RemoveCollectionByRefID(c, typeCode, uint(refID))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+		})
 	}
 }

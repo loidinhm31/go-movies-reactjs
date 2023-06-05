@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/dto"
+	"movies-service/internal/common/dto"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/errors"
-	"movies-service/internal/model"
 	"movies-service/internal/season"
 	"movies-service/internal/test/helper"
 	"testing"
@@ -28,7 +28,7 @@ func TestSeasonService_GetSeasonsByID(t *testing.T) {
 	t.Run("", func(t *testing.T) {
 		_, _, mockSeasonRepo, _, seasonService := initMock()
 
-		mockSeason := &model.Season{ID: uint(1), Name: "Season 1"}
+		mockSeason := &model2.Season{ID: uint(1), Name: "Season 1"}
 		expectedSeasonDto := &dto.SeasonDto{ID: uint(1), Name: "Season 1"}
 
 		// Set up expectations
@@ -45,7 +45,7 @@ func TestSeasonService_GetSeasonsByID(t *testing.T) {
 func TestSeasonService_GetSeasonsByMovieID(t *testing.T) {
 	_, _, mockSeasonRepo, _, seasonService := initMock()
 
-	mockSeasons := []*model.Season{
+	mockSeasons := []*model2.Season{
 		{ID: uint(1), Name: "Season 1"},
 		{ID: uint(2), Name: "Season 2"},
 	}
@@ -115,7 +115,7 @@ func TestSeasonService_AddSeason(t *testing.T) {
 			AirDate:     time.Now(),
 			MovieID:     uint(1),
 		}
-		movieObj := &model.Movie{ID: uint(1)}
+		movieObj := &model2.Movie{ID: uint(1)}
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
@@ -186,7 +186,7 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 
 		// Set up expectations
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
-		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(&model.Season{}, nil)
+		mockSeasonRepo.On("FindSeasonByID", mock.Anything, uint(1)).Return(&model2.Season{}, nil)
 
 		// Call the service method
 		err := seasonService.UpdateSeason(context.Background(), seasonDto)
@@ -206,12 +206,12 @@ func TestSeasonService_UpdateSeason(t *testing.T) {
 			AirDate:     time.Now(),
 			MovieID:     uint(1),
 		}
-		mockSeason := &model.Season{
+		mockSeason := &model2.Season{
 			ID:          uint(1),
 			Name:        "Season 1",
 			Description: "Description",
 			AirDate:     time.Now(),
-			Movie:       &model.Movie{ID: uint(1)},
+			Movie:       &model2.Movie{ID: uint(1)},
 		}
 
 		// Set up expectations

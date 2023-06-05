@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"movies-service/config"
-	"movies-service/internal/model"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/movie"
 	"movies-service/pkg/pagination"
 	"strings"
@@ -21,7 +21,7 @@ func NewMovieRepository(cfg *config.Config, db *gorm.DB) movie.Repository {
 	return &movieRepository{cfg: cfg, db: db}
 }
 
-func (mr *movieRepository) InsertMovie(ctx context.Context, movie *model.Movie) error {
+func (mr *movieRepository) InsertMovie(ctx context.Context, movie *model2.Movie) error {
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -35,8 +35,8 @@ func (mr *movieRepository) InsertMovie(ctx context.Context, movie *model.Movie) 
 
 func (mr *movieRepository) FindAllMovies(ctx context.Context, keyword string,
 	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
-	var allMovies []*model.Movie
+	page *pagination.Page[*model2.Movie]) (*pagination.Page[*model2.Movie], error) {
+	var allMovies []*model2.Movie
 
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
@@ -49,7 +49,7 @@ func (mr *movieRepository) FindAllMovies(ctx context.Context, keyword string,
 		tx = tx.Where("LOWER(title) LIKE ? OR LOWER(description) = ?", lowerWord, lowerWord)
 	}
 	err := tx.Preload("Genres").
-		Scopes(pagination.PageImpl[*model.Movie](allMovies, pageRequest, page, mr.db)).
+		Scopes(pagination.PageImpl[*model2.Movie](allMovies, pageRequest, page, mr.db)).
 		Find(&allMovies).Error
 	if err != nil {
 		return nil, err
@@ -58,8 +58,8 @@ func (mr *movieRepository) FindAllMovies(ctx context.Context, keyword string,
 	return page, nil
 }
 
-func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest, page *pagination.Page[*model.Movie]) (*pagination.Page[*model.Movie], error) {
-	var allMovies []*model.Movie
+func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest, page *pagination.Page[*model2.Movie]) (*pagination.Page[*model2.Movie], error) {
+	var allMovies []*model2.Movie
 	var totalRows int64
 
 	tx := mr.db.WithContext(ctx)
@@ -76,7 +76,7 @@ func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, mov
 	err := tx.Where("type_code = ?", movieType).
 		Count(&totalRows).
 		Preload("Genres").
-		Scopes(pagination.PageImplCountCriteria[*model.Movie](totalRows, pageRequest, page)).
+		Scopes(pagination.PageImplCountCriteria[*model2.Movie](totalRows, pageRequest, page)).
 		Find(&allMovies).Error
 	if err != nil {
 		return nil, err
@@ -85,8 +85,8 @@ func (mr *movieRepository) FindAllMoviesByType(ctx context.Context, keyword, mov
 	return page, nil
 }
 
-func (mr *movieRepository) FindMovieByID(ctx context.Context, id uint) (*model.Movie, error) {
-	var result model.Movie
+func (mr *movieRepository) FindMovieByID(ctx context.Context, id uint) (*model2.Movie, error) {
+	var result model2.Movie
 
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
@@ -102,9 +102,9 @@ func (mr *movieRepository) FindMovieByID(ctx context.Context, id uint) (*model.M
 
 func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 	pageRequest *pagination.PageRequest,
-	page *pagination.Page[*model.Movie],
-	genreId uint) (*pagination.Page[*model.Movie], error) {
-	var movieResults []*model.Movie
+	page *pagination.Page[*model2.Movie],
+	genreId uint) (*pagination.Page[*model2.Movie], error) {
+	var movieResults []*model2.Movie
 	var totalRows int64
 
 	tx := mr.db.WithContext(ctx)
@@ -114,7 +114,7 @@ func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 
 	err := tx.Model(movieResults).Where("movies.id IN (SELECT movie_id FROM movies_genres WHERE genre_id = ?)", genreId).
 		Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*model.Movie](totalRows, pageRequest, page)).
+		Scopes(pagination.PageImplCountCriteria[*model2.Movie](totalRows, pageRequest, page)).
 		Find(&movieResults).Error
 	if err != nil {
 		return nil, err
@@ -123,20 +123,20 @@ func (mr *movieRepository) FindMoviesByGenre(ctx context.Context,
 	return page, nil
 }
 
-func (mr *movieRepository) UpdateMovie(ctx context.Context, movie *model.Movie) error {
+func (mr *movieRepository) UpdateMovie(ctx context.Context, movie *model2.Movie) error {
 	tx := mr.db.WithContext(ctx)
 
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&model.Movie{}).Where("id = ?", movie.ID).Updates(movie).Error
+	err := tx.Model(&model2.Movie{}).Where("id = ?", movie.ID).Updates(movie).Error
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (mr *movieRepository) UpdateMovieGenres(ctx context.Context, movie *model.Movie, genres []*model.Genre) error {
+func (mr *movieRepository) UpdateMovieGenres(ctx context.Context, movie *model2.Movie, genres []*model2.Genre) error {
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -155,7 +155,7 @@ func (mr *movieRepository) DeleteMovieByID(ctx context.Context, id uint) error {
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Select(clause.Associations).Delete(&model.Movie{
+	err := tx.Select(clause.Associations).Delete(&model2.Movie{
 		ID: id,
 	}).Error
 	if err != nil {
@@ -164,8 +164,8 @@ func (mr *movieRepository) DeleteMovieByID(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (mr *movieRepository) FindMovieByEpisodeID(ctx context.Context, episdoeID uint) (*model.Movie, error) {
-	var result *model.Movie
+func (mr *movieRepository) FindMovieByEpisodeID(ctx context.Context, episdoeID uint) (*model2.Movie, error) {
+	var result *model2.Movie
 
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {

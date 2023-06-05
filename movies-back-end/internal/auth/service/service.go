@@ -8,11 +8,11 @@ import (
 	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/cloak"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/model"
 	"movies-service/internal/role"
 	"movies-service/internal/user"
 	"strings"
@@ -39,9 +39,7 @@ func NewAuthService(keycloak config.KeycloakConfig, cloak cloak.GoCloakClientInt
 
 func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
 	fmtUsername := strings.ToLower(userDto.Username)
-	euser, _ := a.userRepository.FindUserByUsername(ctx, &model.User{
-		Username: fmtUsername,
-	})
+	euser, _ := a.userRepository.FindUserByUsername(ctx, fmtUsername)
 	if euser != nil {
 		return nil, errors.ErrUserExisted
 	}
@@ -71,10 +69,7 @@ func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.Us
 }
 
 func (a *authService) SignIn(ctx context.Context, username string) (*dto.UserDto, error) {
-	theUser, _ := a.userRepository.FindUserByUsername(ctx, &model.User{
-		Username: username,
-		IsNew:    false,
-	})
+	theUser, _ := a.userRepository.FindUserByUsernameAndIsNew(ctx, username, false)
 	if theUser == nil {
 		return nil, errors.ErrResourceNotFound
 	}

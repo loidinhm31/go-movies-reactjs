@@ -3,7 +3,7 @@ package helper
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
-	"movies-service/internal/model"
+	"movies-service/internal/common/model"
 )
 
 type MockRoleRepository struct {

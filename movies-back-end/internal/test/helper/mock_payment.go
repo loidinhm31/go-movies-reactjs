@@ -2,28 +2,25 @@ package helper
 
 import (
 	"context"
-	"movies-service/internal/model"
+	"github.com/stretchr/testify/mock"
+	"movies-service/internal/common/model"
 )
 
 type MockPaymentRepository struct {
-	InsertPaymentFn           func(ctx context.Context, payment *model.Payment) (*model.Payment, error)
-	FindByProviderPaymentIDFn func(ctx context.Context, provider model.PaymentProvider, providerPaymentID string) (*model.Payment, error)
+	mock.Mock
 }
 
-func NewMockPaymentRepository() *MockPaymentRepository {
-	return &MockPaymentRepository{}
+func (m *MockPaymentRepository) InsertPayment(ctx context.Context, payment *model.Payment) (*model.Payment, error) {
+	args := m.Called(ctx, payment)
+	return args.Get(0).(*model.Payment), args.Error(1)
 }
 
-func (mpr *MockPaymentRepository) InsertPayment(ctx context.Context, payment *model.Payment) (*model.Payment, error) {
-	if mpr.InsertPaymentFn != nil {
-		return mpr.InsertPaymentFn(ctx, payment)
-	}
-	return nil, nil
+func (m *MockPaymentRepository) FindByProviderPaymentID(ctx context.Context, provider model.PaymentProvider, providerPaymentID string) (*model.Payment, error) {
+	args := m.Called(ctx, provider, providerPaymentID)
+	return args.Get(0).(*model.Payment), args.Error(1)
 }
 
-func (mpr *MockPaymentRepository) FindByProviderPaymentID(ctx context.Context, provider model.PaymentProvider, providerPaymentID string) (*model.Payment, error) {
-	if mpr.FindByProviderPaymentIDFn != nil {
-		return mpr.FindByProviderPaymentIDFn(ctx, provider, providerPaymentID)
-	}
-	return nil, nil
+func (m *MockPaymentRepository) FindByTypeCodeAndRefID(ctx context.Context, typeCode string, refID uint) (*model.Payment, error) {
+	args := m.Called(ctx, typeCode, refID)
+	return args.Get(0).(*model.Payment), args.Error(1)
 }

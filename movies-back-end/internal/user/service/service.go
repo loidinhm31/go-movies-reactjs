@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"movies-service/internal/common/dto"
+	"movies-service/internal/common/model"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/model"
 	"movies-service/internal/role"
 	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
@@ -100,10 +100,7 @@ func (u *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) 
 func (u *userService) AddOidcUser(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
 	log.Println("Checking user...")
 	fmtUsername := strings.ToLower(userDto.Username)
-	euser, _ := u.userRepository.FindUserByUsername(ctx, &model.User{
-		Username: fmtUsername,
-		IsNew:    false,
-	})
+	euser, _ := u.userRepository.FindUserByUsernameAndIsNew(ctx, fmtUsername, false)
 	if euser != nil {
 		return nil, errors.ErrUserExisted
 	}

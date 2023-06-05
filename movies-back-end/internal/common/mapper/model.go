@@ -1,14 +1,14 @@
 package mapper
 
 import (
-	"movies-service/internal/dto"
-	"movies-service/internal/model"
+	"movies-service/internal/common/dto"
+	model2 "movies-service/internal/common/model"
 	"movies-service/pkg/util"
 	"time"
 )
 
-func MapToMovie(movieDto *dto.MovieDto, author string) *model.Movie {
-	return &model.Movie{
+func MapToMovie(movieDto *dto.MovieDto, author string) *model2.Movie {
+	return &model2.Movie{
 		Title:       movieDto.Title,
 		TypeCode:    movieDto.TypeCode,
 		ReleaseDate: movieDto.ReleaseDate,
@@ -25,8 +25,8 @@ func MapToMovie(movieDto *dto.MovieDto, author string) *model.Movie {
 	}
 }
 
-func MapToMovieUpdate(movieDto *dto.MovieDto, author string) *model.Movie {
-	return &model.Movie{
+func MapToMovieUpdate(movieDto *dto.MovieDto, author string) *model2.Movie {
+	return &model2.Movie{
 		ID:          movieDto.ID,
 		Title:       movieDto.Title,
 		TypeCode:    movieDto.TypeCode,
@@ -42,8 +42,8 @@ func MapToMovieUpdate(movieDto *dto.MovieDto, author string) *model.Movie {
 	}
 }
 
-func MapToGenre(genreDto *dto.GenreDto, author string) *model.Genre {
-	return &model.Genre{
+func MapToGenre(genreDto *dto.GenreDto, author string) *model2.Genre {
+	return &model2.Genre{
 		ID:        genreDto.ID,
 		Name:      genreDto.Name,
 		TypeCode:  genreDto.TypeCode,

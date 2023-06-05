@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"movies-service/internal/common/model"
 	"movies-service/internal/control"
-	"movies-service/internal/model"
 	"movies-service/internal/test/helper"
 	"testing"
 )

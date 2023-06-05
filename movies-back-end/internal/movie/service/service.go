@@ -7,12 +7,12 @@ import (
 	"log"
 	"movies-service/internal/blob"
 	"movies-service/internal/collection"
+	"movies-service/internal/common/dto"
+	mapper2 "movies-service/internal/common/mapper"
+	model2 "movies-service/internal/common/model"
 	"movies-service/internal/control"
-	"movies-service/internal/dto"
 	"movies-service/internal/errors"
-	"movies-service/internal/mapper"
 	"movies-service/internal/middlewares"
-	"movies-service/internal/model"
 	"movies-service/internal/movie"
 	"movies-service/internal/payment"
 	"movies-service/pkg/pagination"
@@ -39,10 +39,10 @@ func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository,
 }
 
 func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*model.Movie]{}
+	page := &pagination.Page[*model2.Movie]{}
 
 	var err error
-	var movieResults *pagination.Page[*model.Movie]
+	var movieResults *pagination.Page[*model2.Movie]
 	if movieType != "" {
 		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, keyword, movieType, pageRequest, page)
 		if err != nil {
@@ -57,7 +57,7 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 		}
 	}
 
-	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
+	movieDtos := mapper2.MapToMovieDtoSlice(movieResults.Content)
 
 	return &pagination.Page[*dto.MovieDto]{
 		PageSize:      pageRequest.PageSize,
@@ -81,7 +81,7 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 
 	// Check valid video path
 	if result.Price.Valid {
-		thePayment, err := ms.paymentRepository.FindByTypeCodeAndRefID(ctx, result.TypeCode, result.ID)
+		thePayment, err := ms.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, result.TypeCode, result.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -98,12 +98,12 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 		}
 	}
 
-	movieDto := mapper.MapToMovieDto(result, !isValidUser, isPrivilege)
+	movieDto := mapper2.MapToMovieDto(result, !isValidUser, isPrivilege)
 	return movieDto, nil
 }
 
 func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId uint) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*model.Movie]{}
+	page := &pagination.Page[*model2.Movie]{}
 
 	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
 	if err != nil {
@@ -111,7 +111,7 @@ func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagin
 		return nil, errors.ErrResourceNotFound
 	}
 
-	movieDtos := mapper.MapToMovieDtoSlice(movieResults.Content)
+	movieDtos := mapper2.MapToMovieDtoSlice(movieResults.Content)
 
 	return &pagination.Page[*dto.MovieDto]{
 		PageSize:      pageRequest.PageSize,
@@ -141,14 +141,14 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		return errors.ErrUnAuthorized
 	}
 
-	var genreObjects []*model.Genre
+	var genreObjects []*model2.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
 				log.Println("genre type must equal movie type")
 				return errors.ErrInvalidInput
 			}
-			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
+			genreObjects = append(genreObjects, mapper2.MapToGenre(genre, author))
 		}
 	}
 
@@ -157,7 +157,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		return errors.ErrInvalidInputDetail("genres cannot empty")
 	}
 
-	movieObject := mapper.MapToMovie(movie, author)
+	movieObject := mapper2.MapToMovie(movie, author)
 	movieObject.Genres = genreObjects
 
 	err := ms.movieRepository.InsertMovie(ctx, movieObject)
@@ -191,21 +191,21 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	}
 
 	// After check object exists, write updating value
-	movieObj = mapper.MapToMovieUpdate(movie, author)
+	movieObj = mapper2.MapToMovieUpdate(movie, author)
 
 	err = ms.movieRepository.UpdateMovie(ctx, movieObj)
 	if err != nil {
 		return err
 	}
 
-	var genreObjects []*model.Genre
+	var genreObjects []*model2.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
 				log.Println("genre type must equal movie type")
 				return errors.ErrInvalidInput
 			}
-			genreObjects = append(genreObjects, mapper.MapToGenre(genre, author))
+			genreObjects = append(genreObjects, mapper2.MapToGenre(genre, author))
 		}
 	}
 
@@ -305,6 +305,6 @@ func (ms *movieService) GetMovieByEpisodeID(ctx context.Context, episodeID uint)
 		return nil, errors.ErrResourceNotFound
 	}
 
-	movieDto := mapper.MapToMovieDto(result, !isValidUser, isPrivilege)
+	movieDto := mapper2.MapToMovieDto(result, !isValidUser, isPrivilege)
 	return movieDto, nil
 }

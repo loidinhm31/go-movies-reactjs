@@ -2,11 +2,10 @@ package postgres
 
 import (
 	"fmt"
-	"movies-service/config"
-	"movies-service/internal/model"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"movies-service/config"
+	"movies-service/internal/common/model"
 )
 
 func NewPsqlDB(cfg *config.Config, migrate bool) (*gorm.DB, error) {

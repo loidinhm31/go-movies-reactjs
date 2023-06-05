@@ -23,19 +23,19 @@ type RoleDto struct {
 }
 
 type Viewer struct {
-	MovieId uint   `json:"movie_id"`
+	MovieID uint   `json:"movie_id"`
 	Viewer  string `json:"viewer"`
 }
 
 type CollectionDto struct {
-	Username  string `json:"username,omitempty"`
+	UserID    uint   `json:"user_id,omitempty"`
 	MovieID   uint   `json:"movie_id,omitempty"`
 	EpisodeID uint   `json:"episode_id,omitempty"`
 	TypeCode  string `json:"type_code"`
 }
 
 type CollectionDetailDto struct {
-	Username    string    `json:"username,omitempty"`
+	UserID      string    `json:"user_id,omitempty"`
 	MovieID     uint      `json:"id,omitempty"`
 	EpisodeID   uint      `json:"episode_id,omitempty"`
 	TypeCode    string    `json:"type_code,omitempty"`

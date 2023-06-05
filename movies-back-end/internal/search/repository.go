@@ -2,10 +2,10 @@ package search
 
 import (
 	"context"
-	"movies-service/internal/model"
+	model2 "movies-service/internal/common/model"
 	"movies-service/pkg/pagination"
 )
 
 type Repository interface {
-	SearchMovie(ctx context.Context, searchParams *model.SearchParams) (*pagination.Page[*model.Movie], error)
+	SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*model2.Movie], error)
 }
