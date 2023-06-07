@@ -4,10 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"movies-service/config"
+	"movies-service/internal/common/constant"
 	"movies-service/internal/common/dto"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/common/model"
 	"movies-service/internal/control"
 	"movies-service/internal/errors"
+	"movies-service/internal/mail"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/role"
 	"movies-service/internal/user"
@@ -17,29 +21,33 @@ import (
 )
 
 type userService struct {
+	config         *config.Config
 	mgmtCtrl       control.Service
 	roleRepository role.Repository
 	userRepository user.UserRepository
+	mailService    mail.Service
 }
 
-func NewUserService(mgmtCtrl control.Service, roleRepository role.Repository, userRepository user.UserRepository) user.Service {
+func NewUserService(config *config.Config, mgmtCtrl control.Service, roleRepository role.Repository, userRepository user.UserRepository, mailService mail.Service) user.Service {
 	return &userService{
+		config:         config,
 		mgmtCtrl:       mgmtCtrl,
 		roleRepository: roleRepository,
 		userRepository: userRepository,
+		mailService:    mailService,
 	}
 }
 
-func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.PageRequest, key string, isNew bool) (*pagination.Page[*dto.UserDto], error) {
+func (us *userService) GetUsers(ctx context.Context, pageRequest *pagination.PageRequest, key string, isNew bool) (*pagination.Page[*dto.UserDto], error) {
 	log.Println("checking admin privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
+	if !us.mgmtCtrl.CheckAdminPrivilege(username) {
 		return nil, errors.ErrUnAuthorized
 	}
 
-	page := &pagination.Page[*model.User]{}
+	page := &pagination.Page[*entity.User]{}
 
-	userResults, err := u.userRepository.FindAllUsers(ctx, pageRequest, page, key, isNew)
+	userResults, err := us.userRepository.FindAllUsers(ctx, pageRequest, page, key, isNew)
 	if err != nil {
 		log.Println(err)
 		return nil, errors.ErrResourceNotFound
@@ -73,47 +81,69 @@ func (u *userService) GetUsers(ctx context.Context, pageRequest *pagination.Page
 	}, nil
 }
 
-func (u *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) error {
+func (us *userService) UpdateUserRole(ctx context.Context, userDto *dto.UserDto) error {
 	log.Println("checking admin privilege...")
 	username := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !u.mgmtCtrl.CheckAdminPrivilege(username) {
+	if !us.mgmtCtrl.CheckAdminPrivilege(username) {
 		return errors.ErrUnAuthorized
 	}
 
-	theUser, err := u.userRepository.FindUserByID(ctx, userDto.ID)
+	theUser, err := us.userRepository.FindUserByID(ctx, userDto.ID)
 	if err != nil {
 		return err
 	}
 
-	theRole, err := u.roleRepository.FindRoleByRoleCode(ctx, userDto.Role.RoleCode)
+	theRole, err := us.roleRepository.FindRoleByRoleCode(ctx, userDto.Role.RoleCode)
 	if err != nil {
 		return err
 	}
 
-	err = u.userRepository.UpdateUserRole(ctx, theUser.ID, theRole.ID)
+	err = us.userRepository.UpdateUserRole(ctx, theUser.ID, theRole.ID)
 	if err != nil {
 		return err
 	}
+
+	// Send email to user
+	go func() {
+		htmlMessage := fmt.Sprintf(`
+		<strong>Updated Role</strong><br>
+		Dear %s %s, <br>
+		This is notification for your updated role to <strong>%s</strong>.`,
+			theUser.FirstName, theUser.LastName, strings.ToUpper(theRole.RoleName))
+
+		err := us.mailService.SendMessage(ctx, &model.MailData{
+			To:           theUser.Email,
+			From:         us.config.Mail.From,
+			Subject:      constant.UpdateRoleSubject,
+			Content:      htmlMessage,
+			TemplateMail: "basic.html",
+		})
+		if err != nil {
+			log.Println(err)
+		}
+
+	}()
+
 	return nil
 }
 
-func (u *userService) AddOidcUser(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
+func (us *userService) AddOidcUser(ctx context.Context, userDto *dto.UserDto) (*dto.UserDto, error) {
 	log.Println("Checking user...")
 	fmtUsername := strings.ToLower(userDto.Username)
-	euser, _ := u.userRepository.FindUserByUsernameAndIsNew(ctx, fmtUsername, false)
+	euser, _ := us.userRepository.FindUserByUsernameAndIsNew(ctx, fmtUsername, false)
 	if euser != nil {
 		return nil, errors.ErrUserExisted
 	}
 
 	log.Println("checking admin privilege...")
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	if !u.mgmtCtrl.CheckAdminPrivilege(author) {
+	if !us.mgmtCtrl.CheckAdminPrivilege(author) {
 		return nil, errors.ErrUnAuthorized
 	}
 
-	getRole, err := u.roleRepository.FindRoleByRoleCode(ctx, userDto.Role.RoleCode)
+	getRole, err := us.roleRepository.FindRoleByRoleCode(ctx, userDto.Role.RoleCode)
 
-	err = u.userRepository.InsertUser(ctx, &model.User{
+	err = us.userRepository.InsertUser(ctx, &entity.User{
 		Username:  userDto.Username,
 		Email:     userDto.Email,
 		FirstName: userDto.FirstName,
