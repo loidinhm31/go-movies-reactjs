@@ -1,3 +1,4 @@
+environment: local
 server:
   AppVersion: 1.0.0
   Port: :9090
@@ -33,5 +34,10 @@ tmdb:
   ApiKey:
 
 stripe:
-  PublishableKey:
+  PublishableKey: pk_test_51NEEYoCBUAGsQ2OtKbGkg8qKTroDdItzsT8MBx2N89GwUqFjftSbP40oiFPHokUHF6tlC4vXYaYBSuY1u7mwfzf000ngRHmlmq
   SecretKey:
+
+mail:
+  Host: mailhog
+  Port: 1025
+  From: system@shiftflix.com

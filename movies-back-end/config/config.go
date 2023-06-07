@@ -10,13 +10,17 @@ import (
 
 // Config App config struct
 type Config struct {
-	Server     ServerConfig
-	Postgres   PostgresConfig
-	Keycloak   KeycloakConfig
-	Cloudinary CloudinaryConfig
-	Tmdb       TmdbConfig
-	Stripe     StripeConfig
+	Environment Environment
+	Server      ServerConfig
+	Postgres    PostgresConfig
+	Keycloak    KeycloakConfig
+	Cloudinary  CloudinaryConfig
+	Tmdb        TmdbConfig
+	Stripe      StripeConfig
+	Mail        Mail
 }
+
+type Environment string
 
 // ServerConfig Server config struct
 type ServerConfig struct {
@@ -62,6 +66,12 @@ type TmdbConfig struct {
 type StripeConfig struct {
 	PublishableKey string
 	SecretKey      string
+}
+
+type Mail struct {
+	Host string
+	Port int
+	From string
 }
 
 // LoadConfig Load config file from given path
