@@ -8,14 +8,15 @@ import (
 	"movies-service/internal/blob"
 	"movies-service/internal/collection"
 	"movies-service/internal/common/dto"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/common/mapper"
-	"movies-service/internal/common/model"
 	"movies-service/internal/control"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/payment"
 	"movies-service/internal/season"
+	"movies-service/internal/user"
 	"movies-service/pkg/util"
 	"strings"
 	"sync"
@@ -24,6 +25,7 @@ import (
 
 type episodeService struct {
 	mgmtCtrl             control.Service
+	userRepository       user.UserRepository
 	seasonRepository     season.Repository
 	collectionRepository collection.Repository
 	paymentRepository    payment.Repository
@@ -31,11 +33,13 @@ type episodeService struct {
 	blobService          blob.Service
 }
 
-func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Repository,
-	collectionRepository collection.Repository, paymentRepository payment.Repository,
-	episodeRepository episode.Repository, blobService blob.Service) episode.Service {
+func NewEpisodeService(mgmtCtrl control.Service, userRepository user.UserRepository,
+	seasonRepository season.Repository, collectionRepository collection.Repository,
+	paymentRepository payment.Repository, episodeRepository episode.Repository,
+	blobService blob.Service) episode.Service {
 	return &episodeService{
 		mgmtCtrl:             mgmtCtrl,
+		userRepository:       userRepository,
 		seasonRepository:     seasonRepository,
 		collectionRepository: collectionRepository,
 		paymentRepository:    paymentRepository,
@@ -44,35 +48,39 @@ func NewEpisodeService(mgmtCtrl control.Service, seasonRepository season.Reposit
 	}
 }
 
-func (es episodeService) GetEpisodesByID(ctx context.Context, id uint) (*dto.EpisodeDto, error) {
+func (es episodeService) GetEpisodeByID(ctx context.Context, id uint) (*dto.EpisodeDto, error) {
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	isValidUser, isPrivilege := es.mgmtCtrl.CheckUser(author)
+	theUser, err := es.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
+	if err != nil {
+		return nil, err
+	}
 
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
 	result, err := es.episodeRepository.FindEpisodeByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check valid video path
+	// Set valid video path
 	if result.Price.Valid {
-		thePayment, err := es.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, "TV", result.ID)
+		thePayment, err := es.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, "TV", result.ID)
 		if err != nil {
 			return nil, err
 		}
 
+		// Not paid
 		if !(thePayment.TypeCode == "TV" && thePayment.RefID == result.ID) {
-			theCollection, err := es.collectionRepository.FindCollectionByEpisodeID(ctx, result.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			if !(theCollection.TypeCode == "TV" && uint(theCollection.MovieID.Int64) == result.ID) {
-				result.VideoPath = sql.NullString{}
-			}
+			result.VideoPath = sql.NullString{}
 		}
 	}
 
-	return mapper.MapToEpisodeDto(result, !isValidUser, isPrivilege), nil
+	return mapper.MapToEpisodeDto(
+		result,
+		true,
+		theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
+	), nil
 }
 
 func (es episodeService) GetEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*dto.EpisodeDto, error) {
@@ -106,7 +114,7 @@ func (es episodeService) AddEpisode(ctx context.Context, episode *dto.EpisodeDto
 		return err
 	}
 
-	episodeObject := &model.Episode{
+	episodeObject := &entity.Episode{
 		Name:      episode.Name,
 		AirDate:   episode.AirDate,
 		Runtime:   episode.Runtime,
@@ -152,7 +160,7 @@ func (es episodeService) UpdateEpisode(ctx context.Context, episode *dto.Episode
 	}
 
 	// After check object exists, write updating value
-	episodeObj = &model.Episode{
+	episodeObj = &entity.Episode{
 		ID:        episode.ID,
 		Name:      episode.Name,
 		AirDate:   episode.AirDate,
@@ -176,6 +184,17 @@ func (es episodeService) UpdateEpisode(ctx context.Context, episode *dto.Episode
 func (es episodeService) RemoveEpisodeByID(ctx context.Context, id uint) error {
 	if id == 0 {
 		return errors.ErrInvalidInput
+	}
+
+	// Check collection
+	log.Println("checking collection before deleting...")
+	collections, err := es.collectionRepository.FindCollectionsByEpisodeID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if len(collections) > 0 {
+		return errors.ErrCannotExecuteAction
 	}
 
 	// Get author

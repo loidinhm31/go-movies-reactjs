@@ -6,7 +6,7 @@ import (
 )
 
 func MapEpisodeRoutes(episodeGroup *gin.RouterGroup, h episode.Handler) {
-	episodeGroup.GET("/:id", h.FetchEpisodesByID())
+	episodeGroup.GET("/:id", h.FetchEpisodeByID())
 	episodeGroup.GET("/", h.FetchEpisodesBySeasonID())
 }
 

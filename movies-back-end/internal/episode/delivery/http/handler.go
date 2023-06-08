@@ -20,12 +20,12 @@ func NewEpisodeHandler(episodeService episode.Service) episode.Handler {
 	}
 }
 
-func (e episodeHandler) FetchEpisodesByID() gin.HandlerFunc {
+func (e episodeHandler) FetchEpisodeByID() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		episodeID, _ := strconv.Atoi(id)
 
-		allEpisodes, err := e.episodeService.GetEpisodesByID(c, uint(episodeID))
+		allEpisodes, err := e.episodeService.GetEpisodeByID(c, uint(episodeID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

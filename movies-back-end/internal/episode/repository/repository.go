@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/episode"
 )
 
@@ -17,8 +17,8 @@ func NewEpisodeRepository(cfg *config.Config, db *gorm.DB) episode.Repository {
 	return &episodeRepository{cfg: cfg, db: db}
 }
 
-func (e episodeRepository) FindEpisodeByID(ctx context.Context, id uint) (*model.Episode, error) {
-	var episodeObject *model.Episode
+func (e episodeRepository) FindEpisodeByID(ctx context.Context, id uint) (*entity.Episode, error) {
+	var episodeObject *entity.Episode
 
 	tx := e.db.WithContext(ctx)
 	if e.cfg.Server.Debug {
@@ -32,8 +32,8 @@ func (e episodeRepository) FindEpisodeByID(ctx context.Context, id uint) (*model
 	return episodeObject, nil
 }
 
-func (e episodeRepository) FindEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*model.Episode, error) {
-	var episodeObjects []*model.Episode
+func (e episodeRepository) FindEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*entity.Episode, error) {
+	var episodeObjects []*entity.Episode
 
 	tx := e.db.WithContext(ctx)
 	if e.cfg.Server.Debug {
@@ -48,7 +48,7 @@ func (e episodeRepository) FindEpisodesBySeasonID(ctx context.Context, seasonID 
 	return episodeObjects, nil
 }
 
-func (e episodeRepository) InsertEpisode(ctx context.Context, episode *model.Episode) error {
+func (e episodeRepository) InsertEpisode(ctx context.Context, episode *entity.Episode) error {
 	tx := e.db.WithContext(ctx)
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -60,13 +60,13 @@ func (e episodeRepository) InsertEpisode(ctx context.Context, episode *model.Epi
 	return nil
 }
 
-func (e episodeRepository) UpdateEpisode(ctx context.Context, episode *model.Episode) error {
+func (e episodeRepository) UpdateEpisode(ctx context.Context, episode *entity.Episode) error {
 	tx := e.db.WithContext(ctx)
 
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&model.Episode{}).Where("id = ?", episode.ID).
+	err := tx.Model(&entity.Episode{}).Where("id = ?", episode.ID).
 		Updates(episode).Error
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (e episodeRepository) DeleteEpisodeByID(ctx context.Context, id uint) error
 	if e.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("id = ?", id).Delete(&model.Episode{}).Error
+	err := tx.Where("id = ?", id).Delete(&entity.Episode{}).Error
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (e episodeRepository) DeleteEpisodeBySeasonID(ctx context.Context, seasonID
 		tx = tx.Debug()
 	}
 
-	err := tx.Where("season_id = ?", seasonID).Delete(&model.Episode{}).Error
+	err := tx.Where("season_id = ?", seasonID).Delete(&entity.Episode{}).Error
 	if err != nil {
 		return err
 	}
