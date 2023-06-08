@@ -2,8 +2,11 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"movies-service/internal/common/model"
+	"log"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/payment"
+	"movies-service/pkg/pagination"
+	"movies-service/pkg/util"
 	"net/http"
 	"strconv"
 )
@@ -27,7 +30,7 @@ func (r paymentHandler) VerifyStripePayment() gin.HandlerFunc {
 		refIdStr := c.Query("refId")
 		refID, _ := strconv.Atoi(refIdStr)
 
-		err := r.paymentService.VerifyPayment(c, model.STRIPE, paymentID, username, typeCode, uint(refID))
+		err := r.paymentService.VerifyPayment(c, entity.STRIPE, paymentID, username, typeCode, uint(refID))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -61,7 +64,20 @@ func (r paymentHandler) FetchPaymentsByUserAndRefID() gin.HandlerFunc {
 
 func (r paymentHandler) FetchPaymentsByUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		results, err := r.paymentService.GetPaymentsByUser(c)
+		keyword := c.Query("q")
+
+		pageable, _ := pagination.ReadPageRequest(c)
+
+		if err := util.ReadRequest(c, pageable); err != nil {
+			log.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+			})
+			c.Abort()
+			return
+		}
+
+		results, err := r.paymentService.GetPaymentsByUser(c, keyword, pageable)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),

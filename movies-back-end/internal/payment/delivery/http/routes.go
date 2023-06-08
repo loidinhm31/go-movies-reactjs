@@ -12,5 +12,7 @@ func MapPaymentRoutes(paymentGroup *gin.RouterGroup, h payment.Handler) {
 }
 
 func MapAuthPaymentRoutes(paymentGroup *gin.RouterGroup, h payment.Handler) {
+	paymentGroup.POST("/", h.FetchPaymentsByUser())
 	paymentGroup.GET("/", h.FetchPaymentsByUser())
+
 }

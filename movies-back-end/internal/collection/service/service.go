@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"movies-service/internal/collection"
 	"movies-service/internal/common/dto"
+	model2 "movies-service/internal/common/entity"
 	"movies-service/internal/common/mapper"
-	model2 "movies-service/internal/common/model"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
@@ -56,7 +56,7 @@ func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.
 		}
 
 		if theMovie.Price.Valid {
-			thePayment, err := fs.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, collection.TypeCode, theMovie.ID)
+			thePayment, err := fs.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, collection.TypeCode, theMovie.ID)
 			if err != nil {
 				return err
 			}
@@ -83,7 +83,7 @@ func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.
 		}
 
 		if theEpisode.Price.Valid {
-			thePayment, err := fs.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, collection.TypeCode, theEpisode.ID)
+			thePayment, err := fs.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, collection.TypeCode, theEpisode.ID)
 			if err != nil {
 				return err
 			}
