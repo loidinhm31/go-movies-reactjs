@@ -13,10 +13,7 @@ type Repository interface {
 	FindCollectionByUserIDAndEpisodeID(ctx context.Context, userID uint, episodeID uint) (*entity.Collection, error)
 	FindCollectionByPaymentID(ctx context.Context, paymentID uint) (*entity.Collection, error)
 	FindCollectionsByMovieID(ctx context.Context, movieID uint) ([]*entity.Collection, error)
-	FindCollectionByMovieID(ctx context.Context, movieID uint) (*entity.Collection, error)
 	FindCollectionsByEpisodeID(ctx context.Context, episodeID uint) ([]*entity.Collection, error)
-	FindCollectionByEpisodeID(ctx context.Context, episodeID uint) (*entity.Collection, error)
-	FindCollectionsByID(ctx context.Context, id uint) (*entity.Collection, error)
 	DeleteCollectionByTypeCodeAndMovieID(ctx context.Context, typeCode string, movieID uint) error
 	DeleteCollectionByTypeCodeAndEpisodeID(ctx context.Context, typeCode string, episodeID uint) error
 }

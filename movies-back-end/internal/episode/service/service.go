@@ -186,8 +186,19 @@ func (es episodeService) RemoveEpisodeByID(ctx context.Context, id uint) error {
 		return errors.ErrInvalidInput
 	}
 
+	// Check payment
+	log.Println("checking payment before removing...")
+	payments, err := es.paymentRepository.FindPaymentsByTypeCodeAndRefID(ctx, "TV", id)
+	if err != nil {
+		return err
+	}
+
+	if len(payments) > 0 {
+		return errors.ErrCannotExecuteAction
+	}
+
 	// Check collection
-	log.Println("checking collection before deleting...")
+	log.Println("checking collection before removing...")
 	collections, err := es.collectionRepository.FindCollectionsByEpisodeID(ctx, id)
 	if err != nil {
 		return err
@@ -200,7 +211,7 @@ func (es episodeService) RemoveEpisodeByID(ctx context.Context, id uint) error {
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !es.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
+		return errors.ErrInvalidClient
 	}
 
 	// Get current episode

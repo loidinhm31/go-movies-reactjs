@@ -421,11 +421,35 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		assert.Equal(t, errors.ErrInvalidInput, err)
 	})
 
-	t.Run("Added to Collection", func(t *testing.T) {
-		_, _, _, mockCollection, _, _, _, episodeService := initMock()
+	t.Run("Added to Payment", func(t *testing.T) {
+		_, _, _, _, mockPaymentRepo, _, _, episodeService := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
+
+		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "TV", mock.Anything).
+			Return([]*entity.Payment{
+				{
+					ID: uint(1),
+				},
+			}, nil)
+
+		// Call the service method
+		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+
+		// Assertions
+		assert.Error(t, err)
+		assert.Equal(t, errors.ErrCannotExecuteAction, err)
+	})
+
+	t.Run("Added to Collection", func(t *testing.T) {
+		_, _, _, mockCollection, mockPaymentRepo, _, _, episodeService := initMock()
+
+		// Set up input parameters
+		episodeID := uint(1)
+
+		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "TV", mock.Anything).
+			Return([]*entity.Payment{}, nil)
 
 		mockCollection.On("FindCollectionsByEpisodeID", mock.Anything, mock.Anything).
 			Return([]*entity.Collection{
@@ -448,13 +472,19 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		assert.Equal(t, errors.ErrCannotExecuteAction, err)
 	})
 
-	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, _, _, _, episodeService := initMock()
+	t.Run("Invalid Client", func(t *testing.T) {
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, _, _, episodeService := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
 
 		// Set up expectations
+		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "TV", mock.Anything).
+			Return([]*entity.Payment{}, nil)
+
+		mockCollection.On("FindCollectionsByEpisodeID", mock.Anything, mock.Anything).
+			Return([]*entity.Collection{}, nil)
+
 		mockCollection.On("FindCollectionsByEpisodeID", mock.Anything, mock.Anything).
 			Return([]*entity.Collection{}, nil)
 
@@ -465,16 +495,19 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 
 		// Assertions
 		assert.Error(t, err)
-		assert.Equal(t, errors.ErrUnAuthorized, err)
+		assert.Equal(t, errors.ErrInvalidClient, err)
 	})
 
 	t.Run("Error Deleting", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, _, episodeService := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
 
 		// Set up expectations
+		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "TV", mock.Anything).
+			Return([]*entity.Payment{}, nil)
+
 		mockCollection.On("FindCollectionsByEpisodeID", mock.Anything, mock.Anything).
 			Return([]*entity.Collection{}, nil)
 
@@ -495,12 +528,15 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, _, mockEpisodeRepo, blobService, episodeService := initMock()
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, blobService, episodeService := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
 
 		// Set up expectations
+		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "TV", mock.Anything).
+			Return([]*entity.Payment{}, nil)
+
 		mockCollection.On("FindCollectionsByEpisodeID", mock.Anything, mock.Anything).
 			Return([]*entity.Collection{}, nil)
 

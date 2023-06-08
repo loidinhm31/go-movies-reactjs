@@ -119,21 +119,7 @@ func (cr *collectionRepository) FindCollectionsByMovieID(ctx context.Context, mo
 	if cr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("movie_id = ?", movieID).
-		Find(&results).Error
-	if err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
-func (cr *collectionRepository) FindCollectionByMovieID(ctx context.Context, episodeID uint) (*entity.Collection, error) {
-	var results *entity.Collection
-	tx := cr.db.WithContext(ctx)
-	if cr.cfg.Server.Debug {
-		tx = tx.Debug()
-	}
-	err := tx.Where("episode_id = ?", episodeID).
+	err := tx.Where("movie_id = ? AND type_code", movieID, "MOVIE").
 		Find(&results).Error
 	if err != nil {
 		return nil, err
@@ -147,35 +133,7 @@ func (cr *collectionRepository) FindCollectionsByEpisodeID(ctx context.Context, 
 	if cr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("episode_id = ?", episodeID).
-		Find(&results).Error
-	if err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
-func (cr *collectionRepository) FindCollectionByEpisodeID(ctx context.Context, episodeID uint) (*entity.Collection, error) {
-	var results *entity.Collection
-	tx := cr.db.WithContext(ctx)
-	if cr.cfg.Server.Debug {
-		tx = tx.Debug()
-	}
-	err := tx.Where("episode_id = ?", episodeID).
-		Find(&results).Error
-	if err != nil {
-		return nil, err
-	}
-	return results, nil
-}
-
-func (cr *collectionRepository) FindCollectionsByID(ctx context.Context, id uint) (*entity.Collection, error) {
-	var results *entity.Collection
-	tx := cr.db.WithContext(ctx)
-	if cr.cfg.Server.Debug {
-		tx = tx.Debug()
-	}
-	err := tx.Where("id = ?", id).
+	err := tx.Where("episode_id = ? AND type_code = ?", episodeID, "TV").
 		Find(&results).Error
 	if err != nil {
 		return nil, err

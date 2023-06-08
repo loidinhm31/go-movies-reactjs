@@ -8,13 +8,14 @@ import (
 	"movies-service/internal/blob"
 	"movies-service/internal/collection"
 	"movies-service/internal/common/dto"
+	"movies-service/internal/common/entity"
 	mapper2 "movies-service/internal/common/mapper"
-	model2 "movies-service/internal/common/model"
 	"movies-service/internal/control"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
 	"movies-service/internal/movie"
 	"movies-service/internal/payment"
+	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
 	"strings"
 	"sync"
@@ -22,15 +23,19 @@ import (
 
 type movieService struct {
 	mgmtCtrl             control.Service
+	userRepository       user.UserRepository
 	movieRepository      movie.Repository
 	collectionRepository collection.Repository
 	paymentRepository    payment.Repository
 	blobService          blob.Service
 }
 
-func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository, collectionRepository collection.Repository, paymentRepository payment.Repository, blobService blob.Service) movie.Service {
+func NewMovieService(mgmtCtrl control.Service, userRepository user.UserRepository,
+	movieRepository movie.Repository, collectionRepository collection.Repository,
+	paymentRepository payment.Repository, blobService blob.Service) movie.Service {
 	return &movieService{
 		mgmtCtrl:             mgmtCtrl,
+		userRepository:       userRepository,
 		movieRepository:      movieRepository,
 		collectionRepository: collectionRepository,
 		paymentRepository:    paymentRepository,
@@ -39,10 +44,10 @@ func NewMovieService(mgmtCtrl control.Service, movieRepository movie.Repository,
 }
 
 func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieType string, pageRequest *pagination.PageRequest) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*model2.Movie]{}
+	page := &pagination.Page[*entity.Movie]{}
 
 	var err error
-	var movieResults *pagination.Page[*model2.Movie]
+	var movieResults *pagination.Page[*entity.Movie]
 	if movieType != "" {
 		movieResults, err = ms.movieRepository.FindAllMoviesByType(ctx, keyword, movieType, pageRequest, page)
 		if err != nil {
@@ -71,7 +76,14 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 
 func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDto, error) {
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	isValidUser, isPrivilege := ms.mgmtCtrl.CheckUser(author)
+	theUser, err := ms.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
+	if err != nil {
+		return nil, err
+	}
+
+	if theUser.Role.RoleCode == "BANNED" {
+		return nil, errors.ErrInvalidClient
+	}
 
 	result, err := ms.movieRepository.FindMovieByID(ctx, id)
 	if err != nil {
@@ -79,31 +91,29 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 		return nil, errors.ErrResourceNotFound
 	}
 
-	// Check valid video path
+	// Set valid video path
 	if result.Price.Valid {
-		thePayment, err := ms.paymentRepository.FindPaymentByTypeCodeAndRefID(ctx, result.TypeCode, result.ID)
+		thePayment, err := ms.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, result.TypeCode, result.ID)
 		if err != nil {
 			return nil, err
 		}
 
+		// Not paid
 		if !(thePayment.TypeCode == result.TypeCode && thePayment.RefID == result.ID) {
-			theCollection, err := ms.collectionRepository.FindCollectionByMovieID(ctx, result.ID)
-			if err != nil {
-				return nil, err
-			}
-
-			if !(theCollection.TypeCode == result.TypeCode && uint(theCollection.MovieID.Int64) == result.ID) {
-				result.VideoPath = sql.NullString{}
-			}
+			result.VideoPath = sql.NullString{}
 		}
 	}
 
-	movieDto := mapper2.MapToMovieDto(result, !isValidUser, isPrivilege)
+	movieDto := mapper2.MapToMovieDto(
+		result,
+		true,
+		theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
+	)
 	return movieDto, nil
 }
 
 func (ms *movieService) GetMoviesByGenre(ctx context.Context, pageRequest *pagination.PageRequest, genreId uint) (*pagination.Page[*dto.MovieDto], error) {
-	page := &pagination.Page[*model2.Movie]{}
+	page := &pagination.Page[*entity.Movie]{}
 
 	movieResults, err := ms.movieRepository.FindMoviesByGenre(ctx, pageRequest, page, genreId)
 	if err != nil {
@@ -141,7 +151,7 @@ func (ms *movieService) AddMovie(ctx context.Context, movie *dto.MovieDto) error
 		return errors.ErrUnAuthorized
 	}
 
-	var genreObjects []*model2.Genre
+	var genreObjects []*entity.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
@@ -198,7 +208,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 		return err
 	}
 
-	var genreObjects []*model2.Genre
+	var genreObjects []*entity.Genre
 	for _, genre := range movie.Genres {
 		if genre.Checked {
 			if genre.TypeCode != movie.TypeCode {
@@ -226,8 +236,19 @@ func (ms *movieService) RemoveMovieByID(ctx context.Context, id uint) error {
 		return errors.ErrInvalidInput
 	}
 
+	// Check payment
+	log.Println("checking payment before removing...")
+	payments, err := ms.paymentRepository.FindPaymentsByTypeCodeAndRefID(ctx, "MOVIE", id)
+	if err != nil {
+		return err
+	}
+
+	if len(payments) > 0 {
+		return errors.ErrCannotExecuteAction
+	}
+
 	// Check collection
-	log.Println("checking collection before deleting...")
+	log.Println("checking collection before removing...")
 	collections, err := ms.collectionRepository.FindCollectionsByMovieID(ctx, id)
 	if err != nil {
 		return err
@@ -240,7 +261,7 @@ func (ms *movieService) RemoveMovieByID(ctx context.Context, id uint) error {
 	// Get author
 	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	if !ms.mgmtCtrl.CheckPrivilege(author) {
-		return errors.ErrUnAuthorized
+		return errors.ErrInvalidClient
 	}
 
 	// Get current movie
@@ -251,11 +272,7 @@ func (ms *movieService) RemoveMovieByID(ctx context.Context, id uint) error {
 
 	// Delete video from blob concurrently
 	if movieObj.VideoPath.Valid {
-		var wg sync.WaitGroup
-		wg.Add(1)
-
 		go func() {
-			defer wg.Done()
 			videoPath := movieObj.VideoPath.String
 			videoPathSplit := strings.Split(videoPath, "/")
 			videoKey := videoPathSplit[len(videoPathSplit)-1]
@@ -265,7 +282,6 @@ func (ms *movieService) RemoveMovieByID(ctx context.Context, id uint) error {
 			}
 			log.Println(res)
 		}()
-		wg.Wait()
 	}
 
 	// Delete image from blob concurrently
