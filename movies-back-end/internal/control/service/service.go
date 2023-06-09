@@ -52,7 +52,7 @@ func (mc *managementCtrl) CheckUser(username string) (bool, bool) {
 	}
 
 	if theUser.Username == username &&
-		(theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD") {
+		(theUser.Role.RoleCode == "ADMIN") {
 		isPrivilege = true
 	}
 

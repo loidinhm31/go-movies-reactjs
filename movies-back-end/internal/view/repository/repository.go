@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 	"movies-service/config"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/view"
 	"time"
 )
@@ -24,7 +24,7 @@ func (vr *viewRepository) InsertView(ctx context.Context, viewer *dto.Viewer) er
 	if vr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	result := tx.Create(&model.View{
+	result := tx.Create(&entity.View{
 		ViewedBy: viewer.Viewer,
 		ViewedAt: time.Now(),
 		MovieId:  viewer.MovieID,

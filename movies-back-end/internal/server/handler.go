@@ -64,6 +64,8 @@ import (
 	paymentRepository "movies-service/internal/payment/repository"
 	paymentService "movies-service/internal/payment/service"
 
+	mailService "movies-service/internal/mail/service"
+
 	"net/http"
 	"time"
 )
@@ -87,21 +89,22 @@ func (s *Server) MapHandlers(g *gin.Engine) error {
 
 	// Init service
 	managementCtrl := managementService.NewManagementCtrl(iUserRepo)
+	iMailService := mailService.NewMovieService(s.cfg, managementCtrl)
 	iAuthService := authService.NewAuthService(s.cfg.Keycloak, s.cloak, managementCtrl, iRoleRepo, iUserRepo)
 	iRoleService := roleService.NewRoleService(iRoleRepo)
 	iBlobService := blobService.NewBlobService(s.cfg, managementCtrl)
-	iMovieService := movieService.NewMovieService(managementCtrl, iMovieRepo, iCollectionRepo, iPaymentRepo, iBlobService)
+	iMovieService := movieService.NewMovieService(managementCtrl, iUserRepo, iMovieRepo, iCollectionRepo, iPaymentRepo, iBlobService)
 	iSeasonService := seasonService.NewSeasonService(managementCtrl, iMovieRepo, iSeasonRepo, iEpisodeRepo)
-	iEpisodeService := episodeService.NewEpisodeService(managementCtrl, iSeasonRepo, iCollectionRepo, iPaymentRepo, iEpisodeRepo, iBlobService)
+	iEpisodeService := episodeService.NewEpisodeService(managementCtrl, iUserRepo, iSeasonRepo, iCollectionRepo, iPaymentRepo, iEpisodeRepo, iBlobService)
 	iGenreService := genreService.NewGenreService(managementCtrl, iGenreRepo)
 	iSearchService := searchService.NewSearchService(iSearchRepo)
 	iAnalysisService := analysisService.NewAnalysisService(managementCtrl, iAnalysisRepo)
 	iViewService := viewService.NewViewService(managementCtrl, iViewRepo)
 	iReferenceService := integrationService.NewReferenceService(s.cfg, managementCtrl)
-	iUserService := userService.NewUserService(managementCtrl, iRoleRepo, iUserRepo)
+	iUserService := userService.NewUserService(s.cfg, managementCtrl, iRoleRepo, iUserRepo, iMailService)
 	iRatingService := ratingService.NewRatingService(iRatingRepo)
 	iCollectionService := collectionService.NewCollectionService(iUserRepo, iMovieRepo, iEpisodeRepo, iPaymentRepo, iCollectionRepo)
-	iPaymentService := paymentService.NewPaymentService(s.cfg, iUserRepo, iMovieRepo, iPaymentRepo, iCollectionRepo)
+	iPaymentService := paymentService.NewPaymentService(s.cfg, iUserRepo, iMovieRepo, iEpisodeRepo, iPaymentRepo, iCollectionRepo, iMailService)
 
 	// Init handler
 	iAuthHandler := authHttp.NewAuthHandler(iAuthService, s.cfg.Keycloak, s.cloak)

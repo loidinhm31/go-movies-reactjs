@@ -3,11 +3,11 @@ package mapper
 import (
 	"database/sql"
 	dto2 "movies-service/internal/common/dto"
-	model2 "movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"time"
 )
 
-func MapToMovieDto(movie *model2.Movie, isRestrictResource bool, isPrivilege bool) *dto2.MovieDto {
+func MapToMovieDto(movie *entity.Movie, isRestrictResource bool, isPrivilege bool) *dto2.MovieDto {
 	genreDtos := MapToGenreDtoSlice(movie.Genres)
 
 	// Filter video path for release date
@@ -33,7 +33,7 @@ func MapToMovieDto(movie *model2.Movie, isRestrictResource bool, isPrivilege boo
 	}
 }
 
-func MapToMovieDtoSlice(movieSlice []*model2.Movie) []*dto2.MovieDto {
+func MapToMovieDtoSlice(movieSlice []*entity.Movie) []*dto2.MovieDto {
 	var movieDtos []*dto2.MovieDto
 	for _, m := range movieSlice {
 		movieDtos = append(movieDtos, MapToMovieDto(m, true, false))
@@ -41,7 +41,7 @@ func MapToMovieDtoSlice(movieSlice []*model2.Movie) []*dto2.MovieDto {
 	return movieDtos
 }
 
-func MapToGenreDto(genre *model2.Genre) *dto2.GenreDto {
+func MapToGenreDto(genre *entity.Genre) *dto2.GenreDto {
 	return &dto2.GenreDto{
 		ID:       genre.ID,
 		Name:     genre.Name,
@@ -49,7 +49,7 @@ func MapToGenreDto(genre *model2.Genre) *dto2.GenreDto {
 	}
 }
 
-func MapToGenreDtoSlice(genreSlice []*model2.Genre) []*dto2.GenreDto {
+func MapToGenreDtoSlice(genreSlice []*entity.Genre) []*dto2.GenreDto {
 	var genreDtos []*dto2.GenreDto
 	for _, g := range genreSlice {
 		genreDtos = append(genreDtos, MapToGenreDto(g))
@@ -57,7 +57,7 @@ func MapToGenreDtoSlice(genreSlice []*model2.Genre) []*dto2.GenreDto {
 	return genreDtos
 }
 
-func MapToSeasonDto(season *model2.Season) *dto2.SeasonDto {
+func MapToSeasonDto(season *entity.Season) *dto2.SeasonDto {
 	return &dto2.SeasonDto{
 		ID:          season.ID,
 		Name:        season.Name,
@@ -68,7 +68,7 @@ func MapToSeasonDto(season *model2.Season) *dto2.SeasonDto {
 	}
 }
 
-func MapToSeasonDtoSlice(seasonSlice []*model2.Season) []*dto2.SeasonDto {
+func MapToSeasonDtoSlice(seasonSlice []*entity.Season) []*dto2.SeasonDto {
 	var seasonDtos []*dto2.SeasonDto
 	for _, s := range seasonSlice {
 		seasonDtos = append(seasonDtos, MapToSeasonDto(s))
@@ -76,7 +76,7 @@ func MapToSeasonDtoSlice(seasonSlice []*model2.Season) []*dto2.SeasonDto {
 	return seasonDtos
 }
 
-func MapToEpisodeDto(episode *model2.Episode, isRestrictResource, isPrivilege bool) *dto2.EpisodeDto {
+func MapToEpisodeDto(episode *entity.Episode, isRestrictResource, isPrivilege bool) *dto2.EpisodeDto {
 	// Filter video path for release date
 	if isRestrictResource ||
 		(!isPrivilege && time.Now().Before(episode.AirDate)) {
@@ -100,7 +100,7 @@ func MapToEpisodeDto(episode *model2.Episode, isRestrictResource, isPrivilege bo
 	}
 }
 
-func MapToEpisodeDtoSlice(seasonSlice []*model2.Episode, isRestrictResource, isPrivilege bool) []*dto2.EpisodeDto {
+func MapToEpisodeDtoSlice(seasonSlice []*entity.Episode, isRestrictResource, isPrivilege bool) []*dto2.EpisodeDto {
 	var episodeDtos []*dto2.EpisodeDto
 	for _, e := range seasonSlice {
 		episodeDtos = append(episodeDtos, MapToEpisodeDto(e, isRestrictResource, isPrivilege))
@@ -108,7 +108,7 @@ func MapToEpisodeDtoSlice(seasonSlice []*model2.Episode, isRestrictResource, isP
 	return episodeDtos
 }
 
-func MapToRatingDto(rating *model2.Rating) *dto2.RatingDto {
+func MapToRatingDto(rating *entity.Rating) *dto2.RatingDto {
 	return &dto2.RatingDto{
 		ID:   rating.ID,
 		Code: rating.Code,
@@ -116,7 +116,7 @@ func MapToRatingDto(rating *model2.Rating) *dto2.RatingDto {
 	}
 }
 
-func MapToRatingDtoSlice(ratingSlice []*model2.Rating) []*dto2.RatingDto {
+func MapToRatingDtoSlice(ratingSlice []*entity.Rating) []*dto2.RatingDto {
 	var ratingDtos []*dto2.RatingDto
 	for _, r := range ratingSlice {
 		ratingDtos = append(ratingDtos, MapToRatingDto(r))
@@ -124,7 +124,7 @@ func MapToRatingDtoSlice(ratingSlice []*model2.Rating) []*dto2.RatingDto {
 	return ratingDtos
 }
 
-func MapToCollectionDto(collection *model2.Collection) *dto2.CollectionDto {
+func MapToCollectionDto(collection *entity.Collection) *dto2.CollectionDto {
 	return &dto2.CollectionDto{
 		UserID:    collection.UserID,
 		MovieID:   uint(collection.MovieID.Int64),
@@ -132,7 +132,7 @@ func MapToCollectionDto(collection *model2.Collection) *dto2.CollectionDto {
 	}
 }
 
-func MapToCollectionDetailDto(collection *model2.CollectionDetail) *dto2.CollectionDetailDto {
+func MapToCollectionDetailDto(collection *entity.CollectionDetail) *dto2.CollectionDetailDto {
 	return &dto2.CollectionDetailDto{
 		UserID:      collection.Username,
 		MovieID:     collection.MovieID,
@@ -149,7 +149,7 @@ func MapToCollectionDetailDto(collection *model2.CollectionDetail) *dto2.Collect
 	}
 }
 
-func MapToCollectionDetailDtoSlice(collections []*model2.CollectionDetail) []*dto2.CollectionDetailDto {
+func MapToCollectionDetailDtoSlice(collections []*entity.CollectionDetail) []*dto2.CollectionDetailDto {
 	var collectionDtos []*dto2.CollectionDetailDto
 	for _, c := range collections {
 		collectionDtos = append(collectionDtos, MapToCollectionDetailDto(c))
@@ -157,7 +157,7 @@ func MapToCollectionDetailDtoSlice(collections []*model2.CollectionDetail) []*dt
 	return collectionDtos
 }
 
-func MapToPaymentDto(payment *model2.Payment) *dto2.PaymentDto {
+func MapToPaymentDto(payment *entity.Payment) *dto2.PaymentDto {
 	return &dto2.PaymentDto{
 		ID:            payment.ID,
 		UserID:        payment.UserID,
@@ -172,10 +172,34 @@ func MapToPaymentDto(payment *model2.Payment) *dto2.PaymentDto {
 	}
 }
 
-func MapToPaymentDtoSlice(payments []*model2.Payment) []*dto2.PaymentDto {
+func MapToPaymentDtoSlice(payments []*entity.Payment) []*dto2.PaymentDto {
 	var paymentDtos []*dto2.PaymentDto
 	for _, p := range payments {
 		paymentDtos = append(paymentDtos, MapToPaymentDto(p))
+	}
+	return paymentDtos
+}
+
+func MapToCustomPaymentDto(payment *entity.CustomPayment) *dto2.CustomPaymentDto {
+	return &dto2.CustomPaymentDto{
+		ID:            payment.ID,
+		TypeCode:      payment.TypeCode,
+		MovieTitle:    payment.MovieTitle,
+		SeasonName:    payment.SeasonName,
+		EpisodeName:   payment.EpisodeName,
+		Provider:      payment.Provider,
+		PaymentMethod: payment.PaymentMethod,
+		Amount:        payment.Amount,
+		Currency:      payment.Currency,
+		Status:        payment.Status,
+		CreatedAt:     payment.CreatedAt,
+	}
+}
+
+func MapToCustomPaymentDtoSlice(payments []*entity.CustomPayment) []*dto2.CustomPaymentDto {
+	var paymentDtos []*dto2.CustomPaymentDto
+	for _, p := range payments {
+		paymentDtos = append(paymentDtos, MapToCustomPaymentDto(p))
 	}
 	return paymentDtos
 }

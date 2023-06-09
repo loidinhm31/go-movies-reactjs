@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"movies-service/internal/common/dto"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/common/mapper"
-	"movies-service/internal/common/model"
 	"movies-service/internal/control"
 	"movies-service/internal/errors"
 	"movies-service/internal/genre"
@@ -28,7 +28,7 @@ func NewGenreService(mgmtCtrl control.Service, genreRepository genre.Repository)
 
 func (gs *genreService) GetAllGenresByTypeCode(ctx context.Context, movieType string) ([]*dto.GenreDto, error) {
 	var err error
-	var allGenres []*model.Genre
+	var allGenres []*entity.Genre
 
 	if movieType != "" {
 		allGenres, err = gs.genreRepository.FindAllGenresByTypeCode(ctx, movieType)
@@ -55,9 +55,9 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 		return errors.ErrUnAuthorized
 	}
 
-	var newGenres []*model.Genre
+	var newGenres []*entity.Genre
 	for _, g := range genreDtos {
-		foundedGenre, err := gs.genreRepository.FindGenreByNameAndTypeCode(ctx, &model.Genre{
+		foundedGenre, err := gs.genreRepository.FindGenreByNameAndTypeCode(ctx, &entity.Genre{
 			Name:     g.Name,
 			TypeCode: g.TypeCode,
 		})
@@ -73,7 +73,7 @@ func (gs *genreService) AddGenres(ctx context.Context, genreDtos []dto.GenreDto)
 			return errors.ErrCannotExecuteAction
 		}
 
-		newGenres = append(newGenres, &model.Genre{
+		newGenres = append(newGenres, &entity.Genre{
 			Name:      g.Name,
 			TypeCode:  g.TypeCode,
 			CreatedAt: time.Now(),

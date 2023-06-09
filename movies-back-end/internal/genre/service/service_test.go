@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/errors"
 	"movies-service/internal/genre"
 	"movies-service/internal/test/helper"
@@ -31,7 +31,7 @@ func TestGetAllGenresByTypeCode(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockRepo.On("FindAllGenresByTypeCode", context.Background(), "MOVIE").
-			Return([]*model.Genre{
+			Return([]*entity.Genre{
 				{Name: "Action1", TypeCode: "MOVIE"},
 				{Name: "Action2", TypeCode: "MOVIE"},
 			}, nil)
@@ -48,7 +48,7 @@ func TestGetAllGenresByTypeCode(t *testing.T) {
 
 		// Set up mock expectations and return values
 		mockRepo.On("FindAllGenres", context.Background()).
-			Return([]*model.Genre{
+			Return([]*entity.Genre{
 				{Name: "Comedy1", TypeCode: "MOVIE"},
 				{Name: "Comedy2", TypeCode: "TV"},
 			}, nil)
@@ -76,17 +76,17 @@ func TestAddGenres(t *testing.T) {
 			{Name: "Genre4", TypeCode: "TV"},
 		}
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &entity.Genre{
 			Name:     genreDtos[0].Name,
 			TypeCode: genreDtos[0].TypeCode,
 		}).
-			Return(&model.Genre{}, nil)
+			Return(&entity.Genre{}, nil)
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &entity.Genre{
 			Name:     genreDtos[1].Name,
 			TypeCode: genreDtos[1].TypeCode,
 		}).
-			Return(&model.Genre{}, nil)
+			Return(&entity.Genre{}, nil)
 
 		mockRepo.On("InsertGenres", context.Background(), mock.Anything).
 			Return(nil)
@@ -105,17 +105,17 @@ func TestAddGenres(t *testing.T) {
 			{Name: "Genre2", TypeCode: "TV"},
 		}
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &entity.Genre{
 			Name:     genreDtos[0].Name,
 			TypeCode: genreDtos[0].TypeCode,
 		}).
-			Return(&model.Genre{}, nil)
+			Return(&entity.Genre{}, nil)
 
-		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &model.Genre{
+		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), &entity.Genre{
 			Name:     genreDtos[1].Name,
 			TypeCode: genreDtos[1].TypeCode,
 		}).
-			Return(&model.Genre{Name: genreDtos[1].Name, TypeCode: genreDtos[1].TypeCode}, nil)
+			Return(&entity.Genre{Name: genreDtos[1].Name, TypeCode: genreDtos[1].TypeCode}, nil)
 
 		err := genreService.AddGenres(context.Background(), genreDtos)
 		assert.Error(t, err)
@@ -129,7 +129,7 @@ func TestAddGenres(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("FindGenreByNameAndTypeCode", context.Background(), mock.Anything).
-			Return(&model.Genre{}, nil)
+			Return(&entity.Genre{}, nil)
 
 		genreDtos := []dto.GenreDto{
 			{Name: "Genre1", TypeCode: "INVALID"},

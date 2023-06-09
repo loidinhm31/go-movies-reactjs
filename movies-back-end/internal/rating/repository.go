@@ -2,9 +2,9 @@ package rating
 
 import (
 	"context"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 )
 
 type Repository interface {
-	FindRatings(ctx context.Context) ([]*model.Rating, error)
+	FindRatings(ctx context.Context) ([]*entity.Rating, error)
 }

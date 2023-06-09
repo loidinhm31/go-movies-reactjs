@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"movies-service/internal/common/entity"
 	model2 "movies-service/internal/common/model"
 	"movies-service/internal/test/helper"
 	"movies-service/pkg/pagination"
@@ -43,13 +44,13 @@ func TestSearchMovie(t *testing.T) {
 		},
 	}
 
-	expectedPage := &pagination.Page[*model2.Movie]{
+	expectedPage := &pagination.Page[*entity.Movie]{
 		PageSize:      searchParams.Page.PageSize,
 		PageNumber:    searchParams.Page.PageNumber,
 		Sort:          searchParams.Page.Sort,
 		TotalElements: 2,
 		TotalPages:    1,
-		Content: []*model2.Movie{
+		Content: []*entity.Movie{
 			{Title: "M1"},
 			{Title: "M2"},
 		},

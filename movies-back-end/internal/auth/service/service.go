@@ -9,7 +9,7 @@ import (
 	"movies-service/internal/auth"
 	"movies-service/internal/cloak"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/control"
 	"movies-service/internal/errors"
 	"movies-service/internal/middlewares"
@@ -49,7 +49,7 @@ func (a *authService) SignUp(ctx context.Context, userDto *dto.UserDto) (*dto.Us
 		return nil, err
 	}
 
-	theUser := &model.User{
+	theUser := &entity.User{
 		Username:  fmtUsername,
 		FirstName: userDto.FirstName,
 		LastName:  userDto.LastName,

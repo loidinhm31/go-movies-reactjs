@@ -4,8 +4,9 @@ import (
 	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"movies-service/config"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/errors"
 	"movies-service/internal/test/helper"
 	"movies-service/internal/user"
@@ -14,19 +15,26 @@ import (
 	"time"
 )
 
-func initMock() (*helper.MockManagementCtrl, *helper.MockRoleRepository, *helper.MockUserRepository, user.Service) {
+func initMock() (*helper.MockManagementCtrl, *helper.MockRoleRepository, *helper.MockUserRepository, *helper.MockMailService, user.Service) {
+	cfg := &config.Config{
+		Mail: config.Mail{
+			From: "from",
+		},
+	}
+
 	mockCtrl := new(helper.MockManagementCtrl)
 	mockRoleRepo := new(helper.MockRoleRepository)
 	mockUserRepo := new(helper.MockUserRepository)
+	mockMailSvc := new(helper.MockMailService)
 
-	userService := NewUserService(mockCtrl, mockRoleRepo, mockUserRepo)
+	userService := NewUserService(cfg, mockCtrl, mockRoleRepo, mockUserRepo, mockMailSvc)
 
-	return mockCtrl, mockRoleRepo, mockUserRepo, userService
+	return mockCtrl, mockRoleRepo, mockUserRepo, mockMailSvc, userService
 }
 
 func TestUserService_GetUsers(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, userService := initMock()
+		mockCtrl, _, _, _, userService := initMock()
 
 		// Set up test data
 		ctx := context.Background()
@@ -46,15 +54,15 @@ func TestUserService_GetUsers(t *testing.T) {
 	})
 
 	t.Run("Error Getting User", func(t *testing.T) {
-		mockCtrl, _, mockUserRepo, userService := initMock()
+		mockCtrl, _, mockUserRepo, _, userService := initMock()
 
 		key := "search key"
 
 		// Set up mock expectations
 		mockCtrl.On("CheckAdminPrivilege", mock.Anything).Return(true)
 
-		mockUserRepo.On("FindAllUsers", context.Background(), &pagination.PageRequest{}, &pagination.Page[*model.User]{}, key, true).
-			Return(&pagination.Page[*model.User]{}, errors.ErrResourceNotFound)
+		mockUserRepo.On("FindAllUsers", context.Background(), &pagination.PageRequest{}, &pagination.Page[*entity.User]{}, key, true).
+			Return(&pagination.Page[*entity.User]{}, errors.ErrResourceNotFound)
 
 		// Call the method being tested
 		result, err := userService.GetUsers(context.Background(), &pagination.PageRequest{}, key, true)
@@ -66,23 +74,23 @@ func TestUserService_GetUsers(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, mockUserRepo, userService := initMock()
+		mockCtrl, _, mockUserRepo, _, userService := initMock()
 
 		key := "search key"
 
 		// Set up mock expectations
 		mockCtrl.On("CheckAdminPrivilege", mock.Anything).Return(true)
 
-		mockUserRepo.On("FindAllUsers", context.Background(), &pagination.PageRequest{}, &pagination.Page[*model.User]{}, key, true).
-			Return(&pagination.Page[*model.User]{
+		mockUserRepo.On("FindAllUsers", context.Background(), &pagination.PageRequest{}, &pagination.Page[*entity.User]{}, key, true).
+			Return(&pagination.Page[*entity.User]{
 				PageSize:      1,
 				PageNumber:    0,
 				Sort:          pagination.Sort{},
 				TotalElements: 2,
 				TotalPages:    1,
-				Content: []*model.User{
-					{ID: 1, Username: "f1", Email: "f1@example.com", FirstName: "A", LastName: "AA", IsNew: true, Role: &model.Role{ID: 1, RoleCode: "BANNED"}},
-					{ID: 2, Username: "f1", Email: "f2@example.com", FirstName: "B", LastName: "BB", IsNew: true, Role: &model.Role{ID: 1, RoleCode: "BANNED"}},
+				Content: []*entity.User{
+					{ID: 1, Username: "f1", Email: "f1@example.com", FirstName: "A", LastName: "AA", IsNew: true, Role: &entity.Role{ID: 1, RoleCode: "BANNED"}},
+					{ID: 2, Username: "f1", Email: "f2@example.com", FirstName: "B", LastName: "BB", IsNew: true, Role: &entity.Role{ID: 1, RoleCode: "BANNED"}},
 				},
 			}, nil)
 
@@ -108,7 +116,7 @@ func TestUserService_GetUsers(t *testing.T) {
 
 func TestUserService_UpdateUserRole(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, userService := initMock()
+		mockCtrl, _, _, _, userService := initMock()
 
 		// Set up test data
 		ctx := context.TODO()
@@ -131,7 +139,7 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 	})
 
 	t.Run("Error Getting User", func(t *testing.T) {
-		mockCtrl, mockRoleRepo, mockUserRepo, userService := initMock()
+		mockCtrl, mockRoleRepo, mockUserRepo, _, userService := initMock()
 
 		// Set up test data
 		ctx := context.Background()
@@ -160,7 +168,7 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 	})
 
 	t.Run("Error Getting Role", func(t *testing.T) {
-		mockCtrl, mockRoleRepo, mockUserRepo, userService := initMock()
+		mockCtrl, mockRoleRepo, mockUserRepo, _, userService := initMock()
 
 		// Set up test data
 		ctx := context.TODO()
@@ -173,7 +181,7 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 
 		// Set up mock expectations
 		mockCtrl.On("CheckAdminPrivilege", mock.Anything).Return(true)
-		mockUserRepo.On("FindUserByID", ctx, userDto.ID).Return(&model.User{}, nil)
+		mockUserRepo.On("FindUserByID", ctx, userDto.ID).Return(&entity.User{}, nil)
 		mockRoleRepo.On("FindRoleByRoleCode", ctx, userDto.Role.RoleCode).Return(nil, errors.ErrResourceNotFound)
 
 		// Call the method being tested
@@ -190,7 +198,7 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 	})
 
 	t.Run("Success Update User Role", func(t *testing.T) {
-		mockCtrl, mockRoleRepo, mockUserRepo, userService := initMock()
+		mockCtrl, mockRoleRepo, mockUserRepo, mockMailSvc, userService := initMock()
 
 		// Set up test data
 		ctx := context.Background()
@@ -202,14 +210,14 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 		}
 
 		// Set up mock expectations
-		expectedUser := &model.User{
+		expectedUser := &entity.User{
 			ID:        1,
 			Username:  "john",
 			Email:     "john@example.com",
 			FirstName: "John",
 			LastName:  "Doe",
 			IsNew:     true,
-			Role: &model.Role{
+			Role: &entity.Role{
 				ID:       1,
 				RoleName: "Admin",
 				RoleCode: "ADMIN",
@@ -221,6 +229,8 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 		mockUserRepo.On("FindUserByID", ctx, userDto.ID).Return(expectedUser, nil)
 		mockRoleRepo.On("FindRoleByRoleCode", ctx, userDto.Role.RoleCode).Return(expectedUser.Role, nil)
 		mockUserRepo.On("UpdateUserRole", ctx, expectedUser.ID, expectedUser.Role.ID).Return(nil)
+		mockMailSvc.On("SendMessage", ctx, mock.Anything).
+			Return(nil)
 
 		// Call the method being tested
 		err := userService.UpdateUserRole(ctx, userDto)
@@ -237,10 +247,10 @@ func TestUserService_UpdateUserRole(t *testing.T) {
 
 func TestUserService_AddOidcUser(t *testing.T) {
 	t.Run("User exists", func(t *testing.T) {
-		_, _, mockUserRepo, userService := initMock()
+		_, _, mockUserRepo, _, userService := initMock()
 
-		mockUserRepo.On("FindUserByUsername", context.Background(), mock.Anything).
-			Return(&model.User{}, nil)
+		mockUserRepo.On("FindUserByUsernameAndIsNew", context.Background(), mock.Anything, false).
+			Return(&entity.User{}, nil)
 
 		// Call the method being tested
 		_, err := userService.AddOidcUser(context.Background(), &dto.UserDto{})
@@ -248,13 +258,12 @@ func TestUserService_AddOidcUser(t *testing.T) {
 		// Assert the result
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrUserExisted.Error(), err.Error())
-
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, mockUserRepo, userService := initMock()
+		mockCtrl, _, mockUserRepo, _, userService := initMock()
 
-		mockUserRepo.On("FindUserByUsername", context.Background(), mock.Anything).
+		mockUserRepo.On("FindUserByUsernameAndIsNew", context.Background(), mock.Anything, false).
 			Return(nil, nil)
 
 		mockCtrl.On("CheckAdminPrivilege", mock.Anything).Return(false)
@@ -265,11 +274,10 @@ func TestUserService_AddOidcUser(t *testing.T) {
 		// Assert the result
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrUnAuthorized.Error(), err.Error())
-
 	})
 
 	t.Run("Success Add", func(t *testing.T) {
-		mockCtrl, mockRoleRepo, mockUserRepo, userService := initMock()
+		mockCtrl, mockRoleRepo, mockUserRepo, _, userService := initMock()
 
 		// Set up test data
 		ctx := context.Background()
@@ -284,12 +292,12 @@ func TestUserService_AddOidcUser(t *testing.T) {
 		}
 
 		// Set up mock expectations
-		expectedUser := &model.User{
+		expectedUser := &entity.User{
 			Username:  userDto.Username,
 			Email:     userDto.Email,
 			FirstName: userDto.FirstName,
 			LastName:  userDto.LastName,
-			Role: &model.Role{
+			Role: &entity.Role{
 				ID:       1,
 				RoleName: "Admin",
 				RoleCode: "ADMIN",
@@ -298,10 +306,15 @@ func TestUserService_AddOidcUser(t *testing.T) {
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
-		mockUserRepo.On("FindUserByUsername", ctx, mock.Anything).Return(nil, nil)
+		mockUserRepo.On("FindUserByUsernameAndIsNew", ctx, mock.Anything, false).
+			Return(nil, nil)
+
 		mockCtrl.On("CheckAdminPrivilege", mock.Anything).Return(true)
+
 		mockRoleRepo.On("FindRoleByRoleCode", ctx, userDto.Role.RoleCode).Return(expectedUser.Role, nil)
-		mockUserRepo.On("InsertUser", ctx, mock.AnythingOfType("*model.User")).Return(nil)
+
+		mockUserRepo.On("InsertUser", ctx, mock.Anything).
+			Return(nil)
 
 		// Call the method being tested
 		result, err := userService.AddOidcUser(ctx, userDto)

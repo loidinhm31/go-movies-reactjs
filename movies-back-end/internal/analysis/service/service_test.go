@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"movies-service/internal/analysis"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/errors"
 	"movies-service/internal/test/helper"
 	"testing"
@@ -43,7 +43,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByGenre", mock.Anything, "MOVIE").
-			Return([]*model.GenreCount{
+			Return([]*entity.GenreCount{
 				{TypeCode: "MOVIE", Name: "Action", NumMovies: 10},
 				{TypeCode: "MOVIE", Name: "Adventure", NumMovies: 5},
 			}, nil)
@@ -67,7 +67,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByGenre", context.Background(), "TV").
-			Return([]*model.GenreCount{}, fmt.Errorf("unexpected error occurred"))
+			Return([]*entity.GenreCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
 		result, err := analysisService.GetNumberOfMoviesByGenre(context.Background(), "TV")
@@ -99,7 +99,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByReleaseDate", context.Background(), "2022", []string{"6", "7", "8"}).
-			Return([]*model.MovieCount{
+			Return([]*entity.MovieCount{
 				{Year: "2022", Month: "6", NumMovies: 10},
 				{Year: "2022", Month: "8", NumMovies: 5},
 			}, nil)
@@ -125,7 +125,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByReleaseDate", context.Background(), "2022", []string{"6", "7", "8"}).
-			Return([]*model.MovieCount{}, fmt.Errorf("unexpected error occurred"))
+			Return([]*entity.MovieCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
 		result, err := analysisService.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
@@ -158,7 +158,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByCreatedDate", context.Background(), "2022", []string{"6", "7", "8"}).
-			Return([]*model.MovieCount{
+			Return([]*entity.MovieCount{
 				{Year: "2022", Month: "6", NumMovies: 10},
 				{Year: "2022", Month: "8", NumMovies: 5},
 			}, nil)
@@ -184,7 +184,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
 		mockRepo.On("CountMoviesByCreatedDate", context.Background(), "2022", []string{"6", "7", "8"}).
-			Return([]*model.MovieCount{}, fmt.Errorf("unexpected error occurred"))
+			Return([]*entity.MovieCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
 		result, err := analysisService.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
@@ -232,7 +232,7 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 		mockCtrl, mockRepo, analysisService := initMock()
 
 		// Set up the mock repository's behavior
-		expectedResult := []*model.ViewCount{
+		expectedResult := []*entity.ViewCount{
 			{Year: "2023", Month: "1", NumViewers: 100},
 			{Year: "2023", Month: "2", NumViewers: 150},
 		}
@@ -299,7 +299,7 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 		mockCtrl, mockRepo, analysisService := initMock()
 
 		// Set up the mock repository's behavior
-		expectedResult := []*model.ViewCount{
+		expectedResult := []*entity.ViewCount{
 			{Year: "2023", Month: "1", NumViewers: 100, Cumulative: 100},
 			{Year: "2023", Month: "2", NumViewers: 150, Cumulative: 250},
 		}
@@ -350,7 +350,7 @@ func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 		mockCtrl, mockRepo, analysisService := initMock()
 
 		// Set up the mock repository's behavior
-		expectedResult := []*model.ViewCount{
+		expectedResult := []*entity.ViewCount{
 			{Year: "2023", Month: "1", NumViewers: 100},
 			{Year: "2023", Month: "2", NumViewers: 150},
 		}
@@ -417,7 +417,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 		mockCtrl, mockRepo, analysisService := initMock()
 
 		// Set up the mock repository's behavior
-		data := []*model.MovieCount{
+		data := []*entity.MovieCount{
 			{Year: "2023", Month: "1", NumMovies: 100, Cumulative: 100},
 			{Year: "2023", Month: "2", NumMovies: 150, Cumulative: 250},
 		}

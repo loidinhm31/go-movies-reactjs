@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"movies-service/config"
+	"movies-service/internal/common/entity"
 	model2 "movies-service/internal/common/model"
 	"movies-service/internal/errors"
 	"movies-service/internal/search"
@@ -33,9 +34,9 @@ func NewSearchRepository(cfg *config.Config, db *gorm.DB) search.Repository {
 	return &searchRepository{cfg: cfg, db: db}
 }
 
-func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*model2.Movie], error) {
-	page := &pagination.Page[*model2.Movie]{}
-	var movies []*model2.Movie
+func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*entity.Movie], error) {
+	page := &pagination.Page[*entity.Movie]{}
+	var movies []*entity.Movie
 	var totalRows int64
 
 	tx := sr.db.WithContext(ctx)
@@ -109,7 +110,7 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 	}
 
 	err := tx.Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*model2.Movie](totalRows, searchParams.Page, page)).
+		Scopes(pagination.PageImplCountCriteria[*entity.Movie](totalRows, searchParams.Page, page)).
 		Preload("Genres").
 		Find(&movies).Error
 	if err != nil {

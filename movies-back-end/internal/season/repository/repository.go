@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/season"
 )
 
@@ -17,8 +17,8 @@ func NewSeasonRepository(cfg *config.Config, db *gorm.DB) season.Repository {
 	return &seasonRepository{cfg: cfg, db: db}
 }
 
-func (s seasonRepository) FindSeasonByID(ctx context.Context, id uint) (*model.Season, error) {
-	var seasonObject *model.Season
+func (s seasonRepository) FindSeasonByID(ctx context.Context, id uint) (*entity.Season, error) {
+	var seasonObject *entity.Season
 
 	tx := s.db.WithContext(ctx)
 	if s.cfg.Server.Debug {
@@ -32,8 +32,8 @@ func (s seasonRepository) FindSeasonByID(ctx context.Context, id uint) (*model.S
 	return seasonObject, nil
 }
 
-func (s seasonRepository) FindSeasonsByMovieID(ctx context.Context, movieID uint) ([]*model.Season, error) {
-	var seasonObjects []*model.Season
+func (s seasonRepository) FindSeasonsByMovieID(ctx context.Context, movieID uint) ([]*entity.Season, error) {
+	var seasonObjects []*entity.Season
 
 	tx := s.db.WithContext(ctx)
 	if s.cfg.Server.Debug {
@@ -47,7 +47,7 @@ func (s seasonRepository) FindSeasonsByMovieID(ctx context.Context, movieID uint
 	return seasonObjects, nil
 }
 
-func (s seasonRepository) InsertSeason(ctx context.Context, season *model.Season) error {
+func (s seasonRepository) InsertSeason(ctx context.Context, season *entity.Season) error {
 	tx := s.db.WithContext(ctx)
 	if s.cfg.Server.Debug {
 		tx = tx.Debug()
@@ -59,13 +59,13 @@ func (s seasonRepository) InsertSeason(ctx context.Context, season *model.Season
 	return nil
 }
 
-func (s seasonRepository) UpdateSeason(ctx context.Context, season *model.Season) error {
+func (s seasonRepository) UpdateSeason(ctx context.Context, season *entity.Season) error {
 	tx := s.db.WithContext(ctx)
 
 	if s.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&model.Season{}).Where("id = ?", season.ID).
+	err := tx.Model(&entity.Season{}).Where("id = ?", season.ID).
 		Updates(season).Error
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (s seasonRepository) DeleteSeasonByID(ctx context.Context, id uint) error {
 	if s.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("id = ?", id).Delete(&model.Season{}).Error
+	err := tx.Where("id = ?", id).Delete(&entity.Season{}).Error
 	if err != nil {
 		return err
 	}

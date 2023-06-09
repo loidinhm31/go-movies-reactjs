@@ -1,4 +1,4 @@
-package model
+package entity
 
 import (
 	"database/sql"
@@ -17,7 +17,6 @@ type Collection struct {
 	UserID    uint
 	MovieID   sql.NullInt64 `gorm:"type:integer, default:null"`
 	EpisodeID sql.NullInt64 `gorm:"type:integer, default:null"`
-	PaymentID uint
 	TypeCode  string
 	CreatedAt time.Time
 	CreatedBy string

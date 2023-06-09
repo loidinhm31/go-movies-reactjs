@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/rating"
 )
 
@@ -17,8 +17,8 @@ func NewRatingRepository(cfg *config.Config, db *gorm.DB) rating.Repository {
 	return &ratingRepository{cfg: cfg, db: db}
 }
 
-func (mr *ratingRepository) FindRatings(ctx context.Context) ([]*model.Rating, error) {
-	var results []*model.Rating
+func (mr *ratingRepository) FindRatings(ctx context.Context) ([]*entity.Rating, error) {
+	var results []*entity.Rating
 
 	tx := mr.db.WithContext(ctx)
 	if mr.cfg.Server.Debug {

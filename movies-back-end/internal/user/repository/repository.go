@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/user"
 	"movies-service/pkg/pagination"
 	"strings"
@@ -19,7 +19,7 @@ func NewUserRepository(cfg *config.Config, db *gorm.DB) user.UserRepository {
 	return &userRepository{cfg: cfg, db: db}
 }
 
-func (ur *userRepository) InsertUser(ctx context.Context, user *model.User) error {
+func (ur *userRepository) InsertUser(ctx context.Context, user *entity.User) error {
 	result := ur.db.WithContext(ctx).Create(&user)
 
 	if result.Error != nil {
@@ -28,8 +28,8 @@ func (ur *userRepository) InsertUser(ctx context.Context, user *model.User) erro
 	return nil
 }
 
-func (ur *userRepository) FindUserByUsername(ctx context.Context, username string) (*model.User, error) {
-	var theUser *model.User
+func (ur *userRepository) FindUserByUsername(ctx context.Context, username string) (*entity.User, error) {
+	var theUser *entity.User
 	err := ur.db.WithContext(ctx).Where("username = ?", username).
 		Preload("Role").First(&theUser).Error
 
@@ -40,8 +40,8 @@ func (ur *userRepository) FindUserByUsername(ctx context.Context, username strin
 	return theUser, nil
 }
 
-func (ur *userRepository) FindUserByUsernameAndIsNew(ctx context.Context, username string, isNew bool) (*model.User, error) {
-	var theUser *model.User
+func (ur *userRepository) FindUserByUsernameAndIsNew(ctx context.Context, username string, isNew bool) (*entity.User, error) {
+	var theUser *entity.User
 	err := ur.db.WithContext(ctx).Where("username = ? AND is_new = ?", username, isNew).
 		Preload("Role").First(&theUser).Error
 
@@ -52,8 +52,8 @@ func (ur *userRepository) FindUserByUsernameAndIsNew(ctx context.Context, userna
 	return theUser, nil
 }
 
-func (ur *userRepository) FindUserByID(ctx context.Context, userID uint) (*model.User, error) {
-	var theUser model.User
+func (ur *userRepository) FindUserByID(ctx context.Context, userID uint) (*entity.User, error) {
+	var theUser entity.User
 	err := ur.db.WithContext(ctx).Where("id = ?", userID).First(&theUser).Error
 
 	if err != nil {
@@ -63,15 +63,15 @@ func (ur *userRepository) FindUserByID(ctx context.Context, userID uint) (*model
 	return &theUser, nil
 }
 
-func (ur *userRepository) FindAllUsers(ctx context.Context, pageRequest *pagination.PageRequest, page *pagination.Page[*model.User], key string, isNew bool) (*pagination.Page[*model.User], error) {
-	var allUsers []*model.User
+func (ur *userRepository) FindAllUsers(ctx context.Context, pageRequest *pagination.PageRequest, page *pagination.Page[*entity.User], key string, isNew bool) (*pagination.Page[*entity.User], error) {
+	var allUsers []*entity.User
 	var totalRows int64
 
 	tx := ur.db.WithContext(ctx)
 	if ur.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	tx = tx.Model(&model.User{}).
+	tx = tx.Model(&entity.User{}).
 		Where("is_new = ?", isNew)
 
 	if key != "" {
@@ -82,7 +82,7 @@ func (ur *userRepository) FindAllUsers(ctx context.Context, pageRequest *paginat
 
 	err := tx.Preload("Role").
 		Count(&totalRows).
-		Scopes(pagination.PageImplCountCriteria[*model.User](totalRows, pageRequest, page)).
+		Scopes(pagination.PageImplCountCriteria[*entity.User](totalRows, pageRequest, page)).
 		Find(&allUsers).Error
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (ur *userRepository) UpdateUserRole(ctx context.Context, userID uint, roleI
 		tx = tx.Debug()
 	}
 
-	err := tx.Model(&model.User{}).Where("id = ?", userID).Updates(map[string]interface{}{"role_id": roleID, "is_new": false}).Error
+	err := tx.Model(&entity.User{}).Where("id = ?", userID).Updates(map[string]interface{}{"role_id": roleID, "is_new": false}).Error
 	if err != nil {
 		return err
 	}

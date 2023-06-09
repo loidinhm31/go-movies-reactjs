@@ -8,7 +8,7 @@ import (
 	"movies-service/config"
 	"movies-service/internal/auth"
 	"movies-service/internal/common/dto"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/errors"
 	"movies-service/internal/test/helper"
 	"testing"
@@ -42,7 +42,7 @@ func TestSignUp(t *testing.T) {
 		}
 
 		mockUserRepo.On("FindUserByUsername", context.Background(), mock.Anything).
-			Return(&model.User{ID: 1, Username: "john", IsNew: false}, nil)
+			Return(&entity.User{ID: 1, Username: "john", IsNew: false}, nil)
 
 		_, err := authService.SignUp(context.Background(), userDto)
 
@@ -71,7 +71,7 @@ func TestSignUp(t *testing.T) {
 
 		// Mock the RoleRepository's FindRoleByRoleCode method to return a role
 		mockRoleRepo.On("FindRoleByRoleCode", context.Background(), "BANNED").
-			Return(&model.Role{}, nil)
+			Return(&entity.Role{}, nil)
 
 		// Mock the UserRepository's InsertUser method to succeed
 		mockUserRepo.On("InsertUser", context.Background(), mock.Anything).
@@ -85,7 +85,7 @@ func TestSignUp(t *testing.T) {
 		assert.Equal(t, userDto, result)
 
 		// Assert that the UserRepository's methods were called with the expected arguments
-		mockUserRepo.AssertCalled(t, "FindUserByUsername", context.Background(), &model.User{Username: "john"})
+		mockUserRepo.AssertCalled(t, "FindUserByUsername", context.Background(), "john")
 		mockRoleRepo.AssertCalled(t, "FindRoleByRoleCode", context.Background(), "BANNED")
 		mockUserRepo.AssertCalled(t, "InsertUser", context.Background(), mock.Anything)
 
@@ -99,13 +99,13 @@ func TestSignIn(t *testing.T) {
 
 	// Prepare test data
 	username := "testuser"
-	expectedUser := &model.User{
+	expectedUser := &entity.User{
 		ID:        123,
 		Username:  username,
 		Email:     "testuser@example.com",
 		FirstName: "Test",
 		LastName:  "User",
-		Role: &model.Role{
+		Role: &entity.Role{
 			ID:       456,
 			RoleName: "admin",
 			RoleCode: "ADMIN",
@@ -118,7 +118,7 @@ func TestSignIn(t *testing.T) {
 		_, _, mockUserRepo, _, authService := initMock()
 
 		// Mock the FindUserByUsername method to return an existing user
-		mockUserRepo.On("FindUserByUsername", context.Background(), mock.AnythingOfType("*model.User")).
+		mockUserRepo.On("FindUserByUsernameAndIsNew", context.Background(), mock.Anything, false).
 			Return(expectedUser, nil)
 
 		// Call the SignIn method
@@ -136,7 +136,7 @@ func TestSignIn(t *testing.T) {
 		assert.Equal(t, expectedUser.Role.RoleCode, result.Role.RoleCode)
 
 		// Assert that the FindUserByUsername method was called with the expected arguments
-		mockUserRepo.AssertCalled(t, "FindUserByUsername", context.Background(), &model.User{Username: username, IsNew: false})
+		mockUserRepo.AssertCalled(t, "FindUserByUsernameAndIsNew", context.Background(), username, false)
 
 		// Assert that there are no more calls to the UserRepository
 		mockUserRepo.AssertExpectations(t)
@@ -146,7 +146,7 @@ func TestSignIn(t *testing.T) {
 		_, _, mockUserRepo, _, authService := initMock()
 
 		// Mock the FindUserByUsername method to return a non-existing user
-		mockUserRepo.On("FindUserByUsername", context.Background(), mock.AnythingOfType("*model.User")).
+		mockUserRepo.On("FindUserByUsernameAndIsNew", context.Background(), mock.Anything, false).
 			Return(nil, errors.ErrResourceNotFound)
 
 		// Call the SignIn method
@@ -157,7 +157,7 @@ func TestSignIn(t *testing.T) {
 		assert.Nil(t, result)
 
 		// Assert that the FindUserByUsername method was called with the expected arguments
-		mockUserRepo.AssertCalled(t, "FindUserByUsername", context.Background(), &model.User{Username: username, IsNew: false})
+		mockUserRepo.AssertCalled(t, "FindUserByUsernameAndIsNew", context.Background(), username, false)
 
 		// Assert that there are no more calls to the UserRepository
 		mockUserRepo.AssertExpectations(t)

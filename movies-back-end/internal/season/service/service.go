@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"movies-service/internal/common/dto"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/common/mapper"
-	"movies-service/internal/common/model"
 	"movies-service/internal/control"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
@@ -68,7 +68,7 @@ func (s seasonService) AddSeason(ctx context.Context, season *dto.SeasonDto) err
 		return err
 	}
 
-	seasonObject := &model.Season{
+	seasonObject := &entity.Season{
 		Name:        season.Name,
 		AirDate:     season.AirDate,
 		Description: season.Description,
@@ -112,7 +112,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 	}
 
 	// After check object exists, write updating value
-	seasonObj = &model.Season{
+	seasonObj = &entity.Season{
 		ID:          season.ID,
 		Name:        season.Name,
 		AirDate:     season.AirDate,

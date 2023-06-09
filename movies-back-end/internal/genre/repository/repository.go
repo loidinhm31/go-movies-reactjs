@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/genre"
 )
 
@@ -17,8 +17,8 @@ func NewGenreRepository(cfg *config.Config, db *gorm.DB) genre.Repository {
 	return &genreRepository{cfg: cfg, db: db}
 }
 
-func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*model.Genre, error) {
-	var allGenres []*model.Genre
+func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*entity.Genre, error) {
+	var allGenres []*entity.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
@@ -34,8 +34,8 @@ func (gr *genreRepository) FindAllGenres(ctx context.Context) ([]*model.Genre, e
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*model.Genre, error) {
-	var allGenres []*model.Genre
+func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieType string) ([]*entity.Genre, error) {
+	var allGenres []*entity.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
@@ -52,21 +52,21 @@ func (gr *genreRepository) FindAllGenresByTypeCode(ctx context.Context, movieTyp
 	return allGenres, nil
 }
 
-func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *model.Genre) (*model.Genre, error) {
-	var result model.Genre
+func (gr *genreRepository) FindGenreByNameAndTypeCode(ctx context.Context, genre *entity.Genre) (*entity.Genre, error) {
+	var result entity.Genre
 
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&model.Genre{}).Where("name = ? AND type_code = ?", genre.Name, genre.TypeCode).Find(result).Error
+	err := tx.Model(&entity.Genre{}).Where("name = ? AND type_code = ?", genre.Name, genre.TypeCode).Find(result).Error
 	if err != nil {
 		return nil, err
 	}
 	return &result, nil
 }
 
-func (gr *genreRepository) InsertGenres(ctx context.Context, genres []*model.Genre) error {
+func (gr *genreRepository) InsertGenres(ctx context.Context, genres []*entity.Genre) error {
 	tx := gr.db.WithContext(ctx)
 	if gr.cfg.Server.Debug {
 		tx = tx.Debug()

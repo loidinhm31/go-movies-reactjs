@@ -4,7 +4,7 @@ import (
 	"context"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/role"
 )
 
@@ -17,9 +17,9 @@ func NewRoleRepository(cfg *config.Config, db *gorm.DB) role.Repository {
 	return &roleRepository{cfg: cfg, db: db}
 }
 
-func (rr roleRepository) FindRoleByRoleCode(ctx context.Context, roleCode string) (*model.Role, error) {
-	var result model.Role
-	err := rr.db.WithContext(ctx).Where(&model.Role{
+func (rr roleRepository) FindRoleByRoleCode(ctx context.Context, roleCode string) (*entity.Role, error) {
+	var result entity.Role
+	err := rr.db.WithContext(ctx).Where(&entity.Role{
 		RoleCode: roleCode,
 	}).Find(&result).Error
 
@@ -30,8 +30,8 @@ func (rr roleRepository) FindRoleByRoleCode(ctx context.Context, roleCode string
 	return &result, nil
 }
 
-func (rr roleRepository) FindRoles(ctx context.Context) ([]*model.Role, error) {
-	var results []*model.Role
+func (rr roleRepository) FindRoles(ctx context.Context) ([]*entity.Role, error) {
+	var results []*entity.Role
 	err := rr.db.WithContext(ctx).Find(&results).Error
 
 	if err != nil {

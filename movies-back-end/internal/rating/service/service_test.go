@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/stretchr/testify/assert"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 	"movies-service/internal/rating"
 	"movies-service/internal/test/helper"
 	"testing"
@@ -22,7 +22,7 @@ func initMock() (*helper.MockRatingRepository, rating.Service) {
 func TestGetAllRatings(t *testing.T) {
 	mockRepo, ratingService := initMock()
 
-	data := []*model.Rating{
+	data := []*entity.Rating{
 		{
 			ID:   1,
 			Code: "R",

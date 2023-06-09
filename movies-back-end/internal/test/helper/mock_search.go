@@ -3,6 +3,7 @@ package helper
 import (
 	"context"
 	"github.com/stretchr/testify/mock"
+	"movies-service/internal/common/entity"
 	model2 "movies-service/internal/common/model"
 	"movies-service/pkg/pagination"
 )
@@ -12,7 +13,7 @@ type MockSearchRepository struct {
 	mock.Mock
 }
 
-func (m *MockSearchRepository) SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*model2.Movie], error) {
+func (m *MockSearchRepository) SearchMovie(ctx context.Context, searchParams *model2.SearchParams) (*pagination.Page[*entity.Movie], error) {
 	args := m.Called(ctx, searchParams)
-	return args.Get(0).(*pagination.Page[*model2.Movie]), args.Error(1)
+	return args.Get(0).(*pagination.Page[*entity.Movie]), args.Error(1)
 }

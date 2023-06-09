@@ -1,4 +1,4 @@
-package model
+package entity
 
 import (
 	"database/sql"
@@ -19,4 +19,18 @@ type Payment struct {
 	Status            string
 	CreatedAt         time.Time
 	CreatedBy         string
+}
+
+type CustomPayment struct {
+	ID            uint
+	TypeCode      string
+	MovieTitle    string
+	SeasonName    string
+	EpisodeName   string
+	Provider      string
+	PaymentMethod string
+	Amount        float64
+	Currency      string
+	Status        string
+	CreatedAt     time.Time
 }
