@@ -123,7 +123,7 @@ func (ps *paymentService) VerifyPayment(ctx context.Context, provider entity.Pay
 
 	// Add payment
 	log.Printf("verified from provider...")
-	_, err = ps.paymentRepository.InsertPayment(ctx, &entity.Payment{
+	addedPayment, err := ps.paymentRepository.InsertPayment(ctx, &entity.Payment{
 		RefID:             refID,
 		UserID:            theUser.ID,
 		TypeCode:          typeCode,
@@ -167,20 +167,20 @@ func (ps *paymentService) VerifyPayment(ctx context.Context, provider entity.Pay
 			htmlMessage = fmt.Sprintf(`
 		<strong>Payment Confirmation</strong><br>
 		Dear %s %s, <br>
-		This is confirmation for your payment %f %s on %s at %s.`,
+		This is confirmation for your payment %0.1f %s on %s at %s.`,
 				theUser.FirstName, theUser.LastName,
-				thePayment.Received, strings.ToUpper(thePayment.Currency),
+				addedPayment.Received, strings.ToUpper(addedPayment.Currency),
 				theMovie.Title,
-				thePayment.CreatedAt.Format(constant.Layout))
+				addedPayment.CreatedAt.Format(constant.Layout))
 		} else if typeCode == "TV" {
 			htmlMessage = fmt.Sprintf(`
 		<strong>Payment Confirmation</strong><br>
 		Dear %s %s, <br>
-		This is confirmation for your payment %f %s on %s - %s at %s.`,
+		This is confirmation for your payment %0.1f %s on %s - %s at %s.`,
 				theUser.FirstName, theUser.LastName,
-				thePayment.Received, strings.ToUpper(thePayment.Currency),
+				addedPayment.Received, strings.ToUpper(addedPayment.Currency),
 				theEpisode.Season.Name, theEpisode.Name,
-				thePayment.CreatedAt.Format(constant.Layout))
+				addedPayment.CreatedAt.Format(constant.Layout))
 		}
 
 		err := ps.mailService.SendMessage(ctx, &model.MailData{
