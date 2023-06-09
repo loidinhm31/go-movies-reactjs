@@ -138,7 +138,6 @@ CREATE TABLE public.collections
     movie_id   INTEGER DEFAULT NULL,
     episode_id INTEGER DEFAULT NULL,
     type_code  VARCHAR(10)              NOT NULL,
-    payment_id INTEGER,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_by TEXT                     NOT NULL
 );
