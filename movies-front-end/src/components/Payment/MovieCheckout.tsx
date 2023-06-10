@@ -27,7 +27,7 @@ export default function MovieCheckout({refId, type}: MovieCheckoutProps) {
 
     const {trigger: getMovie} = useSWRMutation(`/api/v1/movies/${refId}`, get);
     const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${type}&refId=${refId}`, get);
-    const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments", post);
+    const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments/intents", post);
 
     useEffect(() => {
         setStripePromise(loadStripe(`${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`));

@@ -54,16 +54,20 @@ export default function WatchEpisode({author, movieId, episodeId}: WatchEpisodeP
                         </Typography>
                     </Box>
                     <Box sx={{p: 2, m: 2}}>
-                        <Typography
-                            variant="h5"
-                        >
-                            {episode?.season?.name} - {episode?.name}
-                        </Typography>
+                        {episode &&
+                            <Typography
+                                variant="h5"
+                            >
+                                {episode?.season?.name} - {episode?.name}
+                            </Typography>
+                        }
                     </Box>
 
                     <Box sx={{p: 1, m: 1}}>
                         <Typography>
-                            <small><em>{format(new Date(episode?.air_date!), "MMMM do, yyyy")} | </em></small>
+                            {episode &&
+                                <small><em>{format(new Date(episode?.air_date!), "MMMM do, yyyy")} | </em></small>
+                            }
                             <small><em>{episode?.runtime} minutes | </em></small>
                             <small><em>Rated {movie.mpaa_rating}</em></small>
                         </Typography>

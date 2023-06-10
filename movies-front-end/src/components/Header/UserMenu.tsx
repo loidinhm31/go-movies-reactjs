@@ -7,6 +7,7 @@ import CameraRollIcon from "@mui/icons-material/CameraRoll";
 import {useHasAnyRole} from "src/hooks/auth/useHasAnyRole";
 import {useRouter} from "next/router";
 import {MilitaryTech} from "@mui/icons-material";
+import PaidIcon from "@mui/icons-material/Paid";
 
 interface MenuOption {
     name: string;
@@ -46,6 +47,13 @@ export function UserMenu() {
             href: "/collections",
             desc: "Your Collections",
             icon: CameraRollIcon,
+            isExternal: false
+        },
+        {
+            name: "Your Payments",
+            href: "/payments",
+            desc: "Your Payments",
+            icon: PaidIcon,
             isExternal: false
         }
     ];

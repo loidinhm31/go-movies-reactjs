@@ -24,7 +24,7 @@ export default function EpisodeCheckout({refId, type}: MovieCheckoutProps) {
     const {trigger: getRootMovie} = useSWRMutation(`/api/v1/movies/checkout?episodeId=${refId}`, get);
     const {trigger: getEpisode} = useSWRMutation(`/api/v1/episodes/${refId}`, get);
     const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${type}&refId=${refId}`, get);
-    const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments", post);
+    const {trigger: getPaymentIntent} = useSWRMutation("/api/v1/payments/intents", post);
     const [paymentId, setPaymentId] = useState();
 
     useEffect(() => {
