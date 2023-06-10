@@ -1,22 +1,27 @@
 import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
 import {Box, Divider, Paper, Stack, Tab, Tabs, Typography} from "@mui/material";
-import {movieTypes} from "src/components/MovieTypeSelect";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CollectionMovieTab} from "src/components/Tab/CollectionMovieTab";
 import {TabPanel} from "src/components/Tab/TabPanel";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import TvIcon from "@mui/icons-material/Tv";
 import {CollectionEpisodeTab} from "src/components/Tab/CollectionEpisodeTab";
+import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
+import {signIn} from "next-auth/react";
 
 export default function Collection() {
+    const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
     const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
 
-    const [selectedType, setSelectedType] = useState<string>(movieTypes[0]);
-
-
-
     const [tabValue, setTabValue] = useState(0);
+
+    useEffect(() => {
+        if (isInvalid) {
+            signIn();
+            return;
+        }
+    }, [isInvalid]);
 
     const handleChangeTab = (event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);

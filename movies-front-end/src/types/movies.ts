@@ -42,12 +42,28 @@ export type CollectionType = {
 }
 
 export type PaymentType = {
-    user_id: string,
+    id: number,
+    user_id: number,
     ref_id: number,
     type_code: string,
+    provider: string,
     amount: number,
     currency: string,
     payment_method: string,
+    status: string,
+    created_at: number,
+}
+
+export type CustomPaymentType = {
+    id: number,
+    type_code: string,
+    movie_title: string,
+    season_name: string,
+    episode_name: string,
+    provider: string,
+    payment_method: string,
+    amount: number,
+    currency: string,
     status: string,
     created_at: number,
 }

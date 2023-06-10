@@ -1,30 +1,44 @@
-import Stripe from "stripe";
+import {Direction, PageType} from "src/types/page";
+import {CustomPaymentType} from "src/types/movies";
 import {withoutRole} from "src/libs/auth";
 
+const handler = withoutRole("banned", async (req, res, token) => {
+    let {pageIndex, pageSize, type, q} = req.query;
 
-const handler = withoutRole("banned", async (req, res) => {
-    try {
-        const payment = req.body;
-        console.log(payment)
-
-        const stripePromise = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`, {
-            apiVersion: "2022-11-15"
-        });
-
-        const paymentIntent = await stripePromise.paymentIntents.create(
-            payment
-        );
-
-        // Send publishable key and PaymentIntent details to client
-        res.send({
-            clientSecret: paymentIntent.client_secret,
-            paymentId: paymentIntent.id,
-        });
-    } catch (e) {
-        return res.status(400).send({
-            message: e.message
-        });
+    let page: PageType<any> = {
+        sort: {
+            orders: [
+                {
+                    property: "created_at",
+                    direction: Direction.DESC
+                }
+            ]
+        }
     }
+    const data: PageType<CustomPaymentType> = req.body;
+    if (data.sort) {
+        page = data;
+    }
+
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    headers.append("Authorization", `Bearer ${token.accessToken}`);
+
+    const requestOptions = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(page),
+    }
+
+    try {
+        let response = await fetch(`${process.env.API_BASE_URL}/auth/payments?q=${q}&page=${pageIndex}&size=${pageSize}`,
+            requestOptions
+        );
+        res.status(response.status).json(await response.json());
+    } catch (error) {
+        res.status(500).json({message: "server error"});
+    }
+
 });
 
 export default handler;
