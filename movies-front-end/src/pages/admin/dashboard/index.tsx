@@ -7,6 +7,7 @@ import {signIn} from "next-auth/react";
 import {useEffect, useState} from "react";
 import MovieTypeSelect from "src/components/MovieTypeSelect";
 import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
+import PaymentBarChart from "src/components/Chart/PaymentBarChart";
 
 function Dashboard() {
     const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
@@ -55,9 +56,15 @@ function Dashboard() {
                     </Container>
                 </Grid>
 
-                <Grid item xs={12} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                <Grid item xs={6} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
                     <Container maxWidth="sm">
                         <LineChart movieType={selectedType}/>
+                    </Container>
+                </Grid>
+
+                <Grid item xs={6} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+                    <Container maxWidth="sm" sx={{p: 2}}>
+                        <PaymentBarChart movieType={selectedType}/>
                     </Container>
                 </Grid>
             </Grid>
