@@ -19,3 +19,8 @@ type ViewCount struct {
 	NumViewers uint
 	Cumulative uint
 }
+
+type TotalPayment struct {
+	TotalAmount   float64
+	TotalReceived float64
+}

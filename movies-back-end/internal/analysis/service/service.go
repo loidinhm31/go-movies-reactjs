@@ -200,3 +200,18 @@ func (as *analysisService) GetNumberOfMoviesByGenreAndReleasedDate(ctx context.C
 	}
 	return &dto.ResultDto{Data: dataSlice}, nil
 }
+
+func (as *analysisService) GetTotalAmountAndTotalReceivedPayment(ctx context.Context, typeCode string) (*dto.TotalPaymentDto, error) {
+	// Get author
+	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
+	if !as.mgmtCtrl.CheckPrivilege(author) {
+		return nil, errors.ErrUnAuthorized
+	}
+
+	result, err := as.analysisRepository.SumTotalAmountAndTotalReceivedPayment(ctx, typeCode)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.TotalPaymentDto{TotalAmount: result.TotalAmount, TotalReceived: result.TotalReceived}, nil
+}

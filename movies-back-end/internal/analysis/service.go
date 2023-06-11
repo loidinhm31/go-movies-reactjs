@@ -13,4 +13,5 @@ type Service interface {
 	GetCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error)
 	GetNumberOfViewsByViewedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error)
 	GetNumberOfMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) (*dto.ResultDto, error)
+	GetTotalAmountAndTotalReceivedPayment(ctx context.Context, typeCode string) (*dto.TotalPaymentDto, error)
 }

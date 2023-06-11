@@ -14,4 +14,5 @@ type Repository interface {
 	CountCumulativeViewsByGenreAndViewedDate(ctx context.Context, request *dto.RequestData) ([]*entity.ViewCount, error)
 	CountViewsByViewedDate(ctx context.Context, request *dto.RequestData) ([]*entity.ViewCount, error)
 	CountMoviesByGenreAndReleasedDate(ctx context.Context, request *dto.RequestData) ([]*entity.MovieCount, error)
+	SumTotalAmountAndTotalReceivedPayment(ctx context.Context, typeCode string) (*entity.TotalPayment, error)
 }

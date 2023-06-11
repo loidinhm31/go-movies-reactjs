@@ -5,7 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"movies-service/config"
-	"movies-service/internal/common/model"
+	"movies-service/internal/common/entity"
 )
 
 func NewPsqlDB(cfg *config.Config, migrate bool) (*gorm.DB, error) {
@@ -23,7 +23,7 @@ func NewPsqlDB(cfg *config.Config, migrate bool) (*gorm.DB, error) {
 	}
 
 	if migrate {
-		db.AutoMigrate(&model.User{})
+		db.AutoMigrate(&entity.User{})
 		// if err != nil {
 		// 	panic("Error when run migrations")
 		// }

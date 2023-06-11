@@ -164,3 +164,18 @@ func (rh *researchHandler) FetchNumberOfMoviesByGenreAndReleaseDate() gin.Handle
 		c.JSON(http.StatusOK, result)
 	}
 }
+
+func (rh *researchHandler) FetchTotalAmountAndTotalReceivedPayment() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		typeCode := c.Query("type")
+		result, err := rh.researchService.GetTotalAmountAndTotalReceivedPayment(c, typeCode)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}

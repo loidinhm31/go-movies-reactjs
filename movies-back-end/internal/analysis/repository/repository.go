@@ -222,3 +222,25 @@ func (ar *analysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.Cont
 
 	return result, nil
 }
+
+func (ar *analysisRepository) SumTotalAmountAndTotalReceivedPayment(ctx context.Context, typeCode string) (*entity.TotalPayment, error) {
+	var result *entity.TotalPayment
+
+	tx := ar.db.WithContext(ctx)
+	if ar.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+
+	tx = tx.Table("payments").
+		Select("SUM(payments.amount) AS total_amount, SUM(payments.received) AS total_received")
+
+	if typeCode != "" {
+		tx = tx.Where("payments.type_code = ?", typeCode)
+	}
+
+	err := tx.Find(&result).Error
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

@@ -24,3 +24,8 @@ type RequestData struct {
 	TypeCode     string         `json:"type_code,omitempty"`
 	IsCumulative bool           `json:"isCumulative,omitempty"`
 }
+
+type TotalPaymentDto struct {
+	TotalAmount   float64 `json:"total_amount"`
+	TotalReceived float64 `json:"total_received"`
+}
