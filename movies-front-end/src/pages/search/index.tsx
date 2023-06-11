@@ -80,7 +80,7 @@ function Search() {
             <NotifySnackbar state={notifyState} setState={setNotifyState}/>
             <Stack spacing={2}>
                 <Box sx={{display: "flex", p: 1, m: 1}}>
-                    <Typography variant="h4">Search</Typography>
+                    <Typography variant="h4">Advanced Search</Typography>
                 </Box>
                 <Divider/>
 

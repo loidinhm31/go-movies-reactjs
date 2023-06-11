@@ -42,7 +42,7 @@ export const getDefaultLayout = (page: React.ReactElement) => (
                     icon: ClassIcon,
                 },
                 {
-                    label: "Search",
+                    label: "Advanced Search",
                     pathname: "/search",
                     desc: "Search",
                     icon: SearchIcon,
