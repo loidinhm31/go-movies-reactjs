@@ -12,15 +12,16 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import {FieldData, SearchRequest} from "src/types/search";
+import {useState} from "react";
+import MovieTypeSelect from "src/components/MovieTypeSelect";
 import {SearchDate} from "src/components/Search/SearchMovie/SearchDate";
 import {SearchGenre} from "src/components/Search/SearchMovie/SearchGenre";
+import {SearchRange} from "src/components/Search/SearchMovie/SearchRange";
 import {SearchString} from "src/components/Search/SearchMovie/SearchString";
-import useSWR from "swr";
-import {RatingType} from "src/types/movies";
 import {get} from "src/libs/api";
-import MovieTypeSelect from "src/components/MovieTypeSelect";
-import {useState} from "react";
+import {RatingType} from "src/types/movies";
+import {FieldData, SearchRequest} from "src/types/search";
+import useSWR from "swr";
 
 interface SearchFieldProps {
     setIsClickSearch: (flag: boolean) => void;
@@ -29,7 +30,12 @@ interface SearchFieldProps {
     setFieldDataMap: (value: Map<string, FieldData>) => void;
 }
 
-export function SearchField({setIsClickSearch, setSearchRequest, fieldDataMap: fieldDataMap, setFieldDataMap: setFieldData}: SearchFieldProps) {
+export function SearchField({
+                                setIsClickSearch,
+                                setSearchRequest,
+                                fieldDataMap: fieldDataMap,
+                                setFieldDataMap: setFieldData
+                            }: SearchFieldProps) {
     const optionalType = ["Both"];
 
     const [selectedType, setSelectedType] = useState<string>(optionalType[0]);
@@ -78,12 +84,37 @@ export function SearchField({setIsClickSearch, setSearchRequest, fieldDataMap: f
                     type: defType,
                     values: [],
                 };
+            } else {
+                if (dateType === "from") {
+                    data.def.values[0] = value;
+                } else if (dateType === "to") {
+                    data.def.values[1] = value;
+                }
             }
+        }
 
-            if (dateType === "from") {
-                data.def.values[0] = value;
-            } else if (dateType === "to") {
-                data.def.values[1] = value;
+        fieldDataMap.set(label, data);
+        setFieldData(new Map(fieldDataMap));
+    }
+
+    const handleRangeField = (label: string, values: string | number[], forField: string, defType: string) => {
+        let data = fieldDataMap.get(label) as FieldData;
+        if (!data) {
+            data = {field: label};
+        }
+
+        if (forField === "operator") {
+            data.operator = values as string;
+        } else if (forField === "def") {
+            console.log(values)
+            if ((!data.def?.values) ||
+                (values[0] === 0 && values[1] === 0)) {
+                data.def = {
+                    type: defType,
+                    values: [],
+                };
+            } else {
+                data.def.values = (values as number[]).map((v) => v.toString());
             }
         }
 
@@ -141,11 +172,14 @@ export function SearchField({setIsClickSearch, setSearchRequest, fieldDataMap: f
                 handleStringField={handleStringField}
             />
 
-            <SearchString
+            <SearchRange
                 label="Runtime"
                 field="runtime"
                 defType="number"
-                handleStringField={handleStringField}
+                min={0}
+                max={500}
+                step={1}
+                handleRangeField={handleRangeField}
             />
 
             <SearchDate
