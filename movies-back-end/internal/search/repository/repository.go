@@ -21,6 +21,7 @@ const (
 	Runtime     = "runtime"
 	MpaaRating  = "mpaa_rating"
 	ReleaseDate = "release_date"
+	Price       = "Price"
 	Genres      = "genres"
 )
 
@@ -73,7 +74,7 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 			}
 			break
 		case Runtime:
-			err := sr.buildEqualQuery(tx, Runtime, f.Operator, f.TypeValue)
+			err := sr.buildRangeQuery(tx, Runtime, f.Operator, f.TypeValue)
 			if err != nil {
 				return nil, err
 			}
@@ -165,6 +166,22 @@ func (sr *searchRepository) buildEqualQuery(tx *gorm.DB, field, operator string,
 
 func buildDateQuery(tx *gorm.DB, field, operator string, def model2.TypeValue) error {
 	if len(def.Values) == 2 && def.Type == model2.DATE {
+		if def.Values[0] == "" || def.Values[1] == "" {
+			return errors.ErrInvalidInput
+		}
+
+		if strings.EqualFold(operator, model2.AND) {
+			tx = tx.Where(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
+		} else if strings.EqualFold(operator, model2.OR) {
+			tx = tx.Or(field+" BETWEEN ? AND ?", def.Values[0], def.Values[1])
+		}
+		return nil
+	}
+	return errors.ErrInvalidInput
+}
+
+func (sr *searchRepository) buildRangeQuery(tx *gorm.DB, field, operator string, def model2.TypeValue) error {
+	if len(def.Values) == 2 && def.Type == model2.NUMBER {
 		if def.Values[0] == "" || def.Values[1] == "" {
 			return errors.ErrInvalidInput
 		}
