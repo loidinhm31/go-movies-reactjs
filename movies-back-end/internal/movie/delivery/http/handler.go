@@ -190,3 +190,22 @@ func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
 		c.JSON(http.StatusOK, allMovies)
 	}
 }
+
+func (mh *movieHandler) PatchMoviePrice() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		movieId := c.Param("id")
+		movieID, _ := strconv.Atoi(movieId)
+
+		err := mh.movieService.UpdatePriceWithAverageEpisodePrice(c, uint(movieID))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+		})
+	}
+}

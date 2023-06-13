@@ -183,3 +183,21 @@ func (mr *movieRepository) FindMovieByEpisodeID(ctx context.Context, episodeID u
 
 	return result, nil
 }
+
+func (mr *movieRepository) UpdatePriceWithAverageEpisodePrice(ctx context.Context, movieID uint) error {
+	tx := mr.db.WithContext(ctx)
+	if mr.cfg.Server.Debug {
+		tx = tx.Debug()
+	}
+	err := tx.Model(&entity.Movie{}).
+		Where("id = ? AND type_code = 'TV'", movieID).
+		Update("price", mr.db.Raw("SELECT AVG(e.price) "+
+			"FROM seasons s "+
+			"INNER JOIN episodes e ON s.id = e.season_id "+
+			"WHERE s.movie_id = ?", movieID)).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

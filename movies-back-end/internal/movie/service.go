@@ -14,4 +14,5 @@ type Service interface {
 	UpdateMovie(ctx context.Context, movie *dto.MovieDto) error
 	RemoveMovieByID(ctx context.Context, id uint) error
 	GetMovieByEpisodeID(ctx context.Context, id uint) (*dto.MovieDto, error)
+	UpdatePriceWithAverageEpisodePrice(ctx context.Context, movieID uint) error
 }

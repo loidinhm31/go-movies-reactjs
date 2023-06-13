@@ -25,4 +25,6 @@ type Repository interface {
 	UpdateMovieGenres(ctx context.Context, movie *entity.Movie, genres []*entity.Genre) error
 
 	FindMovieByEpisodeID(ctx context.Context, episdoeID uint) (*entity.Movie, error)
+
+	UpdatePriceWithAverageEpisodePrice(ctx context.Context, movieID uint) error
 }

@@ -324,3 +324,15 @@ func (ms *movieService) GetMovieByEpisodeID(ctx context.Context, episodeID uint)
 	movieDto := mapper2.MapToMovieDto(result, !isValidUser, isPrivilege)
 	return movieDto, nil
 }
+
+func (ms *movieService) UpdatePriceWithAverageEpisodePrice(ctx context.Context, movieID uint) error {
+	if movieID == 0 {
+		return errors.ErrResourceNotFound
+	}
+
+	err := ms.movieRepository.UpdatePriceWithAverageEpisodePrice(ctx, movieID)
+	if err != nil {
+		return err
+	}
+	return nil
+}

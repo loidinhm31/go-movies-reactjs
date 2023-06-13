@@ -1,8 +1,9 @@
 package http
 
 import (
-	"github.com/gin-gonic/gin"
 	"movies-service/internal/movie"
+
+	"github.com/gin-gonic/gin"
 )
 
 // MapMovieRoutes Map auth routes
@@ -18,4 +19,5 @@ func MapAuthMovieRoutes(movieGroup *gin.RouterGroup, h movie.Handler) {
 	movieGroup.DELETE("/:id", h.DeleteMovie())
 	movieGroup.PATCH("/", h.PatchMovie())
 	movieGroup.GET("/", h.FetchMovies())
+	movieGroup.PATCH("/:id/price", h.PatchMoviePrice())
 }

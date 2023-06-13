@@ -10,4 +10,5 @@ type Handler interface {
 	DeleteMovie() gin.HandlerFunc
 	PatchMovie() gin.HandlerFunc
 	FetchMovies() gin.HandlerFunc
+	PatchMoviePrice() gin.HandlerFunc
 }
