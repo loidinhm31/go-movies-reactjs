@@ -1,4 +1,7 @@
-import React, {useCallback, useEffect, useState} from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import PriceChangeIcon from "@mui/icons-material/PriceChange";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
     Box,
     Chip,
@@ -15,17 +18,15 @@ import {
     TableSortLabel
 } from "@mui/material";
 import {visuallyHidden} from "@mui/utils";
-import {MovieType} from "src/types/movies";
-import AlertDialog from "src/components/shared/alert";
-import {Direction, PageType} from "src/types/page";
 import {format} from "date-fns";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import useSWRMutation from "swr/mutation";
-import {del, post} from "src/libs/api";
-import {NotifyState} from "src/components/shared/snackbar";
+import React, {useCallback, useEffect, useState} from "react";
 import SearchKey from "src/components/Search/SearchKey";
+import AlertDialog from "src/components/shared/alert";
+import {NotifyState} from "src/components/shared/snackbar";
+import {del, patch, post} from "src/libs/api";
+import {MovieType} from "src/types/movies";
+import {Direction, PageType} from "src/types/page";
+import useSWRMutation from "swr/mutation";
 
 export interface Data {
     title: string;
@@ -128,7 +129,12 @@ interface ManageMoviesTableProps {
     setNotifyState: (state: NotifyState) => void;
 }
 
-export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setOpenSeasonDialog, setNotifyState}: ManageMoviesTableProps) {
+export default function ManageMoviesTable({
+                                              selectedMovie,
+                                              setSelectedMovie,
+                                              setOpenSeasonDialog,
+                                              setNotifyState
+                                          }: ManageMoviesTableProps) {
     const [page, setPage] = useState<PageType<MovieType> | null>(null);
 
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
@@ -147,6 +153,7 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
     const {trigger: requestPage} =
         useSWRMutation(`/api/v1/movies?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
     const {trigger: deleteMovie} = useSWRMutation(`/api/v1/admin/movies/delete/${deleteId}`, del);
+    const {trigger: updateMoviePrice} = useSWRMutation(`/api/v1/admin/movies/price`, patch);
 
     useEffect(() => {
         handeRequestPage();
@@ -256,6 +263,29 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
         setSelectedMovie(movie);
     }
 
+    const handleUpdateAveragePrice = (movie: MovieType) => {
+        updateMoviePrice({id: movie.id} as MovieType)
+            .then((result) => {
+                if (result.message === "ok") {
+                    setNotifyState({
+                        open: true,
+                        message: "Average Price Was Updated",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "success"
+                    });
+                }
+            }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
+        });
+    }
+
     return (
         <>
             {isOpenDeleteDialog &&
@@ -335,12 +365,20 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                                                                 <DeleteIcon/>
                                                             </IconButton>
                                                             {row.type_code === "TV" &&
-                                                                <IconButton
-                                                                    color="inherit"
-                                                                    onClick={() => handleViewTv(row)}
-                                                                >
-                                                                    <VisibilityIcon/>
-                                                                </IconButton>
+                                                                <>
+                                                                    <IconButton
+                                                                        color="inherit"
+                                                                        onClick={() => handleViewTv(row)}
+                                                                    >
+                                                                        <VisibilityIcon/>
+                                                                    </IconButton>
+                                                                    <IconButton
+                                                                        color="secondary"
+                                                                        onClick={() => handleUpdateAveragePrice(row)}
+                                                                    >
+                                                                        <PriceChangeIcon/>
+                                                                    </IconButton>
+                                                                </>
                                                             }
                                                         </Box>
                                                     </TableCell>
@@ -363,7 +401,7 @@ export default function ManageMoviesTable({selectedMovie, setSelectedMovie, setO
                     </Paper>
                 </Box>
             }
-            
+
         </>
 
     );

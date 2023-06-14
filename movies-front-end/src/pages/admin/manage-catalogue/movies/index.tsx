@@ -1,9 +1,4 @@
-import {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/router";
-import {signIn} from "next-auth/react";
-import {FileType, GenreType, MovieType, RatingType} from "src/types/movies";
-import {del, get, post, postForm} from "src/libs/api";
-import useSWRMutation from "swr/mutation";
+import {RemoveCircle} from "@mui/icons-material";
 import {
     Box,
     Button,
@@ -25,13 +20,19 @@ import {
     TextField,
     Typography
 } from "@mui/material";
+import {format} from "date-fns";
+import {signIn} from "next-auth/react";
+import {useRouter} from "next/router";
+import {useEffect, useRef, useState} from "react";
+import {movieTypes} from "src/components/MovieTypeSelect";
 import AlertDialog from "src/components/shared/alert";
 import NotifySnackbar, {NotifyState, sleep} from "src/components/shared/snackbar";
-import {format} from "date-fns";
-import {RemoveCircle} from "@mui/icons-material";
-import {movieTypes} from "src/components/MovieTypeSelect";
 import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
+import {del, get, patch, post, postForm} from "src/libs/api";
+import {FileType, GenreType, MovieType, RatingType} from "src/types/movies";
 import useSWR from "swr";
+import useSWRMutation from "swr/mutation";
+import PriceChangeIcon from "@mui/icons-material/PriceChange";
 
 const EditMovie = () => {
     const router = useRouter();
@@ -72,6 +73,8 @@ const EditMovie = () => {
 
     const {trigger: uploadFile} = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
     const {trigger: removeFile} = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
+
+    const {trigger: updateMoviePrice} = useSWRMutation(`/api/v1/admin/movies/price`, patch);
 
     const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
 
@@ -416,10 +419,46 @@ const EditMovie = () => {
                 severity: "error"
             });
         })
-
-
     };
 
+
+    const handleUpdateAveragePrice = () => {
+        updateMoviePrice({id: movie?.id!} as MovieType)
+            .then((result) => {
+                if (result.message === "ok") {
+                    setNotifyState({
+                        open: true,
+                        message: "Average Price Was Updated",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "success"
+                    })
+
+                    fetchMovie().then((movie) => {
+                        setMovie(prevMovie => ({
+                            ...prevMovie,
+                            price: movie?.price,
+                        }));
+                    }).catch((error) => {
+                        setNotifyState({
+                            open: true,
+                            message: error.message.message,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "error"
+                        });
+                    });
+                }
+            }).catch((error) => {
+            setNotifyState({
+                open: true,
+                message: error.message.message,
+                vertical: "top",
+                horizontal: "right",
+                severity: "error"
+            });
+        });
+    }
 
     return (
         <>
@@ -464,20 +503,46 @@ const EditMovie = () => {
                             </Grid>
 
                             <Grid item xs={2}>
-                                {movie.type_code === "MOVIE" &&
-                                    <TextField
-                                        fullWidth
-                                        label="Price"
-                                        variant="outlined"
-                                        type="number"
-                                        name="price"
-                                        InputProps={{
-                                            endAdornment: <InputAdornment position="end">USD</InputAdornment>,
-                                        }}
-                                        value={movie.price}
-                                        onChange={e => handleChange(e, "price")}
-                                    />
-                                }
+                                <>
+                                    {movie.type_code === "MOVIE" &&
+                                        <TextField
+                                            fullWidth
+                                            label="Price"
+                                            variant="outlined"
+                                            type="number"
+                                            name="price"
+                                            InputProps={{
+                                                endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                            }}
+                                            value={movie.price || 0}
+                                            onChange={e => handleChange(e, "price")}
+                                        />
+                                    }
+
+                                    {movie.type_code === "TV" &&
+                                        <Stack direction="row" spacing={2}>
+                                            <IconButton
+                                                color="secondary"
+                                                onClick={handleUpdateAveragePrice}
+                                            >
+                                                <PriceChangeIcon/>
+                                            </IconButton>
+
+                                            <TextField
+                                                disabled
+                                                fullWidth
+                                                label="Average Price"
+                                                variant="outlined"
+                                                type="number"
+                                                name="price"
+                                                InputProps={{
+                                                    endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                                                }}
+                                                value={movie.price || 0}
+                                            />
+                                        </Stack>
+                                    }
+                                </>
                             </Grid>
 
                             <Grid item xs={2}>
