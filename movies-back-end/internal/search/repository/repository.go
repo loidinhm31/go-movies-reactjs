@@ -21,7 +21,7 @@ const (
 	Runtime     = "runtime"
 	MpaaRating  = "mpaa_rating"
 	ReleaseDate = "release_date"
-	Price       = "Price"
+	Price       = "price"
 	Genres      = "genres"
 )
 
@@ -81,6 +81,12 @@ func (sr *searchRepository) SearchMovie(ctx context.Context, searchParams *model
 			break
 		case ReleaseDate:
 			err := buildDateQuery(tx, ReleaseDate, f.Operator, f.TypeValue)
+			if err != nil {
+				return nil, err
+			}
+			break
+		case Price:
+			err := sr.buildRangeQuery(tx, Price, f.Operator, f.TypeValue)
 			if err != nil {
 				return nil, err
 			}
