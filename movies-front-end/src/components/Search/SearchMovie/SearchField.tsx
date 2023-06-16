@@ -165,6 +165,16 @@ export function SearchField({
                 handleStringField={handleStringField}
             />
 
+            <SearchRange
+                label="Price"
+                field="price"
+                defType="number"
+                min={0}
+                max={500}
+                step={1}
+                handleRangeField={handleRangeField}
+            />
+
             <SearchString
                 label="Description"
                 field="description"

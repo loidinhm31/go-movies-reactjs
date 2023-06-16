@@ -51,7 +51,7 @@ const headCells: readonly HeadCell[] = [
         id: "price",
         numeric: true,
         disablePadding: true,
-        label: "Price (USD)",
+        label: "Price/ Average Price (USD)",
     },
     {
         id: "release_date",
@@ -207,7 +207,7 @@ export default function SearchTable({
                                                     {row.type_code}
                                                 </TableCell>
                                                 <TableCell align="right">
-                                                    {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : ""}`}
+                                                    {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : (row.price ? row.price : "UNAVAILABLE")}`}
                                                 </TableCell>
                                                 <TableCell>
                                                     {format(new Date(row.release_date!), "yyyy-MM-dd")}

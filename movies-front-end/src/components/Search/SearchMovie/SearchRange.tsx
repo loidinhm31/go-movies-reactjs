@@ -24,8 +24,8 @@ interface SearchRangeProps {
 function valueLabelFormat(value: number) {
     let scaledValue = value;
 
-    if (scaledValue > 1000) {
-        return "1000+";
+    if (scaledValue > 500) {
+        return "500+";
     }
     return value;
 }
@@ -47,7 +47,7 @@ export function SearchRange({label, field, defType, min, max, step, handleRangeF
             <AccordionSummary
                 expandIcon={<ExpandMoreIcon/>}
             >
-                <Typography>Runtime</Typography>
+                <Typography>{label}</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <Stack spacing={2} direction="row">
