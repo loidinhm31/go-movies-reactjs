@@ -158,6 +158,16 @@ export const authOptions: AuthOptions = {
                                     "Authorization": `Bearer ${account?.access_token}`
                                 }
                             });
+                            const registerUserResponse = await registerRes.json();
+
+                            if (registerRes.ok && registerUserResponse) {
+                                user.id = registerUserResponse.username;
+                                user.name = registerUserResponse.first_name + ' ' + registerUserResponse.last_name;
+                                user.role = registerUserResponse.role.role_name;
+                                user.token = account?.access_token!;
+                                return true;
+                            }
+                            return true;
                         }
                     }
                 }
