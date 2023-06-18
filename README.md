@@ -1,26 +1,28 @@
 # PURPOSE
 
 1. User registration using Keycloak.
-2. Visit and watch movies
-3. Search information about movies
-4. Advanced Search for movies
-5. Manage users
-6. Manage catalogue
-7. Dashboard with Charts
+2. Visit and watch movies.
+3. Search information about movies.
+4. Advanced Search for movies.
+5. Manage users.
+6. Manage catalogue.
+7. Dashboard with Charts.
 8. Integration with [Cloudinary](https://cloudinary.com/)
    and [TMDB](https://developer.themoviedb.org/reference/intro/getting-started)
+10. Integration with [Stripe](https://stripe.com/docs) for payment.
+11. Send email with [MailHog](https://github.com/mailhog/MailHog) as host to catch outgoing SMTP delivery
 
 ## Futuristic features
-1. Payment
-2. Email
-3. Media Management
-4. Different OAuth providers
+1. Media Management
+2. Different OAuth providers
+3. Cronjob
 
 # STRUCTURE
 1. `Postgresql` port `5432`
 2. `Keycloak Admin Console`: port `8086`
-3. `API`: port `9090`
-4. `Website`: port `3000`
+3. `MailHog`: SMTP port `8003`, UI port `8100`
+4. `API`: port `9090`
+5. `Website`: port `3000`
 
 ## ShiftFlix API
 
@@ -30,7 +32,8 @@ This API build using
 
 1. [Gin](https://gin-gonic.com/): A web framework written in Golang.
 2. [GORM](https://gorm.io/): The fantastic ORM library for Golang.
-3. [Gocloak](https://github.com/Nerzal/gocloak/): golang keycloak client.
+3. [Gocloak](https://github.com/Nerzal/gocloak/): Golang keycloak client.
+4. [Go Simple Mail][https://github.com/xhit/go-simple-mail]: The best way to send emails in Go with SMTP Keep Alive and Timeout for Connect and Send.
 
 ### Database
 
