@@ -5,17 +5,14 @@ const handler = async (req, res) => {
     const requestOptions = {
         method: "GET",
         headers: headers,
-    }
+    };
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/ratings`,
-            requestOptions
-        );
+        const response = await fetch(`${process.env.API_BASE_URL}/ratings`, requestOptions);
         res.status(response.status).json(await response.json());
     } catch (error) {
-        res.status(500).json({message: "server error"});
+        res.status(500).json({ message: "server error" });
     }
-
 };
 
 export default handler;

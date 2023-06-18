@@ -1,5 +1,5 @@
-import {withAnyRole} from "src/libs/auth";
-import {MovieType} from "src/types/movies";
+import { withAnyRole } from "src/libs/auth";
+import { MovieType } from "src/types/movies";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     const data: MovieType = req.body;
@@ -11,15 +11,18 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     const requestOptions = {
         method: "POST",
         headers: headers,
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
     };
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/auth/analysis/movies/genres/release-date`, requestOptions);
+        const response = await fetch(
+            `${process.env.API_BASE_URL}/auth/analysis/movies/genres/release-date`,
+            requestOptions
+        );
         res.status(response.status).json(await response.json());
     } catch (error) {
-        res.status(500).json({message: "server error"});
+        res.status(500).json({ message: "server error" });
     }
 });
 
-export default handler
+export default handler;

@@ -1,19 +1,19 @@
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import {Accordion, AccordionDetails, AccordionSummary, Grid, IconButton, Paper, Typography} from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Grid, IconButton, Paper, Typography } from "@mui/material";
 import DialogTitle from "@mui/material/DialogTitle";
-import React, {useEffect, useState} from "react";
-import {MovieType} from "src/types/movies";
-import {get} from "src/libs/api";
-import {SeasonType} from "src/types/seasons";
+import React, { useEffect, useState } from "react";
+import { MovieType } from "src/types/movies";
+import { get } from "src/libs/api";
+import { SeasonType } from "src/types/seasons";
 import format from "date-fns/format";
 import AddIcon from "@mui/icons-material/Add";
 import useSWRMutation from "swr/mutation";
-import {NotifyState} from "src/components/shared/snackbar";
+import { NotifyState } from "src/components/shared/snackbar";
 import EditIcon from "@mui/icons-material/Edit";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {EpisodesTable} from "src/components/Tables/EpisodesTable";
+import { EpisodesTable } from "src/components/Tables/EpisodesTable";
 
 interface SeasonDialogProps {
     setNotifyState: (state: NotifyState) => void;
@@ -24,16 +24,15 @@ interface SeasonDialogProps {
 }
 
 export default function SeasonDialog({
-                                         setNotifyState,
-                                         selectedMovie,
-                                         setSelectedMovie,
-                                         open,
-                                         setOpen
-                                     }: SeasonDialogProps) {
-
+    setNotifyState,
+    selectedMovie,
+    setSelectedMovie,
+    open,
+    setOpen,
+}: SeasonDialogProps) {
     const [seasons, setSeasons] = useState<SeasonType[]>([]);
 
-    const {trigger: fetchSeasons} = useSWRMutation<SeasonType[]>(`/api/v1/seasons?movieId=${selectedMovie?.id}`, get)
+    const { trigger: fetchSeasons } = useSWRMutation<SeasonType[]>(`/api/v1/seasons?movieId=${selectedMovie?.id}`, get);
 
     useEffect(() => {
         if (open) {
@@ -42,17 +41,19 @@ export default function SeasonDialog({
                 return;
             }
 
-            fetchSeasons().then((result) => {
-                setSeasons(result!);
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
+            fetchSeasons()
+                .then((result) => {
+                    setSeasons(result!);
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
+                    });
                 });
-            })
         }
     }, [open]);
 
@@ -63,71 +64,68 @@ export default function SeasonDialog({
 
     return (
         <>
-            <Dialog
-                fullWidth={true}
-                maxWidth={"lg"}
-                open={open}
-                onClose={handleClose}
-            >
+            <Dialog fullWidth={true} maxWidth={"lg"} open={open} onClose={handleClose}>
                 <DialogTitle>
-                    <Typography variant="subtitle1"><b>{`TV Series - ${selectedMovie?.title}`}</b></Typography>
+                    <Typography variant="subtitle1">
+                        <b>{`TV Series - ${selectedMovie?.title}`}</b>
+                    </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    <Paper elevation={5} sx={{p: 1}}>
+                    <Paper elevation={5} sx={{ p: 1 }}>
                         <Button
-                            sx={{m: 2, p: 2}}
+                            sx={{ m: 2, p: 2 }}
                             variant="contained"
                             href={`/admin/manage-catalogue/movies/seasons?movieId=${selectedMovie?.id}`}
                         >
-                            Add Season <AddIcon/>
+                            Add Season <AddIcon />
                         </Button>
 
-                        {seasons && seasons.map((s, index) => (
-                            <Paper
-                                key={`${s.id}-${index}`}
-                                elevation={3}
-                                sx={{
-                                    m: 2,
-                                    p: 2,
-                                    flexGrow: 1,
-                                }}
-                            >
-                                <Grid container spacing={2}>
-                                    <Grid item xs={2}>
-                                        <IconButton
-                                            color="inherit"
-                                            href={`/admin/manage-catalogue/movies/seasons?id=${s.id}?movieId=${s.movie_id}`}
-                                        >
-                                            <EditIcon/>
-                                        </IconButton>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography variant="subtitle1"><b>{s.name}</b></Typography>
-                                    </Grid>
-                                    <Grid item xs={4}>
-                                        <Typography
-                                            variant="subtitle2">{format(new Date(s.air_date!), "MMMM do, yyyy")}</Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Typography variant="body1">{s.description}</Typography>
-                                    </Grid>
-                                    <Grid item xs={12}>
-                                        <Accordion TransitionProps={{unmountOnExit: true}}>
-                                            <AccordionSummary
-                                                expandIcon={<ExpandMoreIcon/>}
+                        {seasons &&
+                            seasons.map((s, index) => (
+                                <Paper
+                                    key={`${s.id}-${index}`}
+                                    elevation={3}
+                                    sx={{
+                                        m: 2,
+                                        p: 2,
+                                        flexGrow: 1,
+                                    }}
+                                >
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={2}>
+                                            <IconButton
+                                                color="inherit"
+                                                href={`/admin/manage-catalogue/movies/seasons?id=${s.id}?movieId=${s.movie_id}`}
                                             >
-                                                <Typography variant="caption">Episodes</Typography>
-                                            </AccordionSummary>
-                                            <AccordionDetails>
-                                                <EpisodesTable
-                                                    season={s}
-                                                />
-                                            </AccordionDetails>
-                                        </Accordion>
+                                                <EditIcon />
+                                            </IconButton>
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <Typography variant="subtitle1">
+                                                <b>{s.name}</b>
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <Typography variant="subtitle2">
+                                                {format(new Date(s.air_date!), "MMMM do, yyyy")}
+                                            </Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Typography variant="body1">{s.description}</Typography>
+                                        </Grid>
+                                        <Grid item xs={12}>
+                                            <Accordion TransitionProps={{ unmountOnExit: true }}>
+                                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                                    <Typography variant="caption">Episodes</Typography>
+                                                </AccordionSummary>
+                                                <AccordionDetails>
+                                                    <EpisodesTable season={s} />
+                                                </AccordionDetails>
+                                            </Accordion>
+                                        </Grid>
                                     </Grid>
-                                </Grid>
-                            </Paper>
-                        ))}
+                                </Paper>
+                            ))}
                     </Paper>
                 </DialogContent>
             </Dialog>

@@ -1,19 +1,19 @@
-import {Box, TextField} from "@mui/material";
+import { Box, TextField } from "@mui/material";
 
 interface SearchKeyProps {
     keyword: string;
     setKeyword: (word: string) => void;
 }
 
-export default function SearchKey({keyword, setKeyword}: SearchKeyProps) {
+export default function SearchKey({ keyword, setKeyword }: SearchKeyProps) {
     return (
-        <Box sx={{my: 3}}>
+        <Box sx={{ my: 3 }}>
             <TextField
                 fullWidth
                 label="Keyword"
                 variant="outlined"
                 value={keyword}
-                onChange={e => setKeyword(e.target.value)}
+                onChange={(e) => setKeyword(e.target.value)}
             />
         </Box>
     );

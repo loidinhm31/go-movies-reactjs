@@ -1,4 +1,4 @@
-import {Line} from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import {
     CategoryScale,
     Chart as ChartJS,
@@ -10,26 +10,18 @@ import {
     Tooltip,
 } from "chart.js";
 import useSWRMutation from "swr/mutation";
-import {get, post} from "src/libs/api";
-import {GenreType} from "src/types/movies";
-import {Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
-import {useEffect, useState} from "react";
-import {Analysis, AnalysisRequest, Result} from "src/types/dashboard";
-import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
+import { get, post } from "src/libs/api";
+import { GenreType } from "src/types/movies";
+import { Box, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Analysis, AnalysisRequest, Result } from "src/types/dashboard";
+import NotifySnackbar, { NotifyState } from "src/components/shared/snackbar";
 import Skeleton from "@mui/material/Skeleton";
-import {format, subMonths} from "date-fns";
-import {useMovieType} from "src/hooks/useMovieType";
+import { format, subMonths } from "date-fns";
+import { useMovieType } from "src/hooks/useMovieType";
 
-export default function LineChart({movieType}) {
-    ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Tooltip,
-        Legend
-    );
+export default function LineChart({ movieType }) {
+    ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
     const selectedType = useMovieType(movieType);
 
@@ -37,7 +29,7 @@ export default function LineChart({movieType}) {
 
     const [selectedGenre, setSelectedGenre] = useState<string>("");
 
-    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
+    const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
     const [dataChart, setDataChart] = useState<any>(null);
 
@@ -56,12 +48,12 @@ export default function LineChart({movieType}) {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, get);
-    const {trigger: triggerViews, error: viewErr} = useSWRMutation(`/api/v1/admin/dashboard/views/genres`, post);
-    const {
-        trigger: triggerMovies,
-        error: movieErr
-    } = useSWRMutation(`/api/v1/admin/dashboard/movies/genres/release-date`, post);
+    const { trigger: fetchGenres } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, get);
+    const { trigger: triggerViews, error: viewErr } = useSWRMutation(`/api/v1/admin/dashboard/views/genres`, post);
+    const { trigger: triggerMovies, error: movieErr } = useSWRMutation(
+        `/api/v1/admin/dashboard/movies/genres/release-date`,
+        post
+    );
 
     useEffect(() => {
         // Reset value
@@ -71,17 +63,19 @@ export default function LineChart({movieType}) {
         if (selectedType === "") {
             setGenreOptions([]);
         } else {
-            fetchGenres().then((data: GenreType[]) => {
-                setGenreOptions(data);
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
+            fetchGenres()
+                .then((data: GenreType[]) => {
+                    setGenreOptions(data);
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
+                    });
                 });
-            });
         }
     }, [selectedType]);
 
@@ -89,7 +83,7 @@ export default function LineChart({movieType}) {
         if (genreOptions.length > 0) {
             setUpChart();
         }
-    }, [selectedGenre])
+    }, [selectedGenre]);
 
     const handleSelectedGenre = (event: SelectChangeEvent) => {
         setSelectedGenre(event.target.value as string);
@@ -100,7 +94,7 @@ export default function LineChart({movieType}) {
         setUpChart();
 
         setIsLoading(false);
-    }
+    };
 
     const setUpChart = () => {
         const labels: string[] = [];
@@ -133,7 +127,7 @@ export default function LineChart({movieType}) {
             if (!timeMap.get(splitTime[0])) {
                 timeMap.set(splitTime[0], []);
             }
-            timeMap.get(splitTime[0])?.push(splitTime[1])
+            timeMap.get(splitTime[0])?.push(splitTime[1]);
         });
 
         const analysis: Analysis[] = [];
@@ -141,7 +135,7 @@ export default function LineChart({movieType}) {
             analysis.push({
                 year: key,
                 months: value,
-            })
+            });
         });
 
         const currGenre = genreOptions.find((g) => g.id === parseInt(selectedGenre));
@@ -154,7 +148,7 @@ export default function LineChart({movieType}) {
         triggerMovies(request)
             .then((result: Result) => {
                 timeArr.forEach((t, index) => {
-                    const d = result.data?.find(a => t === (a.year + "-" + a.month));
+                    const d = result.data?.find((a) => t === a.year + "-" + a.month);
                     if (d) {
                         moviesData.push(d.cumulative!);
                     } else {
@@ -169,7 +163,7 @@ export default function LineChart({movieType}) {
                             }
                         }
                     }
-                })
+                });
             })
             .catch((error) => {
                 setNotifyState({
@@ -177,7 +171,7 @@ export default function LineChart({movieType}) {
                     message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "error"
+                    severity: "error",
                 });
             });
 
@@ -186,7 +180,7 @@ export default function LineChart({movieType}) {
             .then((result: Result) => {
                 if (result.data !== null) {
                     timeArr.forEach((t, index) => {
-                        const d = result.data?.find(a => t === (a.year + "-" + a.month));
+                        const d = result.data?.find((a) => t === a.year + "-" + a.month);
                         if (d) {
                             viewersData.push(d.count);
                             cumulativeViewersData.push(d.cumulative!);
@@ -203,12 +197,12 @@ export default function LineChart({movieType}) {
                                 }
                             }
                         }
-                    })
+                    });
                 } else {
                     timeArr.forEach((t) => {
                         viewersData.push(0);
                         cumulativeViewersData.push(0);
-                    })
+                    });
                 }
             })
             .catch((error) => {
@@ -217,7 +211,7 @@ export default function LineChart({movieType}) {
                     message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "error"
+                    severity: "error",
                 });
             });
 
@@ -227,32 +221,32 @@ export default function LineChart({movieType}) {
                 {
                     label: "Cumulative Movies in Release Date",
                     data: moviesData,
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    backgroundColor: "rgba(53, 162, 235, 0.5)",
                 },
                 {
                     label: "Viewers",
                     data: viewersData,
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    backgroundColor: "rgba(255, 99, 132, 0.5)",
                 },
                 {
                     label: "Cumulative Viewers",
                     data: cumulativeViewersData,
-                    backgroundColor: 'rgba(105, 250, 132, 0.5)',
+                    backgroundColor: "rgba(105, 250, 132, 0.5)",
                 },
             ],
         });
-    }
+    };
 
     return (
         <>
-            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <NotifySnackbar state={notifyState} setState={setNotifyState} />
 
-            <Box sx={{m: 1, p: 1}}>
+            <Box sx={{ m: 1, p: 1 }}>
                 <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">Select Genre</InputLabel>
                     <Select
                         variant="outlined"
-                        sx={{minWidth: 100}}
+                        sx={{ minWidth: 100 }}
                         label="Select Genre"
                         value={selectedGenre}
                         onChange={handleSelectedGenre}
@@ -260,31 +254,20 @@ export default function LineChart({movieType}) {
                         {genreOptions &&
                             genreOptions.map((g, index) => {
                                 return (
-                                    <MenuItem
-                                        key={`${g.id}-${index}`}
-                                        value={g.id}
-                                    >
+                                    <MenuItem key={`${g.id}-${index}`} value={g.id}>
                                         {g.name} - {g.type_code}
                                     </MenuItem>
                                 );
-                            })
-                        }
+                            })}
                     </Select>
 
-                    {isLoading &&
-                        <CircularProgress/>
-                    }
+                    {isLoading && <CircularProgress />}
 
-                    {(viewErr || movieErr) &&
-                        <Skeleton variant="rectangular" width={100} height={50}/>
-                    }
+                    {(viewErr || movieErr) && <Skeleton variant="rectangular" width={100} height={50} />}
 
-                    {dataChart !== null && !isLoading &&
-                        <Line options={options} data={dataChart}/>
-                    }
+                    {dataChart !== null && !isLoading && <Line options={options} data={dataChart} />}
                 </FormControl>
             </Box>
         </>
-
     );
 }

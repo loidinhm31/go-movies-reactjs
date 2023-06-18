@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     Box,
     Paper,
@@ -10,14 +10,14 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TableSortLabel
+    TableSortLabel,
 } from "@mui/material";
-import {visuallyHidden} from "@mui/utils";
-import {CustomPaymentType} from "src/types/movies";
-import {Direction, PageType} from "src/types/page";
-import {format} from "date-fns";
+import { visuallyHidden } from "@mui/utils";
+import { CustomPaymentType } from "src/types/movies";
+import { Direction, PageType } from "src/types/page";
+import { format } from "date-fns";
 import useSWRMutation from "swr/mutation";
-import {post} from "src/libs/api";
+import { post } from "src/libs/api";
 import SearchKey from "src/components/Search/SearchKey";
 
 interface PaymentData {
@@ -104,11 +104,10 @@ interface PaymentTableHeadProps {
 }
 
 function PaymentTableHead(props: PaymentTableHeadProps) {
-    const {order, orderBy, onRequestSort} = props;
-    const createSortHandler =
-        (newOrderBy: keyof PaymentData) => (event: React.MouseEvent<unknown>) => {
-            onRequestSort(event, newOrderBy);
-        };
+    const { order, orderBy, onRequestSort } = props;
+    const createSortHandler = (newOrderBy: keyof PaymentData) => (event: React.MouseEvent<unknown>) => {
+        onRequestSort(event, newOrderBy);
+    };
 
     return (
         <TableHead>
@@ -134,9 +133,7 @@ function PaymentTableHead(props: PaymentTableHeadProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
-                <TableCell
-                    aria-label="last"
-                    style={{width: "var(--Table-lastColumnWidth)"}}/>
+                <TableCell aria-label="last" style={{ width: "var(--Table-lastColumnWidth)" }} />
             </TableRow>
         </TableHead>
     );
@@ -145,26 +142,27 @@ function PaymentTableHead(props: PaymentTableHeadProps) {
 export default function PaymentsTable() {
     const [page, setPage] = useState<PageType<CustomPaymentType> | null>(null);
 
-
     const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(5)
+    const [pageSize, setPageSize] = useState(5);
     const [order, setOrder] = useState<Direction>(Direction.ASC);
     const [orderBy, setOrderBy] = useState<keyof PaymentData>("created_at");
 
     const [searchKey, setSearchKey] = useState<string>("");
 
     // Get Tables
-    const {trigger: requestPage} =
-        useSWRMutation(`/api/v1/payments?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
+    const { trigger: requestPage } = useSWRMutation(
+        `/api/v1/payments?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`,
+        post
+    );
 
     useEffect(() => {
         handeRequestPage();
-    }, [pageIndex, pageSize, order, orderBy, searchKey])
+    }, [pageIndex, pageSize, order, orderBy, searchKey]);
 
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {
         setPageIndex(0);
-    }, [pageSize, searchKey])
+    }, [pageSize, searchKey]);
 
     const handeRequestPage = () => {
         requestPage({
@@ -172,16 +170,18 @@ export default function PaymentsTable() {
                 orders: [
                     {
                         property: orderBy,
-                        direction: order
-                    }
-                ]
-            }
-        }).then((data) => {
-            setPage(data);
-        }).catch((error) => {
-            console.log(error)
-        });
-    }
+                        direction: order,
+                    },
+                ],
+            },
+        })
+            .then((data) => {
+                setPage(data);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof PaymentData) => {
@@ -190,14 +190,14 @@ export default function PaymentsTable() {
             setOrder?.(toggledOrder);
             setOrderBy?.(newOrderBy);
         },
-        [order, orderBy, pageIndex, pageSize],
+        [order, orderBy, pageIndex, pageSize]
     );
 
     const handleChangePageIndex = useCallback(
         (event: unknown, newPageIndex: number) => {
             setPageIndex(newPageIndex);
         },
-        [order, orderBy, pageSize],
+        [order, orderBy, pageSize]
     );
 
     const handleChangeRowsPerPage = useCallback(
@@ -206,76 +206,50 @@ export default function PaymentsTable() {
             setPageSize(updatedRowsPerPage);
             setPageIndex(0);
         },
-        [order, orderBy],
+        [order, orderBy]
     );
 
     return (
         <>
-            {!page &&
+            {!page && (
                 <>
-                    <Skeleton/>
-                    <Skeleton animation="wave"/>
-                    <Skeleton animation={false}/>
+                    <Skeleton />
+                    <Skeleton animation="wave" />
+                    <Skeleton animation={false} />
                 </>
-            }
-            <SearchKey
-                keyword={searchKey}
-                setKeyword={setSearchKey}
-            />
-            {page && page.content &&
-                <Box sx={{width: "100%"}}>
-                    <Paper sx={{width: "100%", mb: 2}}>
+            )}
+            <SearchKey keyword={searchKey} setKeyword={setSearchKey} />
+            {page && page.content && (
+                <Box sx={{ width: "100%" }}>
+                    <Paper sx={{ width: "100%", mb: 2 }}>
                         <TableContainer>
-                            <Table
-                                sx={{minWidth: 750}}
-                                aria-labelledby="tableTitle"
-                            >
-                                <PaymentTableHead
-                                    order={order!}
-                                    orderBy={orderBy!}
-                                    onRequestSort={handleRequestSort}
-                                />
+                            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+                                <PaymentTableHead order={order!} orderBy={orderBy!} onRequestSort={handleRequestSort} />
                                 <TableBody>
                                     {page
                                         ? page.content?.map((row, index) => {
-                                            return (
-                                                <TableRow
-                                                    hover
-                                                    role="checkbox"
-                                                    tabIndex={-1}
-                                                    key={row.id}
-                                                    sx={{cursor: "pointer"}}
-                                                >
-                                                    <TableCell>
-                                                        {row.type_code}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.movie_title}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.season_name}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.episode_name}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {row.amount}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.currency.toUpperCase()}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.payment_method}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.status}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {format(new Date(row.created_at!), "yyyy-MM-dd")}
-                                                    </TableCell>
-                                                </TableRow>
-                                            );
-                                        })
+                                              return (
+                                                  <TableRow
+                                                      hover
+                                                      role="checkbox"
+                                                      tabIndex={-1}
+                                                      key={row.id}
+                                                      sx={{ cursor: "pointer" }}
+                                                  >
+                                                      <TableCell>{row.type_code}</TableCell>
+                                                      <TableCell>{row.movie_title}</TableCell>
+                                                      <TableCell>{row.season_name}</TableCell>
+                                                      <TableCell>{row.episode_name}</TableCell>
+                                                      <TableCell align="right">{row.amount}</TableCell>
+                                                      <TableCell>{row.currency.toUpperCase()}</TableCell>
+                                                      <TableCell>{row.payment_method}</TableCell>
+                                                      <TableCell>{row.status}</TableCell>
+                                                      <TableCell>
+                                                          {format(new Date(row.created_at!), "yyyy-MM-dd")}
+                                                      </TableCell>
+                                                  </TableRow>
+                                              );
+                                          })
                                         : null}
                                 </TableBody>
                             </Table>
@@ -291,9 +265,7 @@ export default function PaymentsTable() {
                         />
                     </Paper>
                 </Box>
-            }
-            
+            )}
         </>
-
     );
 }

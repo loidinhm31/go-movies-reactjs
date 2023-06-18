@@ -7,18 +7,18 @@ import {
     ListItem,
     ListItemButton,
     ListItemIcon,
-    ListItemText
+    ListItemText,
 } from "@mui/material";
 import Link from "next/link";
-import {NextRouter, useRouter} from "next/router";
-import {useTheme} from "@mui/material/styles";
-import React, {ElementType, useState} from "react";
+import { NextRouter, useRouter } from "next/router";
+import { useTheme } from "@mui/material/styles";
+import React, { ElementType, useState } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import MenuIcon from "@mui/icons-material/Menu";
-import {blue} from "@mui/material/colors";
-import {Drawer, DrawerHeader} from "src/components/shared/drawer";
-import {useHasAnyRole} from "src/hooks/auth/useHasAnyRole";
+import { blue } from "@mui/material/colors";
+import { Drawer, DrawerHeader } from "src/components/shared/drawer";
+import { useHasAnyRole } from "src/hooks/auth/useHasAnyRole";
 
 function MiniDrawer(props: SideMenuLayoutProps) {
     const isPrivilege = useHasAnyRole(["admin", "moderator"]);
@@ -37,39 +37,49 @@ function MiniDrawer(props: SideMenuLayoutProps) {
     return (
         <Box component="div">
             <Drawer variant="permanent" open={open}>
-                <DrawerHeader/>
+                <DrawerHeader />
                 <DrawerHeader>
                     <IconButton onClick={handleDrawerClose}>
-                        {theme.direction === "rtl" ? <ChevronRightIcon/> : <ChevronLeftIcon/>}
+                        {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
                     </IconButton>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         onClick={handleDrawerOpen}
                         sx={{
-                            ...(open && {display: "none"}),
+                            ...(open && { display: "none" }),
                         }}
                     >
-                        <MenuIcon/>
+                        <MenuIcon />
                     </IconButton>
                 </DrawerHeader>
-                <Divider/>
+                <Divider />
                 <List>
                     {props.menuButtonOptions.map((item, itemIndex) => (
-                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item}
-                                      itemIndex={itemIndex}/>
+                        <SideMenuItem
+                            key={`${item.label}-${itemIndex}`}
+                            open={open}
+                            router={router}
+                            item={item}
+                            itemIndex={itemIndex}
+                        />
                     ))}
                 </List>
-                <Divider/>
+                <Divider />
                 <List>
-                    {isPrivilege && props.adminMenuButtonOptions!.map((item, itemIndex) => (
-                        <SideMenuItem key={`${item.label}-${itemIndex}`} open={open} router={router} item={item}
-                                      itemIndex={itemIndex}/>
-                    ))}
+                    {isPrivilege &&
+                        props.adminMenuButtonOptions!.map((item, itemIndex) => (
+                            <SideMenuItem
+                                key={`${item.label}-${itemIndex}`}
+                                open={open}
+                                router={router}
+                                item={item}
+                                itemIndex={itemIndex}
+                            />
+                        ))}
                 </List>
             </Drawer>
         </Box>
-
     );
 }
 
@@ -93,18 +103,16 @@ interface SideMenuItemProps {
     itemIndex: number;
 }
 
-function SideMenuItem({open, router, item}: SideMenuItemProps) {
+function SideMenuItem({ open, router, item }: SideMenuItemProps) {
     return (
-        <Link href={item.pathname} style={{textDecoration: "none", color: "black"}}>
-            <ListItem disablePadding sx={{display: "block"}}>
+        <Link href={item.pathname} style={{ textDecoration: "none", color: "black" }}>
+            <ListItem disablePadding sx={{ display: "block" }}>
                 <ListItemButton
                     sx={{
                         minHeight: 48,
                         justifyContent: open ? "initial" : "center",
                         px: 2.5,
-                        ...(router.pathname === item.pathname
-                            && {backgroundColor: blue[500]}),
-
+                        ...(router.pathname === item.pathname && { backgroundColor: blue[500] }),
                     }}
                 >
                     <ListItemIcon
@@ -112,40 +120,37 @@ function SideMenuItem({open, router, item}: SideMenuItemProps) {
                             minWidth: 0,
                             mr: open ? 3 : "auto",
                             justifyContent: "center",
-                            ...(router.pathname === item.pathname
-                                && {color: "white"}),
+                            ...(router.pathname === item.pathname && { color: "white" }),
                         }}
                     >
-                        <item.icon/>
+                        <item.icon />
                     </ListItemIcon>
-                    <ListItemText primary={item.label} sx={{
-                        opacity: open ? 1 : 0,
-                        ...(router.pathname === item.pathname
-                            && {color: "white"})
-                    }}/>
+                    <ListItemText
+                        primary={item.label}
+                        sx={{
+                            opacity: open ? 1 : 0,
+                            ...(router.pathname === item.pathname && { color: "white" }),
+                        }}
+                    />
                 </ListItemButton>
-
             </ListItem>
         </Link>
     );
 }
 
 export function SideMenuLayout(props: SideMenuLayoutProps) {
-
     return (
-        <Box sx={{display: "flex", width: 1}}>
-            <CssBaseline/>
+        <Box sx={{ display: "flex", width: 1 }}>
+            <CssBaseline />
             <MiniDrawer
                 menuButtonOptions={props.menuButtonOptions}
-                adminMenuButtonOptions={props.adminMenuButtonOptions}/>
+                adminMenuButtonOptions={props.adminMenuButtonOptions}
+            />
 
-            <Box component="main" sx={{flexGrow: 1, p: 2, width: "1000px"}}>
-                <DrawerHeader/>
-                <Box>
-                    {props.children}
-                </Box>
+            <Box component="main" sx={{ flexGrow: 1, p: 2, width: "1000px" }}>
+                <DrawerHeader />
+                <Box>{props.children}</Box>
             </Box>
         </Box>
-
     );
 }

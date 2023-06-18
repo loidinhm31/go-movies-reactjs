@@ -9,36 +9,27 @@ import {
     Title,
     Tooltip,
 } from "chart.js";
-import {Line} from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 import useSWRMutation from "swr/mutation";
-import {post} from "src/libs/api";
-import {useEffect, useState} from "react";
-import {Analysis, AnalysisRequest, Result} from "src/types/dashboard";
-import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-import {CircularProgress} from "@mui/material";
+import { post } from "src/libs/api";
+import { useEffect, useState } from "react";
+import { Analysis, AnalysisRequest, Result } from "src/types/dashboard";
+import NotifySnackbar, { NotifyState } from "src/components/shared/snackbar";
+import { CircularProgress } from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
-import {format, subMonths} from "date-fns";
-import {useMovieType} from "src/hooks/useMovieType";
+import { format, subMonths } from "date-fns";
+import { useMovieType } from "src/hooks/useMovieType";
 
-export default function AreaChart({movieType}) {
-    ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Tooltip,
-        Filler,
-        Legend
-    );
+export default function AreaChart({ movieType }) {
+    ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend);
 
     const selectedType = useMovieType(movieType);
 
     const [dataChart, setDataChart] = useState<any>(null);
 
-    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
+    const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
-    const {trigger, error} = useSWRMutation("/api/v1/admin/dashboard/views", post);
+    const { trigger, error } = useSWRMutation("/api/v1/admin/dashboard/views", post);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -64,14 +55,14 @@ export default function AreaChart({movieType}) {
 
         let currMoment: Date = new Date();
         let t1 = format(currMoment, "yyyy-M");
-        let t2 = format(currMoment,"MMM-yyyy");
+        let t2 = format(currMoment, "MMM-yyyy");
         timeArr.push(t1);
         labels.push(t2);
 
         for (let i = 0; i < 11; i++) {
             currMoment = subMonths(currMoment, 1);
             t1 = format(currMoment, "yyyy-M");
-            t2 = format(currMoment,"MMM-yyyy");
+            t2 = format(currMoment, "MMM-yyyy");
             timeArr.push(t1);
             labels.push(t2);
         }
@@ -84,7 +75,7 @@ export default function AreaChart({movieType}) {
             if (!timeMap.get(splitTime[0])) {
                 timeMap.set(splitTime[0], []);
             }
-            timeMap.get(splitTime[0])?.push(splitTime[1])
+            timeMap.get(splitTime[0])?.push(splitTime[1]);
         });
 
         const analysis: Analysis[] = [];
@@ -92,26 +83,26 @@ export default function AreaChart({movieType}) {
             analysis.push({
                 year: key,
                 months: value,
-            })
+            });
         });
 
         const request: AnalysisRequest = {
             analysis: analysis,
             type_code: selectedType,
-        }
+        };
 
         trigger(request)
             .then((result: Result) => {
                 const numbers: number[] = [];
 
                 timeArr.forEach((t) => {
-                    const d = result.data.find(a => t === (a.year + "-" + a.month));
+                    const d = result.data.find((a) => t === a.year + "-" + a.month);
                     if (d) {
                         numbers.push(d.count);
                     } else {
                         numbers.push(0);
                     }
-                })
+                });
 
                 setDataChart({
                     labels: labels,
@@ -124,7 +115,7 @@ export default function AreaChart({movieType}) {
                             backgroundColor: "rgba(53, 162, 235, 0.5)",
                         },
                     ],
-                })
+                });
             })
             .catch((error) => {
                 setNotifyState({
@@ -132,29 +123,23 @@ export default function AreaChart({movieType}) {
                     message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "error"
+                    severity: "error",
                 });
             })
             .finally(() => {
                 setIsLoading(false);
-            })
-    }, [selectedType])
+            });
+    }, [selectedType]);
 
     return (
         <>
-            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <NotifySnackbar state={notifyState} setState={setNotifyState} />
 
-            {isLoading &&
-                <CircularProgress />
-            }
+            {isLoading && <CircularProgress />}
 
-            {error &&
-                <Skeleton variant="rectangular" width={100} height={50}/>
-            }
+            {error && <Skeleton variant="rectangular" width={100} height={50} />}
 
-            {dataChart !== null &&
-                <Line options={options} data={dataChart}/>
-            }
+            {dataChart !== null && <Line options={options} data={dataChart} />}
         </>
     );
 }

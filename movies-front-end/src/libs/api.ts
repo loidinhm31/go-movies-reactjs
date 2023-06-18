@@ -1,5 +1,5 @@
 import axios from "axios";
-import {ClientError} from "src/libs/api_client";
+import { ClientError } from "src/libs/api_client";
 
 const headers = {
     "Content-Type": "application/json",
@@ -9,7 +9,7 @@ const formApi = axios.create();
 
 export const postForm = (url: string, data?: { arg: any }) => formApi.post(url, data?.arg).then((res) => res.data);
 
-const api = axios.create({headers});
+const api = axios.create({ headers });
 
 export const get = (url: string) => api.get(url).then((res) => res.data);
 

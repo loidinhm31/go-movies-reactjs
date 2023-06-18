@@ -1,20 +1,20 @@
 import useSWRMutation from "swr/mutation";
-import {get, put, del} from "src/libs/api";
+import { get, put, del } from "src/libs/api";
 import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
-import {Box, Button, Stack, Typography} from "@mui/material";
-import {CollectionType, MovieType, PaymentType} from "src/types/movies";
-import {useHasUsername} from "src/hooks/auth/useHasUsername";
-import {useEffect, useState} from "react";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { CollectionType, MovieType, PaymentType } from "src/types/movies";
+import { useHasUsername } from "src/hooks/auth/useHasUsername";
+import { useEffect, useState } from "react";
 import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck";
-import {useRouter} from "next/router";
-import {EpisodeType} from "src/types/seasons";
+import { useRouter } from "next/router";
+import { EpisodeType } from "src/types/seasons";
 
 interface CollectionProps {
     movie: MovieType;
     episode?: EpisodeType;
 }
 
-export function BuyCollection({movie, episode}: CollectionProps) {
+export function BuyCollection({ movie, episode }: CollectionProps) {
     const username = useHasUsername();
 
     const router = useRouter();
@@ -24,11 +24,17 @@ export function BuyCollection({movie, episode}: CollectionProps) {
     const [wasCollected, setWasCollected] = useState(false);
     const [wasPaid, setWasPaid] = useState(false);
 
-    const {trigger: addCollection} = useSWRMutation("/api/v1/collections", put);
-    const {trigger: deleteCollection} = useSWRMutation(`/api/v1/collections?type=${movie.type_code}&refId=${refId}`, del);
+    const { trigger: addCollection } = useSWRMutation("/api/v1/collections", put);
+    const { trigger: deleteCollection } = useSWRMutation(
+        `/api/v1/collections?type=${movie.type_code}&refId=${refId}`,
+        del
+    );
 
-    const {trigger: checkBuy} = useSWRMutation(`/api/v1/payments/check?type=${movie.type_code}&refId=${refId}`, get);
-    const {trigger: checkCollect} = useSWRMutation(`/api/v1/collections/check?type=${movie.type_code}&refId=${refId}`, get);
+    const { trigger: checkBuy } = useSWRMutation(`/api/v1/payments/check?type=${movie.type_code}&refId=${refId}`, get);
+    const { trigger: checkCollect } = useSWRMutation(
+        `/api/v1/collections/check?type=${movie.type_code}&refId=${refId}`,
+        get
+    );
 
     useEffect(() => {
         if (movie.type_code === "MOVIE") {
@@ -86,68 +92,54 @@ export function BuyCollection({movie, episode}: CollectionProps) {
                 setWasCollected(true);
             }
         });
-    }
+    };
 
     const handleRemoveCollection = () => {
         deleteCollection().then((result) => {
             if (result.message === "ok") {
                 setWasCollected(false);
             }
-        })
-    }
+        });
+    };
 
     const handleBuy = () => {
         router.push(`/checkout?type=${movie.type_code}&refId=${refId}`);
-    }
+    };
 
     return (
         <>
             {wasPaid && wasCollected ? (
                 <Box>
-                    <Button
-                        variant="contained"
-                        color="success"
-                        onClick={handleRemoveCollection}
-                    >
-                        <LibraryAddCheckIcon sx={{m: 1}}/> Collected
+                    <Button variant="contained" color="success" onClick={handleRemoveCollection}>
+                        <LibraryAddCheckIcon sx={{ m: 1 }} /> Collected
                     </Button>
                 </Box>
-            ) : ((movie.type_code === "MOVIE" && movie.price) || (movie.type_code === "TV" && episode?.price)) && !wasPaid && !wasCollected ?
-                (
-                    <Stack>
-                        <Button color="error">
-                            {movie.type_code === "MOVIE" ? (
-                                <Typography variant="overline">
-                                    Price: <b>{movie.price}</b> USD
-                                </Typography>
-                            ) : (
-                                <Typography variant="overline">
-                                    Price: <b>{episode?.price}</b> USD
-                                </Typography>
-                            )
-                            }
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={handleBuy}
-                        >
-                            <LibraryAddIcon sx={{m: 1}}/> Buy to Watch
-                        </Button>
-                    </Stack>
-
-                ) : (
-                    <Box>
-                        <Button
-                            variant="contained"
-                            color="secondary"
-                            onClick={handleClickAddToCollection}
-                        >
-                            <LibraryAddIcon sx={{m: 1}}/> Add to Collection
-                        </Button>
-                    </Box>
-                )
-            }
+            ) : ((movie.type_code === "MOVIE" && movie.price) || (movie.type_code === "TV" && episode?.price)) &&
+              !wasPaid &&
+              !wasCollected ? (
+                <Stack>
+                    <Button color="error">
+                        {movie.type_code === "MOVIE" ? (
+                            <Typography variant="overline">
+                                Price: <b>{movie.price}</b> USD
+                            </Typography>
+                        ) : (
+                            <Typography variant="overline">
+                                Price: <b>{episode?.price}</b> USD
+                            </Typography>
+                        )}
+                    </Button>
+                    <Button variant="contained" color="secondary" onClick={handleBuy}>
+                        <LibraryAddIcon sx={{ m: 1 }} /> Buy to Watch
+                    </Button>
+                </Stack>
+            ) : (
+                <Box>
+                    <Button variant="contained" color="secondary" onClick={handleClickAddToCollection}>
+                        <LibraryAddIcon sx={{ m: 1 }} /> Add to Collection
+                    </Button>
+                </Box>
+            )}
         </>
     );
 }

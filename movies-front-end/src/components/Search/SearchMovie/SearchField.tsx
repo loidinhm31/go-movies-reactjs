@@ -10,42 +10,42 @@ import {
     MenuItem,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
-import {useState} from "react";
+import { useState } from "react";
 import MovieTypeSelect from "src/components/MovieTypeSelect";
-import {SearchDate} from "src/components/Search/SearchMovie/SearchDate";
-import {SearchGenre} from "src/components/Search/SearchMovie/SearchGenre";
-import {SearchRange} from "src/components/Search/SearchMovie/SearchRange";
-import {SearchString} from "src/components/Search/SearchMovie/SearchString";
-import {get} from "src/libs/api";
-import {RatingType} from "src/types/movies";
-import {FieldData, SearchRequest} from "src/types/search";
+import { SearchDate } from "src/components/Search/SearchMovie/SearchDate";
+import { SearchGenre } from "src/components/Search/SearchMovie/SearchGenre";
+import { SearchRange } from "src/components/Search/SearchMovie/SearchRange";
+import { SearchString } from "src/components/Search/SearchMovie/SearchString";
+import { get } from "src/libs/api";
+import { RatingType } from "src/types/movies";
+import { FieldData, SearchRequest } from "src/types/search";
 import useSWR from "swr";
 
 interface SearchFieldProps {
     setIsClickSearch: (flag: boolean) => void;
     setSearchRequest: (searchRequest: SearchRequest) => void;
-    fieldDataMap: Map<string, FieldData>
+    fieldDataMap: Map<string, FieldData>;
     setFieldDataMap: (value: Map<string, FieldData>) => void;
 }
 
 export function SearchField({
-                                setIsClickSearch,
-                                setSearchRequest,
-                                fieldDataMap: fieldDataMap,
-                                setFieldDataMap: setFieldData
-                            }: SearchFieldProps) {
+    setIsClickSearch,
+    setSearchRequest,
+    fieldDataMap: fieldDataMap,
+    setFieldDataMap: setFieldData,
+}: SearchFieldProps) {
     const optionalType = ["Both"];
 
     const [selectedType, setSelectedType] = useState<string>(optionalType[0]);
 
-    const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
+    const { data: mpaaOptions } = useSWR<RatingType[]>("/api/v1/ratings", get);
 
     const handleStringField = (label: string, values: string | string[], forField: string, defType: string) => {
         let data = fieldDataMap.get(label) as FieldData;
         if (!data) {
-            data = {field: label};
+            data = { field: label };
         }
 
         if (forField === "operator") {
@@ -53,18 +53,18 @@ export function SearchField({
         } else if (forField === "def") {
             data.def = {
                 type: defType,
-                values: values as string[]
+                values: values as string[],
             };
         }
 
         fieldDataMap.set(label, data);
         setFieldData(new Map(fieldDataMap));
-    }
+    };
 
     const handleDateField = (label: string, value: string, forField: string, defType: string, dateType: string) => {
         let data = fieldDataMap.get(label) as FieldData;
         if (!data) {
-            data = {field: label};
+            data = { field: label };
         }
 
         // Reset empty date
@@ -95,20 +95,19 @@ export function SearchField({
 
         fieldDataMap.set(label, data);
         setFieldData(new Map(fieldDataMap));
-    }
+    };
 
     const handleRangeField = (label: string, values: string | number[], forField: string, defType: string) => {
         let data = fieldDataMap.get(label) as FieldData;
         if (!data) {
-            data = {field: label};
+            data = { field: label };
         }
 
         if (forField === "operator") {
             data.operator = values as string;
         } else if (forField === "def") {
-            console.log(values)
-            if ((!data.def?.values) ||
-                (values[0] === 0 && values[1] === 0)) {
+            console.log(values);
+            if (!data.def?.values || (values[0] === 0 && values[1] === 0)) {
                 data.def = {
                     type: defType,
                     values: [],
@@ -120,7 +119,7 @@ export function SearchField({
 
         fieldDataMap.set(label, data);
         setFieldData(new Map(fieldDataMap));
-    }
+    };
 
     const handleSearch = () => {
         let filters: FieldData[] = [];
@@ -129,14 +128,12 @@ export function SearchField({
             operator: "and",
             def: {
                 type: "string",
-                values: [selectedType.toLowerCase() !== "both" ? selectedType : ""]
-            }
+                values: [selectedType.toLowerCase() !== "both" ? selectedType : ""],
+            },
         });
 
         fieldDataMap.forEach((value: FieldData, key) => {
-            if (value.field &&
-                value.operator &&
-                value.def && value.def.type && value.def.values.length > 0) {
+            if (value.field && value.operator && value.def && value.def.type && value.def.values.length > 0) {
                 filters.push(value);
             }
         });
@@ -146,10 +143,10 @@ export function SearchField({
         } as SearchRequest);
 
         setIsClickSearch(true);
-    }
+    };
 
     return (
-        <Stack sx={{width: 1}} spacing={2}>
+        <Stack sx={{ width: 1 }} spacing={2}>
             <Container>
                 <MovieTypeSelect
                     optionalType={optionalType}
@@ -158,12 +155,7 @@ export function SearchField({
                 />
             </Container>
 
-            <SearchString
-                label="Title"
-                field="title"
-                defType="string"
-                handleStringField={handleStringField}
-            />
+            <SearchString label="Title" field="title" defType="string" handleStringField={handleStringField} />
 
             <SearchRange
                 label="Price"
@@ -192,17 +184,10 @@ export function SearchField({
                 handleRangeField={handleRangeField}
             />
 
-            <SearchDate
-                label="Release Date"
-                field="release_date"
-                defType="date"
-                handleDateField={handleDateField}
-            />
+            <SearchDate label="Release Date" field="release_date" defType="date" handleDateField={handleDateField} />
 
             <Accordion>
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon/>}
-                >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Typography>MPAA Rating</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -210,13 +195,13 @@ export function SearchField({
                         <TextField
                             select
                             variant="filled"
-                            sx={{minWidth: 100}}
+                            sx={{ minWidth: 100 }}
                             id="rating-1"
                             label="Operator"
                             onChange={(event) =>
-                                handleStringField("mpaa_rating", event.target.value, "operator", "string")}
+                                handleStringField("mpaa_rating", event.target.value, "operator", "string")
+                            }
                         >
-
                             <MenuItem value={"and"}>AND</MenuItem>
                             <MenuItem value={"or"}>OR</MenuItem>
                         </TextField>
@@ -231,36 +216,35 @@ export function SearchField({
                                 readOnly: true,
                             }}
                         />
-                        {mpaaOptions &&
+                        {mpaaOptions && (
                             <Autocomplete
                                 fullWidth
-                                onChange={(_, value) => handleStringField("mpaa_rating", value.map(v => v.code), "def", "string")}
+                                onChange={(_, value) =>
+                                    handleStringField(
+                                        "mpaa_rating",
+                                        value.map((v) => v.code),
+                                        "def",
+                                        "string"
+                                    )
+                                }
                                 multiple
                                 id="rating-3"
                                 options={mpaaOptions}
                                 getOptionLabel={(option) => option.code}
-                                renderInput={(params) => (
-                                    <TextField {...params} placeholder="MPAA Rating"/>
-                                )}
+                                renderInput={(params) => <TextField {...params} placeholder="MPAA Rating" />}
                             />
-                        }
-
+                        )}
                     </Stack>
                 </AccordionDetails>
             </Accordion>
 
-            <SearchGenre
-                movieType={selectedType}
-                handleStringField={handleStringField}
-            />
+            <SearchGenre movieType={selectedType} handleStringField={handleStringField} />
 
-            <Box sx={{display: "flex", justifyContent: "flex-end"}}>
-                <Button variant="contained" sx={{width: 0.1}}
-                        onClick={handleSearch}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button variant="contained" sx={{ width: 0.1 }} onClick={handleSearch}>
                     Search
                 </Button>
             </Box>
-
         </Stack>
     );
 }

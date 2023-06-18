@@ -1,6 +1,6 @@
-import {forwardRef} from "react";
-import {ElementOf} from "src/types/utils";
-import {FormControl, InputLabel, MenuItem, Select, SelectProps} from "@mui/material";
+import { forwardRef } from "react";
+import { ElementOf } from "src/types/utils";
+import { FormControl, InputLabel, MenuItem, Select, SelectProps } from "@mui/material";
 
 export const roles = ["general", "admin", "moderator", "banned"] as const;
 export type Role = ElementOf<typeof roles>;
@@ -22,7 +22,6 @@ export const RoleSelect = forwardRef<HTMLSelectElement, RoleSelectProps>((props,
                     {...props}
                     ref={ref}
                 >
-
                     {roles.map((role) => (
                         <MenuItem key={role} value={role}>
                             {role}

@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, { useCallback } from "react";
 import {
     Box,
     Chip,
@@ -10,11 +10,11 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TableSortLabel
+    TableSortLabel,
 } from "@mui/material";
-import {visuallyHidden} from "@mui/utils";
-import {MovieType} from "src/types/movies";
-import {Direction, PageType} from "src/types/page";
+import { visuallyHidden } from "@mui/utils";
+import { MovieType } from "src/types/movies";
+import { Direction, PageType } from "src/types/page";
 import format from "date-fns/format";
 
 export interface Data {
@@ -86,11 +86,10 @@ interface SearchTableHeadProps {
 }
 
 function SearchTableHead(props: SearchTableHeadProps) {
-    const {order, orderBy, onRequestSort} = props;
-    const createSortHandler =
-        (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-            onRequestSort(event, newOrderBy);
-        };
+    const { order, orderBy, onRequestSort } = props;
+    const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+        onRequestSort(event, newOrderBy);
+    };
 
     return (
         <TableHead>
@@ -121,7 +120,6 @@ function SearchTableHead(props: SearchTableHeadProps) {
     );
 }
 
-
 interface SearchTableProps {
     page: PageType<MovieType>;
     pageIndex: number;
@@ -135,18 +133,16 @@ interface SearchTableProps {
 }
 
 export default function SearchTable({
-                                        order,
-                                        orderBy,
-                                        page,
-                                        pageIndex,
-                                        rowsPerPage,
-                                        setOrder,
-                                        setOrderBy,
-                                        setPageIndex,
-                                        setRowsPerPage,
-                                    }: SearchTableProps) {
-
-
+    order,
+    orderBy,
+    page,
+    pageIndex,
+    rowsPerPage,
+    setOrder,
+    setOrderBy,
+    setPageIndex,
+    setRowsPerPage,
+}: SearchTableProps) {
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
             const isAsc = orderBy === newOrderBy && order === "asc";
@@ -154,14 +150,14 @@ export default function SearchTable({
             setOrder?.(toggledOrder);
             setOrderBy?.(newOrderBy);
         },
-        [order, orderBy, pageIndex, rowsPerPage],
+        [order, orderBy, pageIndex, rowsPerPage]
     );
 
     const handleChangePageIndex = useCallback(
         (event: unknown, newPageIndex: number) => {
             setPageIndex(newPageIndex);
         },
-        [order, orderBy, rowsPerPage],
+        [order, orderBy, rowsPerPage]
     );
 
     const handleChangeRowsPerPage = useCallback(
@@ -170,61 +166,58 @@ export default function SearchTable({
             setRowsPerPage(updatedRowsPerPage);
             setPageIndex(0);
         },
-        [order, orderBy],
+        [order, orderBy]
     );
 
     return (
         <>
-            <Box sx={{width: "100%"}}>
-                <Paper sx={{width: "100%", mb: 2}}>
+            <Box sx={{ width: "100%" }}>
+                <Paper sx={{ width: "100%", mb: 2 }}>
                     <TableContainer>
-                        <Table
-                            sx={{minWidth: 750}}
-                            aria-labelledby="tableTitle"
-                        >
-                            <SearchTableHead
-                                order={order!}
-                                orderBy={orderBy!}
-                                onRequestSort={handleRequestSort}
-                            />
+                        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+                            <SearchTableHead order={order!} orderBy={orderBy!} onRequestSort={handleRequestSort} />
                             <TableBody>
                                 {page
                                     ? page.content?.map((row, index) => {
-                                        return (
-                                            <TableRow
-                                                hover
-                                                role="checkbox"
-                                                tabIndex={-1}
-                                                key={row.id}
-                                                sx={{cursor: "pointer"}}
-                                            >
+                                          return (
+                                              <TableRow
+                                                  hover
+                                                  role="checkbox"
+                                                  tabIndex={-1}
+                                                  key={row.id}
+                                                  sx={{ cursor: "pointer" }}
+                                              >
+                                                  <TableCell>
+                                                      <Chip
+                                                          label={row.title}
+                                                          color="info"
+                                                          component="a"
+                                                          href={`/movies/${row.id}`}
+                                                          clickable
+                                                      />
+                                                  </TableCell>
+                                                  <TableCell>{row.type_code}</TableCell>
+                                                  <TableCell align="right">
+                                                      {`${
+                                                          row.type_code === "MOVIE"
+                                                              ? row.price
+                                                                  ? row.price
+                                                                  : "FREE"
+                                                              : row.price
+                                                              ? row.price
+                                                              : "UNAVAILABLE"
+                                                      }`}
+                                                  </TableCell>
+                                                  <TableCell>
+                                                      {format(new Date(row.release_date!), "yyyy-MM-dd")}
+                                                  </TableCell>
+                                                  <TableCell>{row.runtime}</TableCell>
+                                                  <TableCell>{row.description}</TableCell>
 
-                                                <TableCell>
-                                                    <Chip label={row.title} color="info" component="a"
-                                                          href={`/movies/${row.id}`} clickable/>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {row.type_code}
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : (row.price ? row.price : "UNAVAILABLE")}`}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {format(new Date(row.release_date!), "yyyy-MM-dd")}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {row.runtime}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {row.description}
-                                                </TableCell>
-
-                                                <TableCell>
-                                                    {row.mpaa_rating}
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
+                                                  <TableCell>{row.mpaa_rating}</TableCell>
+                                              </TableRow>
+                                          );
+                                      })
                                     : null}
                             </TableBody>
                         </Table>
@@ -241,6 +234,5 @@ export default function SearchTable({
                 </Paper>
             </Box>
         </>
-
     );
 }

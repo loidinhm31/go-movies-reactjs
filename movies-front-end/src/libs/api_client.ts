@@ -4,10 +4,10 @@ export class ClientError {
     httpStatusCode: number;
 
     constructor({
-                    errorCode,
-                    httpStatusCode,
-                    message,
-                }: {
+        errorCode,
+        httpStatusCode,
+        message,
+    }: {
         message: string;
         errorCode: number;
         httpStatusCode: number;

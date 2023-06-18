@@ -1,12 +1,11 @@
-import {Box, Divider} from "@mui/material";
+import { Box, Divider } from "@mui/material";
 import Link from "next/link";
 
 export function Footer() {
-
     return (
         <footer>
             <Box>
-                <Divider/>
+                <Divider />
                 <Box display="flex" alignItems="center" my="8">
                     <Box display="flex" alignItems="center">
                         <Link href="/" aria-label="Dashboard" className="flex items-center gap-1">

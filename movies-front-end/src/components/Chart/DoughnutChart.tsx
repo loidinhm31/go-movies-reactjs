@@ -1,19 +1,18 @@
-import {ArcElement, Chart as ChartJS, Legend, Tooltip} from "chart.js";
-import {Doughnut} from "react-chartjs-2";
-import {Result} from "src/types/dashboard";
-import {get} from "src/libs/api";
+import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+import { Result } from "src/types/dashboard";
+import { get } from "src/libs/api";
 import Skeleton from "@mui/material/Skeleton";
-import {useEffect, useState} from "react";
-import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-import {CircularProgress} from "@mui/material";
+import { useEffect, useState } from "react";
+import NotifySnackbar, { NotifyState } from "src/components/shared/snackbar";
+import { CircularProgress } from "@mui/material";
 import useSWRMutation from "swr/mutation";
-import {useMovieType} from "src/hooks/useMovieType";
+import { useMovieType } from "src/hooks/useMovieType";
 
-
-export default function DoughnutChart({movieType}) {
+export default function DoughnutChart({ movieType }) {
     ChartJS.register(ArcElement, Tooltip, Legend);
 
-    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
+    const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
     const [dataChart, setDataChart] = useState<any>(null);
 
@@ -68,66 +67,64 @@ export default function DoughnutChart({movieType}) {
         "rgba(50, 130, 111, 1)",
         "rgba(80, 10, 100, 1)",
         "rgba(255, 122, 180, 1)",
-    ]
+    ];
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const selectedType = useMovieType(movieType);
 
-    const {trigger: fetchData, error} = useSWRMutation<Result>(`/api/v1/admin/dashboard/movies/genres?type=${selectedType}`, get);
-
+    const { trigger: fetchData, error } = useSWRMutation<Result>(
+        `/api/v1/admin/dashboard/movies/genres?type=${selectedType}`,
+        get
+    );
 
     useEffect(() => {
         if (selectedType !== undefined) {
             setIsLoading(true);
-            fetchData().then((result) => {
-                const labels = result!.data.map((d) => {
-                    return `${d.name!} - ${d.type_code!}`;
-                });
+            fetchData()
+                .then((result) => {
+                    const labels = result!.data.map((d) => {
+                        return `${d.name!} - ${d.type_code!}`;
+                    });
 
-                const numberData = result!.data.map((d) => {
-                    return d.count;
-                });
+                    const numberData = result!.data.map((d) => {
+                        return d.count;
+                    });
 
-                setDataChart({
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: "# of Movies By Genre",
-                            data: numberData,
-                            backgroundColor: backgroundColors,
-                            borderColor: borderColors,
-                            borderWidth: 1,
-                        },
-                    ],
-                });
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
-                });
-            }).finally(() => setIsLoading(false));
+                    setDataChart({
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "# of Movies By Genre",
+                                data: numberData,
+                                backgroundColor: backgroundColors,
+                                borderColor: borderColors,
+                                borderWidth: 1,
+                            },
+                        ],
+                    });
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
+                    });
+                })
+                .finally(() => setIsLoading(false));
         }
     }, [selectedType]);
 
     return (
         <>
-            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <NotifySnackbar state={notifyState} setState={setNotifyState} />
 
-            {isLoading &&
-                <CircularProgress />
-            }
+            {isLoading && <CircularProgress />}
 
-            {error &&
-                <Skeleton variant="circular" width={80} height={80}/>
-
-            }
-            {dataChart !== null &&
-                <Doughnut options={options} data={dataChart}/>
-            }
+            {error && <Skeleton variant="circular" width={80} height={80} />}
+            {dataChart !== null && <Doughnut options={options} data={dataChart} />}
         </>
     );
 }

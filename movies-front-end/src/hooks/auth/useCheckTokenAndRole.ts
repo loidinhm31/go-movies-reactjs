@@ -1,11 +1,11 @@
-import {useRouter} from "next/router";
-import {useSession} from "next-auth/react";
-import {useEffect, useState} from "react";
-import {Role} from "src/components/RoleSelect";
+import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { Role } from "src/components/RoleSelect";
 
 export const useCheckTokenAndRole = (roles: Role[]) => {
     const router = useRouter();
-    const {data: session, status} = useSession();
+    const { data: session, status } = useSession();
 
     const [isInvalid, setIsInvalid] = useState(false);
 
@@ -24,4 +24,4 @@ export const useCheckTokenAndRole = (roles: Role[]) => {
     }, [router.pathname, session, status]);
 
     return isInvalid;
-}
+};

@@ -7,27 +7,27 @@ import {
     MenuItem,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
-import {Fragment, useEffect, useState} from "react";
-import {post} from "src/libs/api";
-import {GenreType} from "src/types/movies";
+import { Fragment, useEffect, useState } from "react";
+import { post } from "src/libs/api";
+import { GenreType } from "src/types/movies";
 import useSWRMutation from "swr/mutation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {useMovieType} from "src/hooks/useMovieType";
+import { useMovieType } from "src/hooks/useMovieType";
 
 interface SearchGenreProps {
     movieType: string;
-    handleStringField: (label: string, values: string | string[], forField: string, defType: string) => void
+    handleStringField: (label: string, values: string | string[], forField: string, defType: string) => void;
 }
 
-export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
+export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) {
     const [open, setOpen] = useState(false);
     const [options, setOptions] = useState<readonly GenreType[]>([]);
 
     const selectedType = useMovieType(movieType);
 
-    const {trigger} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, post);
+    const { trigger } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, post);
 
     useEffect(() => {
         if (!open) {
@@ -38,14 +38,12 @@ export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
             .then((data: GenreType[]) => {
                 setOptions(data);
             })
-            .catch((error) => console.log(error))
+            .catch((error) => console.log(error));
     }, [open, movieType]);
 
     return (
         <Accordion>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>Genres</Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -53,13 +51,11 @@ export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
                     <TextField
                         select
                         variant="filled"
-                        sx={{minWidth: 100}}
+                        sx={{ minWidth: 100 }}
                         id="genre-1"
                         label="Operator"
-                        onChange={(event) =>
-                            handleStringField("genres", event.target.value, "operator", "string")}
+                        onChange={(event) => handleStringField("genres", event.target.value, "operator", "string")}
                     >
-
                         <MenuItem value={"and"}>AND</MenuItem>
                         <MenuItem value={"or"}>OR</MenuItem>
                     </TextField>
@@ -87,7 +83,14 @@ export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
                         options={options}
                         getOptionLabel={(option) => `${option.name} - ${option.type_code}`}
                         loading={open}
-                        onChange={(_, value) => handleStringField("genres", value.map(v => `${v.name}-${v.type_code}`), "def", "string")}
+                        onChange={(_, value) =>
+                            handleStringField(
+                                "genres",
+                                value.map((v) => `${v.name}-${v.type_code}`),
+                                "def",
+                                "string"
+                            )
+                        }
                         multiple
                         id="genre-3"
                         renderInput={(params) => (
@@ -98,7 +101,7 @@ export function SearchGenre({movieType, handleStringField}: SearchGenreProps) {
                                     ...params.InputProps,
                                     endAdornment: (
                                         <Fragment>
-                                            {open ? <CircularProgress color="inherit" size={20}/> : null}
+                                            {open ? <CircularProgress color="inherit" size={20} /> : null}
                                             {params.InputProps.endAdornment}
                                         </Fragment>
                                     ),

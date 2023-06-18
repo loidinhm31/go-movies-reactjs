@@ -5,7 +5,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
-
 interface AlertDialogProps {
     open: boolean;
     setOpen: (flag: boolean) => void;
@@ -17,14 +16,14 @@ interface AlertDialogProps {
 }
 
 export default function AlertDialog({
-                                        confirmText,
-                                        description,
-                                        open,
-                                        setConfirmDelete,
-                                        setOpen,
-                                        showCancelButton,
-                                        title
-                                    }: AlertDialogProps) {
+    confirmText,
+    description,
+    open,
+    setConfirmDelete,
+    setOpen,
+    showCancelButton,
+    title,
+}: AlertDialogProps) {
     const handleClose = () => {
         setOpen(false);
     };
@@ -36,36 +35,26 @@ export default function AlertDialog({
 
     return (
         <div>
-            <Dialog
-                open={open}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {title}
-                </DialogTitle>
+            <Dialog open={open} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+                <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                        {description}
-                    </DialogContentText>
+                    <DialogContentText id="alert-dialog-description">{description}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    {
-                        !showCancelButton ? (
-                            <Button onClick={handleClose} autoFocus>
+                    {!showCancelButton ? (
+                        <Button onClick={handleClose} autoFocus>
+                            {confirmText}
+                        </Button>
+                    ) : (
+                        <>
+                            <Button onClick={() => handleConfirmDelete(true)} variant="contained" color="success">
                                 {confirmText}
                             </Button>
-                        ) : (
-                            <>
-                                <Button onClick={() => handleConfirmDelete(true)} variant="contained" color="success">
-                                    {confirmText}
-                                </Button>
-                                <Button onClick={handleClose} variant="contained" color="error">
-                                    No
-                                </Button>
-                            </>
-                        )
-                    }
+                            <Button onClick={handleClose} variant="contained" color="error">
+                                No
+                            </Button>
+                        </>
+                    )}
                 </DialogActions>
             </Dialog>
         </div>

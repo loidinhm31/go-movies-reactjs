@@ -10,15 +10,15 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TableSortLabel
+    TableSortLabel,
 } from "@mui/material";
-import {format} from "date-fns";
-import {Direction, PageType} from "src/types/page";
-import {visuallyHidden} from "@mui/utils";
-import {useCallback, useEffect, useState} from "react";
-import {UserType} from "src/types/users";
+import { format } from "date-fns";
+import { Direction, PageType } from "src/types/page";
+import { visuallyHidden } from "@mui/utils";
+import { useCallback, useEffect, useState } from "react";
+import { UserType } from "src/types/users";
 import RoleDialog from "src/components/Dialog/RoleDialog";
-import {NotifyState} from "src/components/shared/snackbar";
+import { NotifyState } from "src/components/shared/snackbar";
 
 export interface UserData {
     username: string;
@@ -81,11 +81,10 @@ interface UserTableHeadProps {
 }
 
 function UserTableHead(props: UserTableHeadProps) {
-    const {order, orderBy, onRequestSort} = props;
-    const createSortHandler =
-        (newOrderBy: keyof UserData) => (event: React.MouseEvent<unknown>) => {
-            onRequestSort(event, newOrderBy);
-        };
+    const { order, orderBy, onRequestSort } = props;
+    const createSortHandler = (newOrderBy: keyof UserData) => (event: React.MouseEvent<unknown>) => {
+        onRequestSort(event, newOrderBy);
+    };
 
     return (
         <TableHead>
@@ -110,9 +109,7 @@ function UserTableHead(props: UserTableHeadProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
-                <TableCell
-                    aria-label="last"
-                    style={{width: "var(--Table-lastColumnWidth)"}}/>
+                <TableCell aria-label="last" style={{ width: "var(--Table-lastColumnWidth)" }} />
             </TableRow>
         </TableHead>
     );
@@ -129,22 +126,22 @@ interface UserTableProps {
     orderBy?: keyof UserData;
     setOrderBy?: (by: keyof UserData) => void;
     setNotifyState: (state: NotifyState) => void;
-    setWasUpdated: (flag: boolean) => void
+    setWasUpdated: (flag: boolean) => void;
 }
 
 export default function UserTable({
-                                      order,
-                                      orderBy,
-                                      page,
-                                      pageIndex,
-                                      rowsPerPage,
-                                      setOrder,
-                                      setOrderBy,
-                                      setPageIndex,
-                                      setRowsPerPage,
-                                      setNotifyState,
-                                      setWasUpdated
-                                  }: UserTableProps) {
+    order,
+    orderBy,
+    page,
+    pageIndex,
+    rowsPerPage,
+    setOrder,
+    setOrderBy,
+    setPageIndex,
+    setRowsPerPage,
+    setNotifyState,
+    setWasUpdated,
+}: UserTableProps) {
     const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
     const [isOpenDialog, setIsOpenDialog] = useState(false);
 
@@ -152,7 +149,7 @@ export default function UserTable({
         if (!isOpenDialog) {
             setSelectedUser(null);
         }
-    }, [isOpenDialog])
+    }, [isOpenDialog]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof UserData) => {
@@ -161,14 +158,14 @@ export default function UserTable({
             setOrder?.(toggledOrder);
             setOrderBy?.(newOrderBy);
         },
-        [order, orderBy, pageIndex, rowsPerPage],
+        [order, orderBy, pageIndex, rowsPerPage]
     );
 
     const handleChangePageIndex = useCallback(
         (event: unknown, newPageIndex: number) => {
             setPageIndex(newPageIndex);
         },
-        [order, orderBy, rowsPerPage],
+        [order, orderBy, rowsPerPage]
     );
 
     const handleChangeRowsPerPage = useCallback(
@@ -177,7 +174,7 @@ export default function UserTable({
             setRowsPerPage(updatedRowsPerPage);
             setPageIndex(0);
         },
-        [order, orderBy],
+        [order, orderBy]
     );
 
     const handleSelectRow = (user: UserType) => {
@@ -187,7 +184,7 @@ export default function UserTable({
 
     return (
         <>
-            {isOpenDialog &&
+            {isOpenDialog && (
                 <RoleDialog
                     user={selectedUser}
                     open={isOpenDialog}
@@ -195,71 +192,49 @@ export default function UserTable({
                     setNotifyState={setNotifyState}
                     setWasUpdated={setWasUpdated}
                 />
-            }
+            )}
 
-            <Box sx={{width: "100%"}}>
-                <Paper sx={{width: "100%", mb: 2}}>
+            <Box sx={{ width: "100%" }}>
+                <Paper sx={{ width: "100%", mb: 2 }}>
                     <TableContainer>
-                        <Table
-                            sx={{minWidth: 750}}
-                            aria-labelledby="tableTitle"
-                        >
-                            <UserTableHead
-                                order={order!}
-                                orderBy={orderBy!}
-                                onRequestSort={handleRequestSort}
-                            />
+                        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+                            <UserTableHead order={order!} orderBy={orderBy!} onRequestSort={handleRequestSort} />
                             <TableBody>
                                 {page
                                     ? page.content?.map((row, index) => {
-                                        return (
-                                            <TableRow
-                                                hover
-                                                role="checkbox"
-                                                tabIndex={-1}
-                                                key={`${row.id}-${index}`}
-                                                sx={{cursor: "pointer"}}
-                                            >
-
-                                                <TableCell
-                                                >
-                                                    <Chip label={row.username} color="info"/>
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {row.first_name}
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {row.last_name}
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {row.email}
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {format(new Date(row.created_at!), "yyyy-MM-dd")}
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {`${row.is_new ? "YES" : "NO"}`}
-                                                </TableCell>
-                                                <TableCell
-                                                >
-                                                    {row.role.role_code}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Box sx={{display: "flex", gap: 1}}>
-                                                        <Button variant="contained" color="success"
-                                                                onClick={() => handleSelectRow(row)}>
-                                                            Provide Access
-                                                        </Button>
-                                                    </Box>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
+                                          return (
+                                              <TableRow
+                                                  hover
+                                                  role="checkbox"
+                                                  tabIndex={-1}
+                                                  key={`${row.id}-${index}`}
+                                                  sx={{ cursor: "pointer" }}
+                                              >
+                                                  <TableCell>
+                                                      <Chip label={row.username} color="info" />
+                                                  </TableCell>
+                                                  <TableCell>{row.first_name}</TableCell>
+                                                  <TableCell>{row.last_name}</TableCell>
+                                                  <TableCell>{row.email}</TableCell>
+                                                  <TableCell>
+                                                      {format(new Date(row.created_at!), "yyyy-MM-dd")}
+                                                  </TableCell>
+                                                  <TableCell>{`${row.is_new ? "YES" : "NO"}`}</TableCell>
+                                                  <TableCell>{row.role.role_code}</TableCell>
+                                                  <TableCell>
+                                                      <Box sx={{ display: "flex", gap: 1 }}>
+                                                          <Button
+                                                              variant="contained"
+                                                              color="success"
+                                                              onClick={() => handleSelectRow(row)}
+                                                          >
+                                                              Provide Access
+                                                          </Button>
+                                                      </Box>
+                                                  </TableCell>
+                                              </TableRow>
+                                          );
+                                      })
                                     : null}
                             </TableBody>
                         </Table>

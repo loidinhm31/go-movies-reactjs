@@ -1,18 +1,17 @@
-import {PageType} from "src/types/page";
+import { PageType } from "src/types/page";
 
 export type SearchRequest = {
-    filters?: FieldData[],
-    page_request?: PageType<unknown>
-}
+    filters?: FieldData[];
+    page_request?: PageType<unknown>;
+};
 
 export type FieldData = {
-    operator?: string,
-    field: string,
-    def?: TypeValue,
-}
+    operator?: string;
+    field: string;
+    def?: TypeValue;
+};
 
 export type TypeValue = {
-    type: string,
-    values: string[],
-}
-
+    type: string;
+    values: string[];
+};

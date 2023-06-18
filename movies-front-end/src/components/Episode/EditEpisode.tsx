@@ -9,21 +9,21 @@ import {
     Link,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
-import {format} from "date-fns";
-import {RemoveCircle} from "@mui/icons-material";
-import React, {useEffect, useRef, useState} from "react";
-import {NotifyState} from "src/components/shared/snackbar";
-import {EpisodeType} from "src/types/seasons";
+import { format } from "date-fns";
+import { RemoveCircle } from "@mui/icons-material";
+import React, { useEffect, useRef, useState } from "react";
+import { NotifyState } from "src/components/shared/snackbar";
+import { EpisodeType } from "src/types/seasons";
 import useSWRMutation from "swr/mutation";
-import {del, get, post, postForm} from "src/libs/api";
+import { del, get, post, postForm } from "src/libs/api";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import AlertDialog from "src/components/shared/alert";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {FileType} from "src/types/movies";
+import { FileType } from "src/types/movies";
 
 interface EditEpisodeProps {
     id?: number;
@@ -32,7 +32,7 @@ interface EditEpisodeProps {
     setWasUpdated: (flag: boolean) => void;
 }
 
-export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated}: EditEpisodeProps) {
+export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdated }: EditEpisodeProps) {
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
 
@@ -44,7 +44,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         runtime: 0,
         season_id: seasonId,
         price: 0,
-    }
+    };
 
     const [episode, setEpisode] = useState<EpisodeType>(clearObj);
 
@@ -52,33 +52,35 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
     const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
     const [videoPath, setVideoPath] = useState<string>("");
 
-    const {trigger: fetchEpisode} = useSWRMutation<EpisodeType>(`/api/v1/episodes/${id}`, get);
-    const {trigger: triggerEpisode} = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/save`, post);
-    const {trigger: deleteEpisode} = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/delete/${id}`, del);
-    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
-    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
+    const { trigger: fetchEpisode } = useSWRMutation<EpisodeType>(`/api/v1/episodes/${id}`, get);
+    const { trigger: triggerEpisode } = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/save`, post);
+    const { trigger: deleteEpisode } = useSWRMutation(`/api/v1/admin/movies/seasons/episodes/delete/${id}`, del);
+    const { trigger: uploadVideo } = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
+    const { trigger: removeVideo } = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
 
     useEffect(() => {
         if (id === undefined) {
             setEpisode(clearObj);
         } else {
             if (openEdit) {
-                fetchEpisode().then((result) => {
-                    setEpisode(result!);
+                fetchEpisode()
+                    .then((result) => {
+                        setEpisode(result!);
 
-                    // Set file video
-                    if (result?.video_path) {
-                        setVideoPath(result?.video_path!);
-                    }
-                }).catch((error) => {
-                    setNotifyState({
-                        open: true,
-                        message: error.message.message,
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "error"
+                        // Set file video
+                        if (result?.video_path) {
+                            setVideoPath(result?.video_path!);
+                        }
+                    })
+                    .catch((error) => {
+                        setNotifyState({
+                            open: true,
+                            message: error.message.message,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "error",
+                        });
                     });
-                });
             }
         }
     }, [id, seasonId, openEdit]);
@@ -93,7 +95,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                             message: data.message,
                             vertical: "top",
                             horizontal: "right",
-                            severity: "info"
+                            severity: "info",
                         });
                         setWasUpdated(true);
                     }
@@ -104,21 +106,21 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                         message: error.message.message,
                         vertical: "top",
                         horizontal: "right",
-                        severity: "error"
+                        severity: "error",
                     });
                 });
         }
-    }, [isConfirmDelete])
+    }, [isConfirmDelete]);
 
     const handleSubmit = () => {
         let errors: any = [];
         let required = [
-            {field: episode.name, name: "name", label: "Name"},
-            {field: episode.air_date, name: "air_date", label: "Air Date"},
-            {field: episode.runtime, name: "description", label: "Description"},
+            { field: episode.name, name: "name", label: "Name" },
+            { field: episode.air_date, name: "air_date", label: "Air Date" },
+            { field: episode.runtime, name: "description", label: "Description" },
         ];
 
-        required.forEach(function ({field, label}: any) {
+        required.forEach(function ({ field, label }: any) {
             if (field === "" || field === undefined) {
                 errors.push(label);
             }
@@ -130,37 +132,39 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                 message: `Fill value for ${errors.join(", ")}`,
                 vertical: "bottom",
                 horizontal: "center",
-                severity: "warning"
+                severity: "warning",
             });
             return false;
         }
 
-        triggerEpisode(episode).then((data) => {
-            if (data) {
+        triggerEpisode(episode)
+            .then((data) => {
+                if (data) {
+                    setNotifyState({
+                        open: true,
+                        message: "Episode Saved",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "success",
+                    });
+                    setWasUpdated(true);
+
+                    // Clear form for adding new object
+                    setEpisode(clearObj);
+                    setVideoFile(null);
+                    setVideoPath("");
+                    setOpenEdit(false);
+                }
+            })
+            .catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: "Episode Saved",
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "success"
+                    severity: "error",
                 });
-                setWasUpdated(true);
-
-                // Clear form for adding new object
-                setEpisode(clearObj);
-                setVideoFile(null);
-                setVideoPath("");
-                setOpenEdit(false);
-            }
-        }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
             });
-        });
     };
 
     const handleChange = (event, name: string) => {
@@ -168,8 +172,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         if (name === "runtime" || name === "price") {
             value = Number(value);
         } else if (name === "air_date") {
-            if (Number.isNaN(new Date(event.target.value).getTime()))
-                return;
+            if (Number.isNaN(new Date(event.target.value).getTime())) return;
         }
         setEpisode({
             ...episode,
@@ -180,13 +183,13 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
     const considerDelete = (event) => {
         event.preventDefault();
         setIsOpenDeleteDialog(true);
-    }
+    };
 
     const handleChooseVideoFileClick = () => {
         videoFileRef.current.click();
     };
 
-    const handleVideoFileChange = event => {
+    const handleVideoFileChange = (event) => {
         const fileObj = event.target.files && event.target.files[0];
         if (!fileObj) {
             return;
@@ -201,32 +204,34 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
         formData.append("file", fileObj);
         formData.append("fileType", FileType.VIDEO);
 
-        uploadVideo(formData).then((result) => {
-            if (result.fileName) {
-                setVideoPath(result.fileName);
+        uploadVideo(formData)
+            .then((result) => {
+                if (result.fileName) {
+                    setVideoPath(result.fileName);
 
-                setEpisode({
-                    ...episode,
-                    video_path: result.fileName.split(".")[0],
-                });
+                    setEpisode({
+                        ...episode,
+                        video_path: result.fileName.split(".")[0],
+                    });
 
+                    setNotifyState({
+                        open: true,
+                        message: "Video Uploaded",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info",
+                    });
+                }
+            })
+            .catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: "Video Uploaded",
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "info"
+                    severity: "error",
                 });
-            }
-        }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
             });
-        });
     };
 
     const handleRemoveVideoFileClick = () => {
@@ -235,51 +240,53 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
             const fileName = paths[paths.length - 1];
             removeVideo({
                 fileName: fileName,
-            }).then((result) => {
-                if (result.result === "ok") {
-                    setVideoFile(null);
-                    setVideoPath("");
-
-                    setEpisode({
-                        ...episode,
-                        video_path: "",
-                    });
-
-                    setNotifyState({
-                        open: true,
-                        message: "Video Removed",
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "info"
-                    });
-                } else {
-                    setNotifyState({
-                        open: true,
-                        message: `Cannot remove video, ${result.result}`,
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "info"
-                    });
-                }
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
-                });
             })
+                .then((result) => {
+                    if (result.result === "ok") {
+                        setVideoFile(null);
+                        setVideoPath("");
+
+                        setEpisode({
+                            ...episode,
+                            video_path: "",
+                        });
+
+                        setNotifyState({
+                            open: true,
+                            message: "Video Removed",
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "info",
+                        });
+                    } else {
+                        setNotifyState({
+                            open: true,
+                            message: `Cannot remove video, ${result.result}`,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "info",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
+                    });
+                });
         }
     };
 
     const handleOpenEdit = () => {
         setOpenEdit(!openEdit);
-    }
+    };
 
     return (
         <>
-            {isOpenDeleteDialog &&
+            {isOpenDeleteDialog && (
                 <AlertDialog
                     open={isOpenDeleteDialog}
                     setOpen={setIsOpenDeleteDialog}
@@ -289,45 +296,34 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                     showCancelButton={true}
                     setConfirmDelete={setIsConfirmDelete}
                 />
-            }
+            )}
             <Grid container spacing={2}>
                 <Grid item xs={12}>
                     <Stack direction="row" spacing={2}>
                         {openEdit ? (
-                            <Button
-                                color="warning"
-                                variant="contained"
-                                onClick={handleOpenEdit}>
-                                <CloseIcon/>
+                            <Button color="warning" variant="contained" onClick={handleOpenEdit}>
+                                <CloseIcon />
                             </Button>
-                        ) : (id ? (
-                                <Button
-                                    variant="contained"
-                                    onClick={handleOpenEdit}>
-                                    <EditIcon/>
-                                </Button>
-                            ) : (
-                                <Button
-                                    variant="contained"
-                                    onClick={handleOpenEdit}>
-                                    <AddIcon/>
-                                </Button>
-                            )
-
+                        ) : id ? (
+                            <Button variant="contained" onClick={handleOpenEdit}>
+                                <EditIcon />
+                            </Button>
+                        ) : (
+                            <Button variant="contained" onClick={handleOpenEdit}>
+                                <AddIcon />
+                            </Button>
                         )}
 
                         {id! > 0 && (
-                            <Button
-                                variant="contained" color="error"
-                                onClick={considerDelete}>
-                                <DeleteIcon/>
+                            <Button variant="contained" color="error" onClick={considerDelete}>
+                                <DeleteIcon />
                             </Button>
                         )}
                     </Stack>
                 </Grid>
 
                 <Grid item xs={12}>
-                    {openEdit &&
+                    {openEdit && (
                         <Container>
                             <Grid container spacing={2}>
                                 <input type="hidden" name="id" defaultValue={id} id="id" readOnly={true}></input>
@@ -337,7 +333,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                         label="Name"
                                         variant="outlined"
                                         value={episode.name}
-                                        onChange={e => handleChange(e, "name")}
+                                        onChange={(e) => handleChange(e, "name")}
                                     />
                                 </Grid>
 
@@ -349,7 +345,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                         type="date"
                                         name="air_date"
                                         value={format(new Date(episode.air_date!), "yyyy-MM-dd")}
-                                        onChange={e => handleChange(e, "air_date")}
+                                        onChange={(e) => handleChange(e, "air_date")}
                                     />
                                 </Grid>
 
@@ -364,7 +360,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                             endAdornment: <InputAdornment position="end">minutes</InputAdornment>,
                                         }}
                                         value={episode.runtime}
-                                        onChange={e => handleChange(e, "runtime")}
+                                        onChange={(e) => handleChange(e, "runtime")}
                                     />
                                 </Grid>
 
@@ -379,7 +375,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                             endAdornment: <InputAdornment position="end">USD</InputAdornment>,
                                         }}
                                         value={episode.price}
-                                        onChange={e => handleChange(e, "price")}
+                                        onChange={(e) => handleChange(e, "price")}
                                     />
                                 </Grid>
 
@@ -392,7 +388,7 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                         onChange={handleVideoFileChange}
                                     />
                                     <Stack spacing={2} direction="row">
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
                                             <Typography variant="subtitle1">Upload Video</Typography>
                                         </Box>
 
@@ -400,55 +396,51 @@ export default function EditEpisode({id, seasonId, setNotifyState, setWasUpdated
                                             Choose File
                                         </Button>
 
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
                                             <Typography>{videoFile?.name}</Typography>
                                         </Box>
 
-                                        {videoPath !== "" &&
+                                        {videoPath !== "" && (
                                             <>
-                                                <Box sx={{display: "flex", alignItems: "center"}}>
+                                                <Box sx={{ display: "flex", alignItems: "center" }}>
                                                     <Link
                                                         href={`${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${videoPath}`}
                                                         target="_blank"
                                                     >
-                                                        {
-                                                            videoPath.split("/").reverse()[0]
-                                                        }
+                                                        {videoPath.split("/").reverse()[0]}
                                                     </Link>
                                                 </Box>
-                                                <IconButton aria-label="delete" color="error"
-                                                            onClick={handleRemoveVideoFileClick}>
-                                                    <RemoveCircle/>
+                                                <IconButton
+                                                    aria-label="delete"
+                                                    color="error"
+                                                    onClick={handleRemoveVideoFileClick}
+                                                >
+                                                    <RemoveCircle />
                                                 </IconButton>
                                             </>
-                                        }
+                                        )}
                                     </Stack>
                                 </Grid>
 
-                                <Divider component="div" variant="middle"/>
+                                <Divider component="div" variant="middle" />
 
                                 <Grid item xs={12}>
-                                    <Box sx={{display: "flex", justifyContent: "center", m: 2}}>
+                                    <Box sx={{ display: "flex", justifyContent: "center", m: 2 }}>
                                         <Stack direction="row" spacing={2}>
-                                            <Button
-                                                variant="contained"
-                                                onClick={handleSubmit}
-                                            >
+                                            <Button variant="contained" onClick={handleSubmit}>
                                                 Save
                                             </Button>
                                             {episode.id! > 0 && (
-                                                <Button variant="contained" color="error"
-                                                        onClick={considerDelete}>
+                                                <Button variant="contained" color="error" onClick={considerDelete}>
                                                     Delete Episode
                                                 </Button>
                                             )}
                                         </Stack>
                                     </Box>
-
                                 </Grid>
                             </Grid>
                         </Container>
-                    }
+                    )}
                 </Grid>
             </Grid>
         </>

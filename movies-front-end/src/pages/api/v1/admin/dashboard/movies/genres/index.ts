@@ -1,7 +1,7 @@
-import {withAnyRole} from "src/libs/auth";
+import { withAnyRole } from "src/libs/auth";
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
-    const {type} = req.query;
+    const { type } = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -13,10 +13,13 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     };
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/auth/analysis/movies/genres?type=${type}`, requestOptions);
+        const response = await fetch(
+            `${process.env.API_BASE_URL}/auth/analysis/movies/genres?type=${type}`,
+            requestOptions
+        );
         res.status(response.status).json(await response.json());
     } catch (error) {
-        res.status(500).json({message: "server error"});
+        res.status(500).json({ message: "server error" });
     }
 });
 

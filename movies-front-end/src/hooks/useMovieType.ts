@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 export const useMovieType = (selectedType: string) => {
     const [movieType, setMovieType] = useState(selectedType.toLowerCase() !== "both" ? selectedType : "");

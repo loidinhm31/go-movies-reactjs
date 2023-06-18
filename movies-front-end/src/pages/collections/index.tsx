@@ -1,18 +1,18 @@
-import NotifySnackbar, {NotifyState} from "src/components/shared/snackbar";
-import {Box, Divider, Paper, Stack, Tab, Tabs, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
-import {CollectionMovieTab} from "src/components/Tab/CollectionMovieTab";
-import {TabPanel} from "src/components/Tab/TabPanel";
+import NotifySnackbar, { NotifyState } from "src/components/shared/snackbar";
+import { Box, Divider, Paper, Stack, Tab, Tabs, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { CollectionMovieTab } from "src/components/Tab/CollectionMovieTab";
+import { TabPanel } from "src/components/Tab/TabPanel";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import TvIcon from "@mui/icons-material/Tv";
-import {CollectionEpisodeTab} from "src/components/Tab/CollectionEpisodeTab";
-import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
-import {signIn} from "next-auth/react";
+import { CollectionEpisodeTab } from "src/components/Tab/CollectionEpisodeTab";
+import { useCheckTokenAndRole } from "src/hooks/auth/useCheckTokenAndRole";
+import { signIn } from "next-auth/react";
 
 export default function Collection() {
     const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
-    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
+    const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
     const [tabValue, setTabValue] = useState(0);
 
@@ -29,36 +29,29 @@ export default function Collection() {
 
     return (
         <>
-            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <NotifySnackbar state={notifyState} setState={setNotifyState} />
             <Stack spacing={2}>
-                <Box sx={{p: 1, m: 1}}>
+                <Box sx={{ p: 1, m: 1 }}>
                     <Typography variant="h4">Your Collections</Typography>
                 </Box>
-                <Divider/>
+                <Divider />
 
-                <Paper
-                    elevation={3}
-                    sx={{p: 2}}
-                >
+                <Paper elevation={3} sx={{ p: 2 }}>
                     <Tabs value={tabValue} onChange={handleChangeTab} aria-label="icon label tabs example">
-                        <Tab icon={<TheatersIcon/>} label="Movies"/>
-                        <Tab icon={<TvIcon/>} label="TV Series"/>
+                        <Tab icon={<TheatersIcon />} label="Movies" />
+                        <Tab icon={<TvIcon />} label="TV Series" />
                     </Tabs>
                 </Paper>
 
-                <Box component="span"
-                     sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
-
+                <Box component="span" sx={{ display: "flex", justifyContent: "center", p: 1, m: 1 }}>
                     <TabPanel value={tabValue} index={0}>
-                        <CollectionMovieTab/>
+                        <CollectionMovieTab />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
-                        <CollectionEpisodeTab/>
+                        <CollectionEpisodeTab />
                     </TabPanel>
-
                 </Box>
             </Stack>
-
         </>
     );
 }

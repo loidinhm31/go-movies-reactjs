@@ -1,10 +1,10 @@
 // https://nextjs.org/docs/basic-features/layouts
 
-import type {NextPage} from "next";
-import {SideMenuLayout} from "src/components/Layout/SideMenuLayout";
-import {Header} from "src/components/Header";
-import {Footer} from "src/components/Footer";
-import {Box, Grid} from "@mui/material";
+import type { NextPage } from "next";
+import { SideMenuLayout } from "src/components/Layout/SideMenuLayout";
+import { Header } from "src/components/Header";
+import { Footer } from "src/components/Footer";
+import { Box, Grid } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,7 +20,7 @@ export type NextPageWithLayout<P = unknown, IP = P> = NextPage<P, IP> & {
 
 export const getDefaultLayout = (page: React.ReactElement) => (
     <Grid container>
-        <Header/>
+        <Header />
         <SideMenuLayout
             menuButtonOptions={[
                 {
@@ -75,10 +75,8 @@ export const getDefaultLayout = (page: React.ReactElement) => (
                 },
             ]}
         >
-            <Box>
-                {page}
-            </Box>
-            <Footer/>
+            <Box>{page}</Box>
+            <Footer />
         </SideMenuLayout>
     </Grid>
 );

@@ -1,18 +1,18 @@
 import Head from "next/head";
-import {useRouter} from "next/router";
-import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
-import {Footer} from "src/components/Footer";
-import {Header} from "src/components/Header";
-import {AuthLayout} from "src/components/Layout/AuthLayout";
-import {ClientSafeProvider, getProviders, signIn} from "next-auth/react";
-import {Role, RoleSelect} from "src/components/RoleSelect";
-import {GetServerSideProps} from "next";
-import {Box, Button, ButtonProps, Chip, Divider, Stack, TextField} from "@mui/material";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Footer } from "src/components/Footer";
+import { Header } from "src/components/Header";
+import { AuthLayout } from "src/components/Layout/AuthLayout";
+import { ClientSafeProvider, getProviders, signIn } from "next-auth/react";
+import { Role, RoleSelect } from "src/components/RoleSelect";
+import { GetServerSideProps } from "next";
+import { Box, Button, ButtonProps, Chip, Divider, Stack, TextField } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BugReportIcon from "@mui/icons-material/BugReport";
-import {DrawerHeader} from "src/components/shared/drawer";
-import {Key} from "@mui/icons-material";
+import { DrawerHeader } from "src/components/shared/drawer";
+import { Key } from "@mui/icons-material";
 
 export type SignInErrorTypes =
     | "Signin"
@@ -28,16 +28,16 @@ const errorMessages: Record<SignInErrorTypes, string> = {
     Callback: "Try signing in with a different account.",
     CredentialsSignin: "Sign in failed. Check the details you provided are correct.",
     SessionRequired: "Please sign in to access this page.",
-    default: "Unable to sign in."
+    default: "Unable to sign in.",
 };
 
 interface SigninProps {
     providers: Awaited<ReturnType<typeof getProviders>> | any;
 }
 
-function Signin({providers}: SigninProps) {
+function Signin({ providers }: SigninProps) {
     const router = useRouter();
-    const {debug, server, keycloak} = providers;
+    const { debug, server, keycloak } = providers;
     const [error, setError] = useState("");
 
     useEffect(() => {
@@ -57,15 +57,15 @@ function Signin({providers}: SigninProps) {
                 <title>Sign In</title>
             </Head>
             <AuthLayout>
-                <DrawerHeader/>
+                <DrawerHeader />
                 <Stack spacing="2">
-                    {debug && <DebugSigninForm credentials={debug}/>}
+                    {debug && <DebugSigninForm credentials={debug} />}
                     {keycloak && (
-                        <Box sx={{m: 2, p: 2}}>
-                            <Box sx={{display: "flex", justifyContent: "center"}}>
+                        <Box sx={{ m: 2, p: 2 }}>
+                            <Box sx={{ display: "flex", justifyContent: "center" }}>
                                 <SigninButton
-                                    startIcon={<Key/>}
-                                    onClick={() => signIn(keycloak.id, {callbackUrl: "/"})}
+                                    startIcon={<Key />}
+                                    onClick={() => signIn(keycloak.id, { callbackUrl: "/" })}
                                 >
                                     Continue with Keycloak
                                 </SigninButton>
@@ -86,23 +86,16 @@ function Signin({providers}: SigninProps) {
 
 Signin.getLayout = (page) => (
     <div className="grid grid-rows-[min-content_1fr_min-content] h-full justify-items-stretch">
-        <Header/>
+        <Header />
         {page}
-        <Footer/>
+        <Footer />
     </div>
 );
 
 export default Signin;
 
 const SigninButton = (props: ButtonProps) => {
-    return (
-        <Button
-            variant="contained"
-            startIcon={props.startIcon}
-            type="submit"
-            {...props}>
-        </Button>
-    );
+    return <Button variant="contained" startIcon={props.startIcon} type="submit" {...props}></Button>;
 };
 
 interface SigninFormData {
@@ -110,25 +103,24 @@ interface SigninFormData {
     password: string;
 }
 
-const SigninForm = ({credentials}: { credentials: ClientSafeProvider; }) => {
-    const {register, handleSubmit} = useForm<SigninFormData>();
+const SigninForm = ({ credentials }: { credentials: ClientSafeProvider }) => {
+    const { register, handleSubmit } = useForm<SigninFormData>();
 
     function signinWithCredentials(data: SigninFormData) {
         signIn(credentials.id, {
             callbackUrl: "/admin/dashboard",
-            ...data
+            ...data,
         });
     }
 
     return (
-        <Box component="form"
-             onSubmit={handleSubmit(signinWithCredentials)}>
+        <Box component="form" onSubmit={handleSubmit(signinWithCredentials)}>
             <Stack spacing={2}>
                 <TextField label="Username" variant="outlined" {...register("username")} />
                 <TextField label="Password" variant="outlined" type="password" {...register("password")} />
 
-                <Box sx={{display: "flex", justifyContent: "center"}}>
-                    <SigninButton startIcon={<PersonIcon/>}>Continue with User</SigninButton>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <SigninButton startIcon={<PersonIcon />}>Continue with User</SigninButton>
                 </Box>
             </Stack>
         </Box>
@@ -140,40 +132,45 @@ interface DebugSigninFormData {
     role: Role;
 }
 
-const DebugSigninForm = ({credentials}: { credentials: ClientSafeProvider; }) => {
-    const {register, handleSubmit} = useForm<DebugSigninFormData>({
+const DebugSigninForm = ({ credentials }: { credentials: ClientSafeProvider }) => {
+    const { register, handleSubmit } = useForm<DebugSigninFormData>({
         defaultValues: {
             role: "general",
-            username: "dev"
-        }
+            username: "dev",
+        },
     });
 
     function signinWithDebugCredentials(data: DebugSigninFormData) {
         signIn(credentials.id, {
             callbackUrl: "/admin/dashboard",
-            ...data
+            ...data,
         });
     }
 
     return (
-        <Box component="form" sx={{
-            color: "orange", m: 2, p: 2,
-            border: 1, borderRadius: 1, borderWidth: 5
-        }}
-             onSubmit={handleSubmit(signinWithDebugCredentials)}
+        <Box
+            component="form"
+            sx={{
+                color: "orange",
+                m: 2,
+                p: 2,
+                border: 1,
+                borderRadius: 1,
+                borderWidth: 5,
+            }}
+            onSubmit={handleSubmit(signinWithDebugCredentials)}
         >
-
             <Stack spacing={2}>
                 <TextField label="Username" variant="outlined" {...register("username")} />
 
                 <RoleSelect {...register("role")}></RoleSelect>
 
-                <Box sx={{display: "flex", justifyContent: "center"}}>
-                    <SigninButton startIcon={<BugReportIcon/>}>Continue with Debug User</SigninButton>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <SigninButton startIcon={<BugReportIcon />}>Continue with Debug User</SigninButton>
                 </Box>
             </Stack>
-            <Divider sx={{p: 2}}>
-                <Chip sx={{color: "white", background: "orange"}} label="FOR DEBUGGING ONLY"/>
+            <Divider sx={{ p: 2 }}>
+                <Chip sx={{ color: "white", background: "orange" }} label="FOR DEBUGGING ONLY" />
             </Divider>
         </Box>
     );
@@ -183,6 +180,6 @@ export const getServerSideProps: GetServerSideProps<SigninProps> = async () => {
     return {
         props: {
             providers,
-        }
+        },
     };
 };

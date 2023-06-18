@@ -1,8 +1,8 @@
 import useSWR from "swr";
-import React, {useEffect} from "react";
-import {Chip} from "@mui/material";
+import React, { useEffect } from "react";
+import { Chip } from "@mui/material";
 import MovieIcon from "@mui/icons-material/Movie";
-import {get} from "src/libs/api";
+import { get } from "src/libs/api";
 
 interface View {
     message: string;
@@ -15,8 +15,8 @@ interface ViewProps {
     setWasMuateView: (flag: boolean) => void;
 }
 
-export function Views({movieId, wasMutateView, setWasMuateView}: ViewProps) {
-    const {data, mutate, isValidating} = useSWR<View>(`/api/v1/views/${movieId}`, get);
+export function Views({ movieId, wasMutateView, setWasMuateView }: ViewProps) {
+    const { data, mutate, isValidating } = useSWR<View>(`/api/v1/views/${movieId}`, get);
 
     useEffect(() => {
         if (wasMutateView) {
@@ -28,11 +28,7 @@ export function Views({movieId, wasMutateView, setWasMuateView}: ViewProps) {
 
     return (
         <>
-            <Chip
-                icon={<MovieIcon/>}
-                label={`${data?.views ? data.views : 0} views`}
-                color="info"
-            />
+            <Chip icon={<MovieIcon />} label={`${data?.views ? data.views : 0} views`} color="info" />
         </>
     );
 }

@@ -1,5 +1,5 @@
-import {useSession} from "next-auth/react";
-import {useEffect, useState} from "react";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 export const useHasUsername = () => {
     const session = useSession();
@@ -12,4 +12,4 @@ export const useHasUsername = () => {
     }, [session]);
 
     return author;
-}
+};

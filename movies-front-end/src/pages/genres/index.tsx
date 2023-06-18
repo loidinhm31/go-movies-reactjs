@@ -1,12 +1,12 @@
 import Link from "next/link";
 import useSWR from "swr";
-import {get} from "src/libs/api";
-import {Box, Chip, ListItem, Paper, Stack, Typography} from "@mui/material";
+import { get } from "src/libs/api";
+import { Box, Chip, ListItem, Paper, Stack, Typography } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import {GenreType} from "src/types/movies";
-import {useState} from "react";
+import { GenreType } from "src/types/movies";
+import { useState } from "react";
 
-const GenrePaper = ({title, genres}) => {
+const GenrePaper = ({ title, genres }) => {
     return (
         <Box>
             <Typography variant="overline">{title}</Typography>
@@ -21,31 +21,26 @@ const GenrePaper = ({title, genres}) => {
                 }}
                 component="ul"
             >
-                {genres && genres.map((g) => (
-                    <Link
-                        key={g.id}
-                        href={`/genres/${g.id}?genreName=${g.name}`}
-                        style={{textDecoration: "none"}}
-                    >
-                        <ListItem>
-                            <Chip
-                                color="info"
-                                variant="filled"
-                                clickable
-                                label={g.name}/>
-                        </ListItem>
-
-                    </Link>
-                ))}
+                {genres &&
+                    genres.map((g) => (
+                        <Link
+                            key={g.id}
+                            href={`/genres/${g.id}?genreName=${g.name}`}
+                            style={{ textDecoration: "none" }}
+                        >
+                            <ListItem>
+                                <Chip color="info" variant="filled" clickable label={g.name} />
+                            </ListItem>
+                        </Link>
+                    ))}
             </Paper>
         </Box>
     );
-}
+};
 
 function Genres() {
     const [movieGenres, setMovieGenres] = useState<GenreType[]>([]);
     const [tvGenres, setTvGenres] = useState<GenreType[]>([]);
-
 
     const {} = useSWR<GenreType[]>(`/api/v1/genres`, get, {
         onSuccess: (data) => {
@@ -68,22 +63,15 @@ function Genres() {
 
     return (
         <Stack spacing={2}>
-            <Box sx={{p: 1, m: 1}}>
+            <Box sx={{ p: 1, m: 1 }}>
                 <Typography variant="h4">Genres</Typography>
             </Box>
-            <Divider/>
-            <Box component="span"
-                 sx={{display: "flex", justifyContent: "center", p: 1, m: 1}}>
+            <Divider />
+            <Box component="span" sx={{ display: "flex", justifyContent: "center", p: 1, m: 1 }}>
                 <Stack spacing={3}>
-                    <GenrePaper
-                        title={"Movie"}
-                        genres={movieGenres}
-                    />
+                    <GenrePaper title={"Movie"} genres={movieGenres} />
 
-                    <GenrePaper
-                        title={"TV Series"}
-                        genres={tvGenres}
-                    />
+                    <GenrePaper title={"TV Series"} genres={tvGenres} />
                 </Stack>
             </Box>
         </Stack>

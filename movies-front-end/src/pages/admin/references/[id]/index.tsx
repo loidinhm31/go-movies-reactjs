@@ -1,8 +1,8 @@
-import {useEffect, useRef, useState} from "react";
-import {useRouter} from "next/router";
-import {signIn} from "next-auth/react";
-import {GenreType, MovieType, RatingType} from "src/types/movies";
-import {get, post, postForm} from "src/libs/api";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
+import { GenreType, MovieType, RatingType } from "src/types/movies";
+import { get, post, postForm } from "src/libs/api";
 import useSWRMutation from "swr/mutation";
 import {
     Box,
@@ -23,16 +23,16 @@ import {
     RadioGroup,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
 import AlertDialog from "src/components/shared/alert";
-import NotifySnackbar, {NotifyState, sleep} from "src/components/shared/snackbar";
-import {format} from "date-fns";
-import {RemoveCircle} from "@mui/icons-material";
-import {ClientError} from "src/libs/api_client";
-import {movieTypes} from "src/components/MovieTypeSelect";
+import NotifySnackbar, { NotifyState, sleep } from "src/components/shared/snackbar";
+import { format } from "date-fns";
+import { RemoveCircle } from "@mui/icons-material";
+import { ClientError } from "src/libs/api_client";
+import { movieTypes } from "src/components/MovieTypeSelect";
 import useSWR from "swr";
-import {useCheckTokenAndRole} from "src/hooks/auth/useCheckTokenAndRole";
+import { useCheckTokenAndRole } from "src/hooks/auth/useCheckTokenAndRole";
 
 const ReferenceMovie = () => {
     const router = useRouter();
@@ -41,10 +41,10 @@ const ReferenceMovie = () => {
     const [isOpenAlertDialog, setIsOpenAlertDialog] = useState<boolean>(false);
     const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
 
-    const [notifyState, setNotifyState] = useState<NotifyState>({open: false, vertical: "top", horizontal: "right"});
+    const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
     // Get id from the URL
-    let {id, type} = router.query;
+    let { id, type } = router.query;
 
     const [movie, setMovie] = useState<MovieType>({
         title: "",
@@ -62,14 +62,17 @@ const ReferenceMovie = () => {
 
     const [newGenres, setNewGenres] = useState<GenreType[]>([]);
 
-    const {trigger: fetchGenres} = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${type}`, get);
-    const {trigger: fetchMovie} = useSWRMutation<MovieType>(`/api/v1/admin/movies/references/${id}?type=${type}`, get);
-    const {trigger: triggerMovie} = useSWRMutation(`/api/v1/admin/movies/save`, post);
-    const {trigger: uploadVideo} = useSWRMutation(`/api/v1/admin/movies/video/upload`, postForm);
-    const {trigger: removeVideo} = useSWRMutation(`/api/v1/admin/movies/video/remove`, post);
-    const {trigger: addNewGenres} = useSWRMutation(`/api/v1/admin/genres`, post);
+    const { trigger: fetchGenres } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${type}`, get);
+    const { trigger: fetchMovie } = useSWRMutation<MovieType>(
+        `/api/v1/admin/movies/references/${id}?type=${type}`,
+        get
+    );
+    const { trigger: triggerMovie } = useSWRMutation(`/api/v1/admin/movies/save`, post);
+    const { trigger: uploadVideo } = useSWRMutation(`/api/v1/admin/movies/video/upload`, postForm);
+    const { trigger: removeVideo } = useSWRMutation(`/api/v1/admin/movies/video/remove`, post);
+    const { trigger: addNewGenres } = useSWRMutation(`/api/v1/admin/genres`, post);
 
-    const {data: mpaaOptions} = useSWR<RatingType[]>("/api/v1/ratings", get);
+    const { data: mpaaOptions } = useSWR<RatingType[]>("/api/v1/ratings", get);
 
     useEffect(() => {
         if (isInvalid) {
@@ -80,59 +83,58 @@ const ReferenceMovie = () => {
 
     useEffect(() => {
         if (id) {
-            fetchMovie().then((movie) => {
-                setMovie(movie!);
+            fetchMovie()
+                .then((movie) => {
+                    setMovie(movie!);
 
-                // Set file video
-                if (movie?.video_path) {
-                    setVideoPath(movie?.video_path!);
-                }
+                    // Set file video
+                    if (movie?.video_path) {
+                        setVideoPath(movie?.video_path!);
+                    }
 
-                if (movie?.type_code !== undefined &&
-                    movie?.type_code !== "" &&
-                    movie.genres) {
-                    const checks: GenreType[] = [];
+                    if (movie?.type_code !== undefined && movie?.type_code !== "" && movie.genres) {
+                        const checks: GenreType[] = [];
 
-                    // Check genre from TMDB, use genre name to compare instead of id
-                    fetchGenres().then((results) => {
-                        results?.forEach((g) => {
-                            if (movie?.genres.some(mg => mg.name === g.name)) {
-                                checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: true});
-                            } else {
-                                checks.push({id: g.id, name: g.name, type_code: g.type_code, checked: false});
-                            }
+                        // Check genre from TMDB, use genre name to compare instead of id
+                        fetchGenres().then((results) => {
+                            results?.forEach((g) => {
+                                if (movie?.genres.some((mg) => mg.name === g.name)) {
+                                    checks.push({ id: g.id, name: g.name, type_code: g.type_code, checked: true });
+                                } else {
+                                    checks.push({ id: g.id, name: g.name, type_code: g.type_code, checked: false });
+                                }
+                            });
+
+                            setMovie({
+                                ...movie,
+                                genres: checks,
+                            } as MovieType);
+
+                            // Check new genres
+                            const nGenres: GenreType[] = [];
+                            const checked = checks?.filter((g) => g.checked);
+                            movie?.genres.forEach((mg) => {
+                                if (!checked!.some((g) => g.name === mg.name)) {
+                                    nGenres.push({
+                                        name: mg.name,
+                                        type_code: movie.type_code,
+                                    } as GenreType);
+                                }
+                            });
+                            setNewGenres(nGenres);
                         });
-
-                        setMovie({
-                            ...movie,
-                            genres: checks,
-                        } as MovieType);
-
-                        // Check new genres
-                        const nGenres: GenreType[] = [];
-                        const checked = checks?.filter(g => g.checked);
-                        movie?.genres.forEach((mg) => {
-                            if (!checked!.some(g => g.name === mg.name)) {
-                                nGenres.push({
-                                    name: mg.name,
-                                    type_code: movie.type_code,
-                                } as GenreType);
-                            }
-                        });
-                        setNewGenres(nGenres);
+                    }
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
                     });
-                }
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
                 });
-            });
         }
-
     }, [id, router]);
 
     const handleSubmit = (event) => {
@@ -140,21 +142,21 @@ const ReferenceMovie = () => {
 
         let errors: any = [];
         let required = [
-            {field: movie.title, name: "title", label: "Title"},
-            {field: movie.type_code, name: "type_code", label: "Type Movie"},
-            {field: movie.release_date, name: "release_date", label: "Release Date"},
-            {field: movie.runtime, name: "runtime", label: "Runtime"},
-            {field: movie.description, name: "description", label: "Description"},
-            {field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating"},
+            { field: movie.title, name: "title", label: "Title" },
+            { field: movie.type_code, name: "type_code", label: "Type Movie" },
+            { field: movie.release_date, name: "release_date", label: "Release Date" },
+            { field: movie.runtime, name: "runtime", label: "Runtime" },
+            { field: movie.description, name: "description", label: "Description" },
+            { field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating" },
         ];
-        required.forEach(function ({field, label}: any) {
+        required.forEach(function ({ field, label }: any) {
             if (field === "" || field === undefined) {
                 errors.push(label);
             }
         });
 
         // Check genres
-        if (!movie.genres.some(g => g.checked)) {
+        if (!movie.genres.some((g) => g.checked)) {
             setIsOpenAlertDialog(true);
             errors.push("Genres");
         }
@@ -165,7 +167,7 @@ const ReferenceMovie = () => {
                 message: `Fill value for ${errors.join(", ")}`,
                 vertical: "bottom",
                 horizontal: "center",
-                severity: "warning"
+                severity: "warning",
             });
             return false;
         }
@@ -175,39 +177,40 @@ const ReferenceMovie = () => {
         if (movie.image_url !== "") {
             movie.image_url = `${process.env.NEXT_PUBLIC_TMDB_IMAGE_PATH}/${movie.image_url}`;
         }
-        triggerMovie(movie).then((data) => {
-            if (data.message === "ok") {
+        triggerMovie(movie)
+            .then((data) => {
+                if (data.message === "ok") {
+                    setNotifyState({
+                        open: true,
+                        message: "Movie Saved",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "success",
+                    });
+
+                    (async () => {
+                        await sleep(1500);
+                        await router.push("/admin/manage-catalogue");
+                    })();
+                }
+            })
+            .catch((error: ClientError) => {
                 setNotifyState({
                     open: true,
-                    message: "Movie Saved",
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "success"
+                    severity: "error",
                 });
-
-                (async () => {
-                    await sleep(1500);
-                    await router.push("/admin/manage-catalogue");
-                })();
-            }
-        }).catch((error: ClientError) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
             });
-        });
     };
 
     const handleChange = (event, name: string) => {
         let value: string | number = event.target.value;
         if (name === "runtime" || name === "price") {
-             value = Number(value);
+            value = Number(value);
         } else if (name === "release_date") {
-            if (Number.isNaN(new Date(event.target.value).getTime()))
-                return;
+            if (Number.isNaN(new Date(event.target.value).getTime())) return;
         }
         setMovie({
             ...movie,
@@ -229,7 +232,7 @@ const ReferenceMovie = () => {
         videoFileRef.current.click();
     };
 
-    const handleVideoFileChange = event => {
+    const handleVideoFileChange = (event) => {
         const fileObj = event.target.files && event.target.files[0];
         if (!fileObj) {
             return;
@@ -243,32 +246,34 @@ const ReferenceMovie = () => {
         const formData = new FormData();
         formData.append("file", fileObj);
 
-        uploadVideo(formData).then((result) => {
-            if (result.fileName) {
-                setVideoPath(result.fileName);
+        uploadVideo(formData)
+            .then((result) => {
+                if (result.fileName) {
+                    setVideoPath(result.fileName);
 
-                setMovie({
-                    ...movie,
-                    video_path: result.fileName.split(".")[0],
-                });
+                    setMovie({
+                        ...movie,
+                        video_path: result.fileName.split(".")[0],
+                    });
 
+                    setNotifyState({
+                        open: true,
+                        message: "Video Uploaded",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info",
+                    });
+                }
+            })
+            .catch((error) => {
                 setNotifyState({
                     open: true,
-                    message: "Video Uploaded",
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "info"
+                    severity: "error",
                 });
-            }
-        }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
             });
-        });
     };
 
     const handleRemoveVideoFileClick = () => {
@@ -277,100 +282,103 @@ const ReferenceMovie = () => {
             const fileName = paths[paths.length - 1];
             removeVideo({
                 fileName: fileName,
-            }).then((result) => {
-                if (result.message === "ok") {
-                    setVideoFile(null);
-                    setVideoPath("");
-
-                    setMovie({
-                        ...movie,
-                        video_path: "",
-                    });
-
-                    setNotifyState({
-                        open: true,
-                        message: "Video Removed",
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "info"
-                    });
-                } else {
-                    setNotifyState({
-                        open: true,
-                        message: `Cannot remove video, ${result.result}`,
-                        vertical: "top",
-                        horizontal: "right",
-                        severity: "info"
-                    });
-                }
-            }).catch((error) => {
-                setNotifyState({
-                    open: true,
-                    message: error.message.message,
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "error"
-                });
             })
+                .then((result) => {
+                    if (result.message === "ok") {
+                        setVideoFile(null);
+                        setVideoPath("");
+
+                        setMovie({
+                            ...movie,
+                            video_path: "",
+                        });
+
+                        setNotifyState({
+                            open: true,
+                            message: "Video Removed",
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "info",
+                        });
+                    } else {
+                        setNotifyState({
+                            open: true,
+                            message: `Cannot remove video, ${result.result}`,
+                            vertical: "top",
+                            horizontal: "right",
+                            severity: "info",
+                        });
+                    }
+                })
+                .catch((error) => {
+                    setNotifyState({
+                        open: true,
+                        message: error.message.message,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "error",
+                    });
+                });
         }
     };
 
     const handleAddNewGenresClick = () => {
         addNewGenres({
             genres: newGenres,
-        }).then((result) => {
-            if (result.message === "ok") {
-                setNewGenres([]);
+        })
+            .then((result) => {
+                if (result.message === "ok") {
+                    setNewGenres([]);
 
-                setNotifyState({
-                    open: true,
-                    message: "New Genres Added",
-                    vertical: "top",
-                    horizontal: "right",
-                    severity: "info"
-                });
+                    setNotifyState({
+                        open: true,
+                        message: "New Genres Added",
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info",
+                    });
 
-                fetchGenres().then((result) => {
-                    setMovie(
-                        {
+                    fetchGenres().then((result) => {
+                        setMovie({
                             ...movie,
                             genres: result!,
-                        }
-                    )
-                });
-            } else {
+                        });
+                    });
+                } else {
+                    setNotifyState({
+                        open: true,
+                        message: `Cannot add new genres, ${result.message}`,
+                        vertical: "top",
+                        horizontal: "right",
+                        severity: "info",
+                    });
+                }
+            })
+            .catch((error: ClientError) => {
                 setNotifyState({
                     open: true,
-                    message: `Cannot add new genres, ${result.message}`,
+                    message: error.message.message,
                     vertical: "top",
                     horizontal: "right",
-                    severity: "info"
+                    severity: "error",
                 });
-            }
-        }).catch((error: ClientError) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
             });
-        })
-    }
+    };
 
     return (
         <>
-            <NotifySnackbar state={notifyState} setState={setNotifyState}/>
+            <NotifySnackbar state={notifyState} setState={setNotifyState} />
 
-            {isOpenAlertDialog &&
+            {isOpenAlertDialog && (
                 <AlertDialog
                     open={isOpenAlertDialog}
                     setOpen={setIsOpenAlertDialog}
                     title={"Error!"}
                     description={"You must choose at least one genre!"}
-                    confirmText={"Agree"}/>
-            }
-            {isOpenDeleteDialog &&
+                    confirmText={"Agree"}
+                />
+            )}
+            {isOpenDeleteDialog && (
                 <AlertDialog
                     open={isOpenDeleteDialog}
                     setOpen={setIsOpenDeleteDialog}
@@ -379,14 +387,13 @@ const ReferenceMovie = () => {
                     confirmText={"Yes"}
                     showCancelButton={true}
                 />
-            }
+            )}
             <Stack spacing={2}>
-
-                <Box sx={{p: 1, m: 1}}>
+                <Box sx={{ p: 1, m: 1 }}>
                     <Typography variant="h4">Add Reference Movie</Typography>
                 </Box>
-                <Divider/>
-                <Box sx={{display: "flex", justifyContent: "center", p: 1, m: 1, width: 1}}>
+                <Divider />
+                <Box sx={{ display: "flex", justifyContent: "center", p: 1, m: 1, width: 1 }}>
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={2}>
                             <Grid item xs={8}>
@@ -395,12 +402,12 @@ const ReferenceMovie = () => {
                                     label="Title"
                                     variant="outlined"
                                     value={movie.title}
-                                    onChange={e => handleChange(e, "title")}
+                                    onChange={(e) => handleChange(e, "title")}
                                 />
                             </Grid>
 
                             <Grid item xs={2}>
-                                {movie.type_code === "MOVIE" &&
+                                {movie.type_code === "MOVIE" && (
                                     <TextField
                                         fullWidth
                                         label="Price"
@@ -411,9 +418,9 @@ const ReferenceMovie = () => {
                                             endAdornment: <InputAdornment position="end">USD</InputAdornment>,
                                         }}
                                         value={movie.price}
-                                        onChange={e => handleChange(e, "price")}
+                                        onChange={(e) => handleChange(e, "price")}
                                     />
-                                }
+                                )}
                             </Grid>
 
                             <Grid item xs={2}>
@@ -436,16 +443,14 @@ const ReferenceMovie = () => {
                                                     disabled
                                                     key={`${t}-${index}`}
                                                     value={t}
-                                                    control={<Radio/>}
+                                                    control={<Radio />}
                                                     label={label}
                                                 />
                                             );
                                         })}
                                     </RadioGroup>
                                 </FormControl>
-
                             </Grid>
-
 
                             <Grid item xs={4}>
                                 <TextField
@@ -455,7 +460,7 @@ const ReferenceMovie = () => {
                                     type="date"
                                     name="release_date"
                                     value={format(new Date(movie.release_date!), "yyyy-MM-dd")}
-                                    onChange={e => handleChange(e, "release_date")}
+                                    onChange={(e) => handleChange(e, "release_date")}
                                 />
                             </Grid>
 
@@ -470,7 +475,7 @@ const ReferenceMovie = () => {
                                         endAdornment: <InputAdornment position="end">minutes</InputAdornment>,
                                     }}
                                     value={movie.runtime}
-                                    onChange={e => handleChange(e, "runtime")}
+                                    onChange={(e) => handleChange(e, "runtime")}
                                 />
                             </Grid>
 
@@ -481,11 +486,14 @@ const ReferenceMovie = () => {
                                     label="MPAA Rating"
                                     variant="outlined"
                                     value={movie.mpaa_rating}
-                                    onChange={e => handleChange(e, "mpaa_rating")}
+                                    onChange={(e) => handleChange(e, "mpaa_rating")}
                                 >
-                                    {mpaaOptions && mpaaOptions.map((o) =>
-                                        <MenuItem key={o.id} value={o.code}>{o.name}</MenuItem>
-                                    )}
+                                    {mpaaOptions &&
+                                        mpaaOptions.map((o) => (
+                                            <MenuItem key={o.id} value={o.code}>
+                                                {o.name}
+                                            </MenuItem>
+                                        ))}
                                 </TextField>
                             </Grid>
 
@@ -495,11 +503,11 @@ const ReferenceMovie = () => {
                                     label="Image Path"
                                     variant="outlined"
                                     value={movie.image_url}
-                                    onChange={e => handleChange(e, "image_url")}
+                                    onChange={(e) => handleChange(e, "image_url")}
                                 />
                             </Grid>
 
-                            {movie && movie.type_code === "MOVIE" &&
+                            {movie && movie.type_code === "MOVIE" && (
                                 <Grid item xs={12}>
                                     <input
                                         ref={videoFileRef}
@@ -509,7 +517,7 @@ const ReferenceMovie = () => {
                                         onChange={handleVideoFileChange}
                                     />
                                     <Stack spacing={2} direction="row">
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
                                             <Typography variant="subtitle1">Upload Video</Typography>
                                         </Box>
 
@@ -517,31 +525,32 @@ const ReferenceMovie = () => {
                                             Choose File
                                         </Button>
 
-                                        <Box sx={{display: "flex", alignItems: "center"}}>
+                                        <Box sx={{ display: "flex", alignItems: "center" }}>
                                             <Typography>{videoFile?.name}</Typography>
                                         </Box>
 
-                                        {videoPath !== "" &&
+                                        {videoPath !== "" && (
                                             <>
-                                                <Box sx={{display: "flex", alignItems: "center"}}>
+                                                <Box sx={{ display: "flex", alignItems: "center" }}>
                                                     <Link
                                                         href={`${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${videoPath}`}
                                                         target="_blank"
                                                     >
-                                                        {
-                                                            videoPath.split("/").reverse()[0]
-                                                        }
+                                                        {videoPath.split("/").reverse()[0]}
                                                     </Link>
                                                 </Box>
-                                                <IconButton aria-label="delete" color="error"
-                                                            onClick={handleRemoveVideoFileClick}>
-                                                    <RemoveCircle/>
+                                                <IconButton
+                                                    aria-label="delete"
+                                                    color="error"
+                                                    onClick={handleRemoveVideoFileClick}
+                                                >
+                                                    <RemoveCircle />
                                                 </IconButton>
                                             </>
-                                        }
+                                        )}
                                     </Stack>
                                 </Grid>
-                            }
+                            )}
                             <Grid item xs={12}>
                                 <TextField
                                     fullWidth
@@ -550,57 +559,57 @@ const ReferenceMovie = () => {
                                     multiline
                                     rows={4}
                                     value={movie.description}
-                                    onChange={e => handleChange(e, "description")}
+                                    onChange={(e) => handleChange(e, "description")}
                                 />
                             </Grid>
 
-                            <Divider component="div" variant="middle"/>
+                            <Divider component="div" variant="middle" />
                         </Grid>
 
-                        <Typography sx={{p: 2}} variant="h6">Genres</Typography>
-                        {newGenres.length > 0 &&
-                            <Stack direction="row" spacing={3} sx={{display: "flex", alignItems: "center"}}>
-
+                        <Typography sx={{ p: 2 }} variant="h6">
+                            Genres
+                        </Typography>
+                        {newGenres.length > 0 && (
+                            <Stack direction="row" spacing={3} sx={{ display: "flex", alignItems: "center" }}>
                                 <Typography>New Genres for Reference Movie</Typography>
-                                <Box sx={{p: 1, border: 1, borderRadius: 1, borderWidth: 1}}>
+                                <Box sx={{ p: 1, border: 1, borderRadius: 1, borderWidth: 1 }}>
                                     {newGenres.map((g, index) => {
-                                        return (
-                                            <Chip key={index} label={g.name} color="warning" sx={{p: 1, m: 1}}/>
-                                        );
+                                        return <Chip key={index} label={g.name} color="warning" sx={{ p: 1, m: 1 }} />;
                                     })}
                                 </Box>
-                                <Button variant="contained"
-                                        onClick={handleAddNewGenresClick}>
+                                <Button variant="contained" onClick={handleAddNewGenresClick}>
                                     Add New Genres
                                 </Button>
                             </Stack>
-                        }
+                        )}
 
                         <Grid item xs={12}>
                             <FormGroup>
                                 <Grid container spacing={1}>
-                                    {movie.genres && movie.genres.length > 0 &&
+                                    {movie.genres &&
+                                        movie.genres.length > 0 &&
                                         movie.genres.map((g, index) => (
-                                            <Grid key={`${g.id}-${index}`} item xs={2} sx={{m: 1}}>
+                                            <Grid key={`${g.id}-${index}`} item xs={2} sx={{ m: 1 }}>
                                                 <FormControlLabel
                                                     label={g.name}
                                                     name="genre"
                                                     onChange={(event) => handleCheck(event, index)}
                                                     value={g.id}
-                                                    control={<Checkbox checked={g.checked === true}/>}
+                                                    control={<Checkbox checked={g.checked === true} />}
                                                 />
                                             </Grid>
-                                        ))
-                                    }
+                                        ))}
                                 </Grid>
                             </FormGroup>
                         </Grid>
 
-                        <Divider component="div" variant="middle"/>
+                        <Divider component="div" variant="middle" />
 
-                        <Box sx={{display: "flex", justifyContent: "center", m: 2}}>
+                        <Box sx={{ display: "flex", justifyContent: "center", m: 2 }}>
                             <Stack direction="row" spacing={2}>
-                                <Button variant="contained" type="submit">Save</Button>
+                                <Button variant="contained" type="submit">
+                                    Save
+                                </Button>
                             </Stack>
                         </Box>
                     </form>

@@ -1,7 +1,7 @@
-import {withOptionalRole} from "src/libs/auth";
+import { withOptionalRole } from "src/libs/auth";
 
 const handler = withOptionalRole("banned", async (req, res, token) => {
-    const {seasonId} = req.query;
+    const { seasonId } = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -13,15 +13,13 @@ const handler = withOptionalRole("banned", async (req, res, token) => {
     const requestOptions = {
         method: "GET",
         headers: headers,
-    }
+    };
 
     try {
-        const response = await fetch(`${process.env.API_BASE_URL}/episodes?seasonID=${seasonId}`,
-            requestOptions
-        );
+        const response = await fetch(`${process.env.API_BASE_URL}/episodes?seasonID=${seasonId}`, requestOptions);
         res.status(response.status).json(await response.json());
     } catch (error) {
-        res.status(500).json({message: "server error"});
+        res.status(500).json({ message: "server error" });
     }
 });
 

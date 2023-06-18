@@ -8,7 +8,7 @@ import {
     MenuItem,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
 
 interface SearchStringProps {
@@ -18,12 +18,10 @@ interface SearchStringProps {
     handleStringField: (label: string, values: string | string[], forField: string, defType: string) => void;
 }
 
-export function SearchString({label, field, defType, handleStringField}: SearchStringProps) {
+export function SearchString({ label, field, defType, handleStringField }: SearchStringProps) {
     return (
         <Accordion>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>{label}</Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -31,13 +29,11 @@ export function SearchString({label, field, defType, handleStringField}: SearchS
                     <TextField
                         select
                         variant="filled"
-                        sx={{minWidth: 100}}
+                        sx={{ minWidth: 100 }}
                         id={`${field}-1`}
                         label={"Operator"}
-                        onChange={(event) =>
-                            handleStringField(field, event.target.value, "operator", defType)}
+                        onChange={(event) => handleStringField(field, event.target.value, "operator", defType)}
                     >
-
                         <MenuItem value={"and"}>AND</MenuItem>
                         <MenuItem value={"or"}>OR</MenuItem>
                     </TextField>
@@ -60,20 +56,19 @@ export function SearchString({label, field, defType, handleStringField}: SearchS
                         freeSolo
                         renderTags={(vals: string[], getTagProps) =>
                             vals.map((option: string, index: number) => (
-                                <Chip label={option} {...getTagProps({index})} />
+                                <Chip label={option} {...getTagProps({ index })} />
                             ))
                         }
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                {...(defType === "number" ? {type: "number"} : {})}
+                                {...(defType === "number" ? { type: "number" } : {})}
                                 label="Value"
                                 placeholder="Value"
                             />
                         )}
                     />
                 </Stack>
-
             </AccordionDetails>
         </Accordion>
     );

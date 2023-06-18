@@ -15,17 +15,17 @@ import {
     TableHead,
     TablePagination,
     TableRow,
-    TableSortLabel
+    TableSortLabel,
 } from "@mui/material";
-import {visuallyHidden} from "@mui/utils";
-import {format} from "date-fns";
-import React, {useCallback, useEffect, useState} from "react";
+import { visuallyHidden } from "@mui/utils";
+import { format } from "date-fns";
+import React, { useCallback, useEffect, useState } from "react";
 import SearchKey from "src/components/Search/SearchKey";
 import AlertDialog from "src/components/shared/alert";
-import {NotifyState} from "src/components/shared/snackbar";
-import {del, patch, post} from "src/libs/api";
-import {MovieType} from "src/types/movies";
-import {Direction, PageType} from "src/types/page";
+import { NotifyState } from "src/components/shared/snackbar";
+import { del, patch, post } from "src/libs/api";
+import { MovieType } from "src/types/movies";
+import { Direction, PageType } from "src/types/page";
 import useSWRMutation from "swr/mutation";
 
 export interface Data {
@@ -83,11 +83,10 @@ interface EnhancedTableHeadProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableHeadProps) {
-    const {order, orderBy, onRequestSort} = props;
-    const createSortHandler =
-        (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-            onRequestSort(event, newOrderBy);
-        };
+    const { order, orderBy, onRequestSort } = props;
+    const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+        onRequestSort(event, newOrderBy);
+    };
 
     return (
         <TableHead>
@@ -113,35 +112,32 @@ function EnhancedTableHead(props: EnhancedTableHeadProps) {
                         </TableSortLabel>
                     </TableCell>
                 ))}
-                <TableCell
-                    aria-label="last"
-                    style={{width: "var(--Table-lastColumnWidth)"}}/>
+                <TableCell aria-label="last" style={{ width: "var(--Table-lastColumnWidth)" }} />
             </TableRow>
         </TableHead>
     );
 }
 
-
 interface ManageMoviesTableProps {
     selectedMovie: MovieType | null;
-    setSelectedMovie: (obj: MovieType | null) => void
+    setSelectedMovie: (obj: MovieType | null) => void;
     setOpenSeasonDialog: (flag: boolean) => void;
     setNotifyState: (state: NotifyState) => void;
 }
 
 export default function ManageMoviesTable({
-                                              selectedMovie,
-                                              setSelectedMovie,
-                                              setOpenSeasonDialog,
-                                              setNotifyState
-                                          }: ManageMoviesTableProps) {
+    selectedMovie,
+    setSelectedMovie,
+    setOpenSeasonDialog,
+    setNotifyState,
+}: ManageMoviesTableProps) {
     const [page, setPage] = useState<PageType<MovieType> | null>(null);
 
     const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
     const [deleteId, setDeleteId] = useState<number | null>();
 
     const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(5)
+    const [pageSize, setPageSize] = useState(5);
     const [order, setOrder] = useState<Direction>(Direction.ASC);
     const [orderBy, setOrderBy] = useState<keyof Data>("release_date");
 
@@ -150,19 +146,21 @@ export default function ManageMoviesTable({
     const [searchKey, setSearchKey] = useState<string>("");
 
     // Get Tables
-    const {trigger: requestPage} =
-        useSWRMutation(`/api/v1/movies?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`, post);
-    const {trigger: deleteMovie} = useSWRMutation(`/api/v1/admin/movies/delete/${deleteId}`, del);
-    const {trigger: updateMoviePrice} = useSWRMutation(`/api/v1/admin/movies/price`, patch);
+    const { trigger: requestPage } = useSWRMutation(
+        `/api/v1/movies?q=${searchKey}&pageIndex=${pageIndex}&pageSize=${pageSize}`,
+        post
+    );
+    const { trigger: deleteMovie } = useSWRMutation(`/api/v1/admin/movies/delete/${deleteId}`, del);
+    const { trigger: updateMoviePrice } = useSWRMutation(`/api/v1/admin/movies/price`, patch);
 
     useEffect(() => {
         handeRequestPage();
-    }, [pageIndex, pageSize, order, orderBy, searchKey])
+    }, [pageIndex, pageSize, order, orderBy, searchKey]);
 
     // Ensure the page index has been reset when the page size changes
     useEffect(() => {
         setPageIndex(0);
-    }, [pageSize, searchKey])
+    }, [pageSize, searchKey]);
 
     useEffect(() => {
         if (deleteId && isConfirmDelete) {
@@ -174,7 +172,7 @@ export default function ManageMoviesTable({
                             message: "Movie deleted",
                             vertical: "top",
                             horizontal: "right",
-                            severity: "info"
+                            severity: "info",
                         });
 
                         handeRequestPage();
@@ -186,7 +184,7 @@ export default function ManageMoviesTable({
                         message: error.message.message,
                         vertical: "top",
                         horizontal: "right",
-                        severity: "error"
+                        severity: "error",
                     });
                 })
                 .finally(() => {
@@ -210,22 +208,24 @@ export default function ManageMoviesTable({
                 orders: [
                     {
                         property: orderBy,
-                        direction: order
-                    }
-                ]
-            }
-        }).then((data) => {
-            setPage(data);
-        }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
+                        direction: order,
+                    },
+                ],
+            },
+        })
+            .then((data) => {
+                setPage(data);
+            })
+            .catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error",
+                });
             });
-        });
-    }
+    };
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
@@ -234,14 +234,14 @@ export default function ManageMoviesTable({
             setOrder?.(toggledOrder);
             setOrderBy?.(newOrderBy);
         },
-        [order, orderBy, pageIndex, pageSize],
+        [order, orderBy, pageIndex, pageSize]
     );
 
     const handleChangePageIndex = useCallback(
         (event: unknown, newPageIndex: number) => {
             setPageIndex(newPageIndex);
         },
-        [order, orderBy, pageSize],
+        [order, orderBy, pageSize]
     );
 
     const handleChangeRowsPerPage = useCallback(
@@ -250,7 +250,7 @@ export default function ManageMoviesTable({
             setPageSize(updatedRowsPerPage);
             setPageIndex(0);
         },
-        [order, orderBy],
+        [order, orderBy]
     );
 
     const handleDeleteRow = (movie: MovieType) => {
@@ -261,10 +261,10 @@ export default function ManageMoviesTable({
     const handleViewTv = (movie: MovieType) => {
         setOpenSeasonDialog(true);
         setSelectedMovie(movie);
-    }
+    };
 
     const handleUpdateAveragePrice = (movie: MovieType) => {
-        updateMoviePrice({id: movie.id} as MovieType)
+        updateMoviePrice({ id: movie.id } as MovieType)
             .then((result) => {
                 if (result.message === "ok") {
                     setNotifyState({
@@ -272,23 +272,24 @@ export default function ManageMoviesTable({
                         message: "Average Price Was Updated",
                         vertical: "top",
                         horizontal: "right",
-                        severity: "success"
+                        severity: "success",
                     });
                 }
-            }).catch((error) => {
-            setNotifyState({
-                open: true,
-                message: error.message.message,
-                vertical: "top",
-                horizontal: "right",
-                severity: "error"
+            })
+            .catch((error) => {
+                setNotifyState({
+                    open: true,
+                    message: error.message.message,
+                    vertical: "top",
+                    horizontal: "right",
+                    severity: "error",
+                });
             });
-        });
-    }
+    };
 
     return (
         <>
-            {isOpenDeleteDialog &&
+            {isOpenDeleteDialog && (
                 <AlertDialog
                     open={isOpenDeleteDialog}
                     setOpen={setIsOpenDeleteDialog}
@@ -296,28 +297,23 @@ export default function ManageMoviesTable({
                     description={"You cannot undo this action!"}
                     confirmText={"Yes"}
                     showCancelButton={true}
-                    setConfirmDelete={setIsConfirmDelete}/>
-            }
+                    setConfirmDelete={setIsConfirmDelete}
+                />
+            )}
 
-            {!page &&
+            {!page && (
                 <>
-                    <Skeleton/>
-                    <Skeleton animation="wave"/>
-                    <Skeleton animation={false}/>
+                    <Skeleton />
+                    <Skeleton animation="wave" />
+                    <Skeleton animation={false} />
                 </>
-            }
-            <SearchKey
-                keyword={searchKey}
-                setKeyword={setSearchKey}
-            />
-            {page && page.content &&
-                <Box sx={{width: "100%"}}>
-                    <Paper sx={{width: "100%", mb: 2}}>
+            )}
+            <SearchKey keyword={searchKey} setKeyword={setSearchKey} />
+            {page && page.content && (
+                <Box sx={{ width: "100%" }}>
+                    <Paper sx={{ width: "100%", mb: 2 }}>
                         <TableContainer>
-                            <Table
-                                sx={{minWidth: 750}}
-                                aria-labelledby="tableTitle"
-                            >
+                            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
                                 <EnhancedTableHead
                                     order={order!}
                                     orderBy={orderBy!}
@@ -326,65 +322,72 @@ export default function ManageMoviesTable({
                                 <TableBody>
                                     {page
                                         ? page.content?.map((row, index) => {
-                                            return (
-                                                <TableRow
-                                                    hover
-                                                    role="checkbox"
-                                                    tabIndex={-1}
-                                                    key={row.id}
-                                                    sx={{cursor: "pointer"}}
-                                                >
-                                                    <TableCell>
-                                                        <Chip label={row.title} color="info" component="a"
-                                                              href={`/movies/${row.id}`} clickable/>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.type_code}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {`${row.type_code === "MOVIE" ? (row.price ? row.price : "FREE") : ""}`}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {format(new Date(row.release_date!), "yyyy-MM-dd")}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {row.mpaa_rating}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Box sx={{display: "flex", gap: 1}}>
-                                                            <IconButton
-                                                                color="inherit"
-                                                                href={`/admin/manage-catalogue/movies?id=${row.id}`}
-                                                            >
-                                                                <EditIcon/>
-                                                            </IconButton>
-                                                            <IconButton
-                                                                color="error"
-                                                                onClick={() => handleDeleteRow(row)}
-                                                            >
-                                                                <DeleteIcon/>
-                                                            </IconButton>
-                                                            {row.type_code === "TV" &&
-                                                                <>
-                                                                    <IconButton
-                                                                        color="inherit"
-                                                                        onClick={() => handleViewTv(row)}
-                                                                    >
-                                                                        <VisibilityIcon/>
-                                                                    </IconButton>
-                                                                    <IconButton
-                                                                        color="secondary"
-                                                                        onClick={() => handleUpdateAveragePrice(row)}
-                                                                    >
-                                                                        <PriceChangeIcon/>
-                                                                    </IconButton>
-                                                                </>
-                                                            }
-                                                        </Box>
-                                                    </TableCell>
-                                                </TableRow>
-                                            );
-                                        })
+                                              return (
+                                                  <TableRow
+                                                      hover
+                                                      role="checkbox"
+                                                      tabIndex={-1}
+                                                      key={row.id}
+                                                      sx={{ cursor: "pointer" }}
+                                                  >
+                                                      <TableCell>
+                                                          <Chip
+                                                              label={row.title}
+                                                              color="info"
+                                                              component="a"
+                                                              href={`/movies/${row.id}`}
+                                                              clickable
+                                                          />
+                                                      </TableCell>
+                                                      <TableCell>{row.type_code}</TableCell>
+                                                      <TableCell align="right">
+                                                          {`${
+                                                              row.type_code === "MOVIE"
+                                                                  ? row.price
+                                                                      ? row.price
+                                                                      : "FREE"
+                                                                  : ""
+                                                          }`}
+                                                      </TableCell>
+                                                      <TableCell>
+                                                          {format(new Date(row.release_date!), "yyyy-MM-dd")}
+                                                      </TableCell>
+                                                      <TableCell>{row.mpaa_rating}</TableCell>
+                                                      <TableCell>
+                                                          <Box sx={{ display: "flex", gap: 1 }}>
+                                                              <IconButton
+                                                                  color="inherit"
+                                                                  href={`/admin/manage-catalogue/movies?id=${row.id}`}
+                                                              >
+                                                                  <EditIcon />
+                                                              </IconButton>
+                                                              <IconButton
+                                                                  color="error"
+                                                                  onClick={() => handleDeleteRow(row)}
+                                                              >
+                                                                  <DeleteIcon />
+                                                              </IconButton>
+                                                              {row.type_code === "TV" && (
+                                                                  <>
+                                                                      <IconButton
+                                                                          color="inherit"
+                                                                          onClick={() => handleViewTv(row)}
+                                                                      >
+                                                                          <VisibilityIcon />
+                                                                      </IconButton>
+                                                                      <IconButton
+                                                                          color="secondary"
+                                                                          onClick={() => handleUpdateAveragePrice(row)}
+                                                                      >
+                                                                          <PriceChangeIcon />
+                                                                      </IconButton>
+                                                                  </>
+                                                              )}
+                                                          </Box>
+                                                      </TableCell>
+                                                  </TableRow>
+                                              );
+                                          })
                                         : null}
                                 </TableBody>
                             </Table>
@@ -400,9 +403,7 @@ export default function ManageMoviesTable({
                         />
                     </Paper>
                 </Box>
-            }
-
+            )}
         </>
-
     );
 }

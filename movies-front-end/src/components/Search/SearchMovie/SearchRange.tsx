@@ -7,9 +7,9 @@ import {
     Slider,
     Stack,
     TextField,
-    Typography
+    Typography,
 } from "@mui/material";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 interface SearchRangeProps {
     label: string;
@@ -30,8 +30,7 @@ function valueLabelFormat(value: number) {
     return value;
 }
 
-
-export function SearchRange({label, field, defType, min, max, step, handleRangeField}: SearchRangeProps) {
+export function SearchRange({ label, field, defType, min, max, step, handleRangeField }: SearchRangeProps) {
     const [values, setValues] = useState<number[]>([0, 0]);
 
     useEffect(() => {
@@ -44,9 +43,7 @@ export function SearchRange({label, field, defType, min, max, step, handleRangeF
 
     return (
         <Accordion>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>{label}</Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -54,13 +51,11 @@ export function SearchRange({label, field, defType, min, max, step, handleRangeF
                     <TextField
                         select
                         variant="filled"
-                        sx={{minWidth: 100}}
+                        sx={{ minWidth: 100 }}
                         id={`${field}-1`}
                         label="Operator"
-                        onChange={(event) =>
-                            handleRangeField(field, event.target.value, "operator", defType)}
+                        onChange={(event) => handleRangeField(field, event.target.value, "operator", defType)}
                     >
-
                         <MenuItem value={"and"}>AND</MenuItem>
                         <MenuItem value={"or"}>OR</MenuItem>
                     </TextField>
@@ -85,7 +80,6 @@ export function SearchRange({label, field, defType, min, max, step, handleRangeF
                         max={max}
                         valueLabelFormat={valueLabelFormat}
                     />
-
                 </Stack>
             </AccordionDetails>
         </Accordion>

@@ -1,16 +1,17 @@
-import {withAnyRole} from "src/libs/auth";
+import { withAnyRole } from "src/libs/auth";
 import httpProxyMiddleware from "next-http-proxy-middleware";
-
 
 const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
     httpProxyMiddleware(req, res, {
         target: `${process.env.API_BASE_URL}/auth/blobs/file`,
-        pathRewrite: [{
-            patternStr: req.url!,
-            replaceStr: "",
-        }],
+        pathRewrite: [
+            {
+                patternStr: req.url!,
+                replaceStr: "",
+            },
+        ],
         headers: {
-            'Authorization': `Bearer ${token.accessToken}`,
+            Authorization: `Bearer ${token.accessToken}`,
         },
     });
 });
@@ -21,6 +22,6 @@ export const config = {
         bodyParser: false,
         externalResolver: true,
     },
-}
+};
 
 export default handler;

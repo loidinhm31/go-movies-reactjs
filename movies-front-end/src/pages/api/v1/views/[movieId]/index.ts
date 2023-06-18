@@ -1,5 +1,5 @@
 const handler = async (req, res) => {
-    let {movieId} = req.query;
+    let { movieId } = req.query;
 
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -7,29 +7,9 @@ const handler = async (req, res) => {
     const requestOptions = {
         method: "GET",
         headers: headers,
-    }
+    };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    const response = await fetch(`${process.env.API_BASE_URL}/views/${movieId}`,
-        requestOptions
-    );
+    const response = await fetch(`${process.env.API_BASE_URL}/views/${movieId}`, requestOptions);
     const views = await response.json();
     if (response.ok) {
         res.status(200).json(views);

@@ -1,6 +1,6 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {Accordion, AccordionDetails, AccordionSummary, MenuItem, Stack, TextField, Typography} from "@mui/material";
-import {useEffect, useState} from "react";
+import { Accordion, AccordionDetails, AccordionSummary, MenuItem, Stack, TextField, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 
 interface SearchDateProps {
     label: string;
@@ -9,7 +9,7 @@ interface SearchDateProps {
     handleDateField: (label: string, value: string, forField: string, defType: string, dateType: string) => void;
 }
 
-export function SearchDate({label, field, defType, handleDateField}: SearchDateProps) {
+export function SearchDate({ label, field, defType, handleDateField }: SearchDateProps) {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEnDate] = useState("");
 
@@ -25,14 +25,11 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
             setStartDate("");
         }
         handleDateField(field, endDate, "def", defType, "to");
-
     }, [endDate]);
 
     return (
         <Accordion>
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon/>}
-            >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography>Release Date</Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -40,13 +37,11 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
                     <TextField
                         select
                         variant="filled"
-                        sx={{minWidth: 100}}
+                        sx={{ minWidth: 100 }}
                         id={`${field}-1`}
                         label="Operator"
-                        onChange={(event) =>
-                            handleDateField(field, event.target.value, "operator", defType, "")}
+                        onChange={(event) => handleDateField(field, event.target.value, "operator", defType, "")}
                     >
-
                         <MenuItem value={"and"}>AND</MenuItem>
                         <MenuItem value={"or"}>OR</MenuItem>
                     </TextField>
@@ -69,7 +64,7 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
                         type="date"
                         name="release-3"
                         value={startDate}
-                        onChange={e => setStartDate(e.target.value)}
+                        onChange={(e) => setStartDate(e.target.value)}
                     />
 
                     <TextField
@@ -79,9 +74,8 @@ export function SearchDate({label, field, defType, handleDateField}: SearchDateP
                         type="date"
                         name="release-4"
                         value={endDate}
-                        onChange={e => setEnDate(e.target.value)}
+                        onChange={(e) => setEnDate(e.target.value)}
                     />
-
                 </Stack>
             </AccordionDetails>
         </Accordion>

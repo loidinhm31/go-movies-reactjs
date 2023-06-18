@@ -15,7 +15,7 @@ export interface AnalysisRequest {
     analysis: Analysis[];
     name?: string;
     type_code?: string;
-    isCumulative?: boolean
+    isCumulative?: boolean;
 }
 
 export interface Analysis {
