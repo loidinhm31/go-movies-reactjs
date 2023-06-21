@@ -16,7 +16,7 @@ function Movies() {
     return (
         <Stack spacing={2}>
             <Box sx={{ p: 1, m: 1 }}>
-                <Typography variant="h4">Movies</Typography>
+                <Typography variant="h4">All Movies</Typography>
             </Box>
             <Divider />
 

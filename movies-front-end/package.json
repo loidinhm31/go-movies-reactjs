@@ -39,7 +39,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "jest": "jest --watch",
+    "test": "jest --watchAll --coverage",
+    "test:ci": "jest --coverage",
+    "test:single": "jest --watch --collectCoverage=false",
     "fix:lint": "eslint --fix src/ --ext .js,.jsx,.ts,.tsx",
     "fix:format": "prettier --write ./src",
     "fix": "npm run fix:format && npm run fix:lint"
