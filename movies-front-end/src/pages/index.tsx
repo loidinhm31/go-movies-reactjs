@@ -1,8 +1,8 @@
-import { getDefaultLayout } from "src/components/Layout/Layout";
-import Home from "src/pages/home";
+import { getDefaultLayout } from "@/components/Layout/Layout";
+import Home from "@/pages/home";
 
 function App() {
-    return <Home />;
+  return <Home />;
 }
 
 App.getLayout = getDefaultLayout;

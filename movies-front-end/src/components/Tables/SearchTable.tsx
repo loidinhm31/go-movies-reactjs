@@ -1,238 +1,224 @@
 import React, { useCallback } from "react";
 import {
-    Box,
-    Chip,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TablePagination,
-    TableRow,
-    TableSortLabel,
+  Box,
+  Chip,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
-import { MovieType } from "src/types/movies";
-import { Direction, PageType } from "src/types/page";
+import { MovieType } from "@/types/movies";
+import { Direction, PageType } from "@/types/page";
 import format from "date-fns/format";
 
 export interface Data {
-    title: string;
-    price: number;
-    type_code: string;
-    release_date: Date;
-    runtime: number;
-    description: string;
-    mpaa_rating: string;
+  title: string;
+  price: number;
+  type_code: string;
+  release_date: Date;
+  runtime: number;
+  description: string;
+  mpaa_rating: string;
 }
 
 export interface HeadCell {
-    disablePadding: boolean;
-    id: keyof Data;
-    label: string;
-    numeric: boolean;
+  disablePadding: boolean;
+  id: keyof Data;
+  label: string;
+  numeric: boolean;
 }
 
 const headCells: readonly HeadCell[] = [
-    {
-        id: "title",
-        numeric: false,
-        disablePadding: false,
-        label: "Movie",
-    },
-    {
-        id: "type_code",
-        numeric: false,
-        disablePadding: false,
-        label: "Type",
-    },
-    {
-        id: "price",
-        numeric: true,
-        disablePadding: true,
-        label: "Price/ Average Price (USD)",
-    },
-    {
-        id: "release_date",
-        numeric: false,
-        disablePadding: false,
-        label: "Release Date",
-    },
-    {
-        id: "runtime",
-        numeric: true,
-        disablePadding: false,
-        label: "Runtime",
-    },
-    {
-        id: "description",
-        numeric: false,
-        disablePadding: false,
-        label: "Description",
-    },
-    {
-        id: "mpaa_rating",
-        numeric: false,
-        disablePadding: false,
-        label: "MPAA Rating",
-    },
+  {
+    id: "title",
+    numeric: false,
+    disablePadding: false,
+    label: "Movie",
+  },
+  {
+    id: "type_code",
+    numeric: false,
+    disablePadding: false,
+    label: "Type",
+  },
+  {
+    id: "price",
+    numeric: true,
+    disablePadding: true,
+    label: "Price/ Average Price (USD)",
+  },
+  {
+    id: "release_date",
+    numeric: false,
+    disablePadding: false,
+    label: "Release Date",
+  },
+  {
+    id: "runtime",
+    numeric: true,
+    disablePadding: false,
+    label: "Runtime",
+  },
+  {
+    id: "description",
+    numeric: false,
+    disablePadding: false,
+    label: "Description",
+  },
+  {
+    id: "mpaa_rating",
+    numeric: false,
+    disablePadding: false,
+    label: "MPAA Rating",
+  },
 ];
 
 interface SearchTableHeadProps {
-    onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
-    order: Direction;
-    orderBy: string;
+  onRequestSort: (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => void;
+  order: Direction;
+  orderBy: string;
 }
 
 function SearchTableHead(props: SearchTableHeadProps) {
-    const { order, orderBy, onRequestSort } = props;
-    const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
-        onRequestSort(event, newOrderBy);
-    };
+  const { order, orderBy, onRequestSort } = props;
+  const createSortHandler = (newOrderBy: keyof Data) => (event: React.MouseEvent<unknown>) => {
+    onRequestSort(event, newOrderBy);
+  };
 
-    return (
-        <TableHead>
-            <TableRow>
-                {headCells.map((headCell) => (
-                    <TableCell
-                        key={headCell.id}
-                        align={headCell.numeric ? "right" : "left"}
-                        padding={headCell.disablePadding ? "none" : "normal"}
-                        sortDirection={orderBy === headCell.id ? order : false}
-                    >
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : "asc"}
-                            onClick={createSortHandler(headCell.id)}
-                        >
-                            <b>{headCell.label}</b>
-                            {orderBy === headCell.id ? (
-                                <Box component="span" sx={visuallyHidden}>
-                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                </Box>
-                            ) : null}
-                        </TableSortLabel>
-                    </TableCell>
-                ))}
-            </TableRow>
-        </TableHead>
-    );
+  return (
+    <TableHead>
+      <TableRow>
+        {headCells.map((headCell) => (
+          <TableCell
+            key={headCell.id}
+            align={headCell.numeric ? "right" : "left"}
+            padding={headCell.disablePadding ? "none" : "normal"}
+            sortDirection={orderBy === headCell.id ? order : false}
+          >
+            <TableSortLabel
+              active={orderBy === headCell.id}
+              direction={orderBy === headCell.id ? order : "asc"}
+              onClick={createSortHandler(headCell.id)}
+            >
+              <b>{headCell.label}</b>
+              {orderBy === headCell.id ? (
+                <Box component="span" sx={visuallyHidden}>
+                  {order === "desc" ? "sorted descending" : "sorted ascending"}
+                </Box>
+              ) : null}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    </TableHead>
+  );
 }
 
 interface SearchTableProps {
-    page: PageType<MovieType>;
-    pageIndex: number;
-    setPageIndex: (value: number) => void;
-    rowsPerPage: number;
-    setRowsPerPage: (value: number) => void;
-    order?: Direction;
-    setOrder?: (direction: Direction) => void;
-    orderBy?: keyof Data;
-    setOrderBy?: (by: keyof Data) => void;
+  page: PageType<MovieType>;
+  pageIndex: number;
+  setPageIndex: (value: number) => void;
+  rowsPerPage: number;
+  setRowsPerPage: (value: number) => void;
+  order?: Direction;
+  setOrder?: (direction: Direction) => void;
+  orderBy?: keyof Data;
+  setOrderBy?: (by: keyof Data) => void;
 }
 
 export default function SearchTable({
-    order,
-    orderBy,
-    page,
-    pageIndex,
-    rowsPerPage,
-    setOrder,
-    setOrderBy,
-    setPageIndex,
-    setRowsPerPage,
+  order,
+  orderBy,
+  page,
+  pageIndex,
+  rowsPerPage,
+  setOrder,
+  setOrderBy,
+  setPageIndex,
+  setRowsPerPage,
 }: SearchTableProps) {
-    const handleRequestSort = useCallback(
-        (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
-            const isAsc = orderBy === newOrderBy && order === "asc";
-            const toggledOrder = isAsc ? Direction.DESC : Direction.ASC;
-            setOrder?.(toggledOrder);
-            setOrderBy?.(newOrderBy);
-        },
-        [order, orderBy, pageIndex, rowsPerPage]
-    );
+  const handleRequestSort = useCallback(
+    (event: React.MouseEvent<unknown>, newOrderBy: keyof Data) => {
+      const isAsc = orderBy === newOrderBy && order === "asc";
+      const toggledOrder = isAsc ? Direction.DESC : Direction.ASC;
+      setOrder?.(toggledOrder);
+      setOrderBy?.(newOrderBy);
+    },
+    [order, orderBy, pageIndex, rowsPerPage]
+  );
 
-    const handleChangePageIndex = useCallback(
-        (event: unknown, newPageIndex: number) => {
-            setPageIndex(newPageIndex);
-        },
-        [order, orderBy, rowsPerPage]
-    );
+  const handleChangePageIndex = useCallback(
+    (event: unknown, newPageIndex: number) => {
+      setPageIndex(newPageIndex);
+    },
+    [order, orderBy, rowsPerPage]
+  );
 
-    const handleChangeRowsPerPage = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            const updatedRowsPerPage = parseInt(event.target.value, 10);
-            setRowsPerPage(updatedRowsPerPage);
-            setPageIndex(0);
-        },
-        [order, orderBy]
-    );
+  const handleChangeRowsPerPage = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const updatedRowsPerPage = parseInt(event.target.value, 10);
+      setRowsPerPage(updatedRowsPerPage);
+      setPageIndex(0);
+    },
+    [order, orderBy]
+  );
 
-    return (
-        <>
-            <Box sx={{ width: "100%" }}>
-                <Paper sx={{ width: "100%", mb: 2 }}>
-                    <TableContainer>
-                        <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-                            <SearchTableHead order={order!} orderBy={orderBy!} onRequestSort={handleRequestSort} />
-                            <TableBody>
-                                {page
-                                    ? page.content?.map((row, index) => {
-                                          return (
-                                              <TableRow
-                                                  hover
-                                                  role="checkbox"
-                                                  tabIndex={-1}
-                                                  key={row.id}
-                                                  sx={{ cursor: "pointer" }}
-                                              >
-                                                  <TableCell>
-                                                      <Chip
-                                                          label={row.title}
-                                                          color="info"
-                                                          component="a"
-                                                          href={`/movies/${row.id}`}
-                                                          clickable
-                                                      />
-                                                  </TableCell>
-                                                  <TableCell>{row.type_code}</TableCell>
-                                                  <TableCell align="right">
-                                                      {`${
-                                                          row.type_code === "MOVIE"
-                                                              ? row.price
-                                                                  ? row.price
-                                                                  : "FREE"
-                                                              : row.price
-                                                              ? row.price
-                                                              : "UNAVAILABLE"
-                                                      }`}
-                                                  </TableCell>
-                                                  <TableCell>
-                                                      {format(new Date(row.release_date!), "yyyy-MM-dd")}
-                                                  </TableCell>
-                                                  <TableCell>{row.runtime}</TableCell>
-                                                  <TableCell>{row.description}</TableCell>
+  return (
+    <>
+      <Box sx={{ width: "100%" }}>
+        <Paper sx={{ width: "100%", mb: 2 }}>
+          <TableContainer>
+            <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+              <SearchTableHead order={order!} orderBy={orderBy!} onRequestSort={handleRequestSort} />
+              <TableBody>
+                {page
+                  ? page.content?.map((row, index) => {
+                      return (
+                        <TableRow hover role="checkbox" tabIndex={-1} key={row.id} sx={{ cursor: "pointer" }}>
+                          <TableCell>
+                            <Chip label={row.title} color="info" component="a" href={`/movies/${row.id}`} clickable />
+                          </TableCell>
+                          <TableCell>{row.type_code}</TableCell>
+                          <TableCell align="right">
+                            {`${
+                              row.type_code === "MOVIE"
+                                ? row.price
+                                  ? row.price
+                                  : "FREE"
+                                : row.price
+                                ? row.price
+                                : "UNAVAILABLE"
+                            }`}
+                          </TableCell>
+                          <TableCell>{format(new Date(row.release_date!), "yyyy-MM-dd")}</TableCell>
+                          <TableCell>{row.runtime}</TableCell>
+                          <TableCell>{row.description}</TableCell>
 
-                                                  <TableCell>{row.mpaa_rating}</TableCell>
-                                              </TableRow>
-                                          );
-                                      })
-                                    : null}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    <TablePagination
-                        rowsPerPageOptions={[5, 10, 25, 50]}
-                        component="div"
-                        count={page.total_elements!}
-                        rowsPerPage={rowsPerPage}
-                        page={pageIndex}
-                        onPageChange={handleChangePageIndex}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                </Paper>
-            </Box>
-        </>
-    );
+                          <TableCell>{row.mpaa_rating}</TableCell>
+                        </TableRow>
+                      );
+                    })
+                  : null}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            component="div"
+            count={page.total_elements!}
+            rowsPerPage={rowsPerPage}
+            page={pageIndex}
+            onPageChange={handleChangePageIndex}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      </Box>
+    </>
+  );
 }

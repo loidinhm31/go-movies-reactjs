@@ -1,8 +1,8 @@
 import axios from "axios";
-import { ClientError } from "src/libs/api_client";
+import { ClientError } from "@/libs/api_client";
 
 const headers = {
-    "Content-Type": "application/json",
+  "Content-Type": "application/json",
 };
 
 const formApi = axios.create();
@@ -22,14 +22,14 @@ export const put = (url: string, data?: { arg: any }) => api.put(url, data?.arg)
 export const patch = (url: string, data?: { arg: any }) => api.patch(url, data?.arg).then((res) => res.data);
 
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        const err = error?.response;
-        throw new ClientError({
-            message: err?.data || "",
-            errorCode: err?.errorCode,
-            httpStatusCode: error?.status || -1,
-        });
-    }
+  (response) => response,
+  (error) => {
+    const err = error?.response;
+    throw new ClientError({
+      message: err?.data || "",
+      errorCode: err?.errorCode,
+      httpStatusCode: error?.status || -1,
+    });
+  }
 );
 export default api;
