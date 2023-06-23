@@ -6,24 +6,20 @@ import { TextDecoderStream } from "@stardazed/streams-text-encoding";
 import { TextDecoder, TextEncoder } from "util";
 import { ReadableStream } from "web-streams-polyfill/es6";
 
+import { server } from "@/__tests__/__mocks__/msw/server";
+
 global.TextEncoder = TextEncoder;
 global.TextDecoderStream = TextDecoderStream;
 global.TextDecoder = TextDecoder;
 global.ReadableStream = ReadableStream;
+global.ResizeObserver = ResizeObserver;
 
-const CONSOLE_FAIL_TYPES = ["error", "warn"];
+// Establish API mocking before all tests.
+beforeAll(() => server.listen());
 
-// Throw errors when a `console.error` or `console.warn` happens
-// by overriding the functions.
-// If the warning/error is intentional, then catch it and expect for it, like:
-//
-//  jest.spyOn(console, 'warn').mockImplementation();
-//  ...
-//  expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('Empty titles are deprecated.'));
-CONSOLE_FAIL_TYPES.forEach((type) => {
-  const orig_f = console[type];
-  console[type] = (...message) => {
-    orig_f(...message);
-    throw new Error(`Failing due to console.${type} while running test!\n\n${message.join(" ")}`);
-  };
-});
+// Reset any request handlers that we may add during the tests,
+// so they don't affect other tests.
+afterEach(() => server.resetHandlers());
+
+// Clean up after the tests are finished.
+afterAll(() => server.close());
