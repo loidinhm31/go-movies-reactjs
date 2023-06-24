@@ -8,6 +8,7 @@ import (
 	"movies-service/internal/common/dto"
 	"movies-service/internal/common/entity"
 	"movies-service/internal/errors"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/movie"
 	"movies-service/internal/test/helper"
 	"movies-service/pkg/pagination"
@@ -31,15 +32,15 @@ func initMock() (*helper.MockManagementCtrl, *helper.MockUserRepository, *helper
 	mockPaymentRepo := new(helper.MockPaymentRepository)
 
 	// Create a genre service instance with the mock repository and controller
-	movieService := NewMovieService(mockCtrl, mockUserRepo, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc)
+	movieSvc := NewMovieService(mockCtrl, mockUserRepo, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc)
 
-	return mockCtrl, mockUserRepo, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc, movieService
+	return mockCtrl, mockUserRepo, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc, movieSvc
 }
 
 func TestMovieService_GetAllMoviesByType(t *testing.T) {
 
 	t.Run("Valid movie type (MOVIE)", func(t *testing.T) {
-		_, _, mockMovieRepo, _, _, _, movieService := initMock()
+		_, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindAllMoviesByType", context.Background(), "title", "MOVIE", &pagination.PageRequest{}, &pagination.Page[*entity.Movie]{}).
@@ -55,7 +56,7 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 				},
 			}, nil)
 
-		pageMovie, err := movieService.GetAllMoviesByType(context.Background(), "title", "MOVIE", &pagination.PageRequest{})
+		pageMovie, err := movieSvc.GetAllMoviesByType(context.Background(), "title", "MOVIE", &pagination.PageRequest{})
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(pageMovie.Content))
 		assert.Equal(t, "Movie1", pageMovie.Content[0].Title)
@@ -63,7 +64,7 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 	})
 
 	t.Run("Empty movie type", func(t *testing.T) {
-		_, _, mockMovieRepo, _, _, _, movieService := initMock()
+		_, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindAllMovies", context.Background(), "title", &pagination.PageRequest{}, &pagination.Page[*entity.Movie]{}).
@@ -79,7 +80,7 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 				},
 			}, nil)
 
-		pageMovie, err := movieService.GetAllMoviesByType(context.Background(), "title", "", &pagination.PageRequest{})
+		pageMovie, err := movieSvc.GetAllMoviesByType(context.Background(), "title", "", &pagination.PageRequest{})
 
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(pageMovie.Content))
@@ -91,33 +92,10 @@ func TestMovieService_GetAllMoviesByType(t *testing.T) {
 }
 
 func TestMovieService_GetMovieByID(t *testing.T) {
-	t.Run("Invalid Client", func(t *testing.T) {
-		_, mockUserRepo, _, _, _, _, movieService := initMock()
+	t.Run("Anonymous Client", func(t *testing.T) {
+		_, mockUserRepo, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
-		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, false).
-			Return(&entity.User{
-				Role: &entity.Role{
-					RoleCode: "BANNED",
-				},
-			}, nil)
-
-		_, err := movieService.GetMovieByID(context.Background(), uint(1))
-		assert.Error(t, err)
-		assert.Equal(t, errors.ErrInvalidClient, err)
-	})
-
-	t.Run("Valid", func(t *testing.T) {
-		_, mockUserRepo, mockMovieRepo, _, mockPaymentRepo, _, movieService := initMock()
-
-		// Set up mock expectations and return values
-		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, false).
-			Return(&entity.User{
-				Role: &entity.Role{
-					RoleCode: "GENERAL",
-				},
-			}, nil)
-
 		mockMovieRepo.On("FindMovieByID", context.Background(), mock.Anything).
 			Return(&entity.Movie{
 				ID:       uint(1),
@@ -129,10 +107,47 @@ func TestMovieService_GetMovieByID(t *testing.T) {
 				},
 			}, nil)
 
-		mockPaymentRepo.On("FindPaymentByUserIDAndTypeCodeAndRefID", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, false).
+			Return(&entity.User{
+				Role: &entity.Role{
+					RoleCode: "BANNED",
+				},
+			}, nil)
+
+		result, err := movieSvc.GetMovieByID(context.Background(), uint(1))
+		assert.NoError(t, err)
+		assert.Equal(t, result.Title, "Movie1")
+	})
+
+	t.Run("Valid", func(t *testing.T) {
+		_, mockUserRepo, mockMovieRepo, _, mockPaymentRepo, _, movieSvc := initMock()
+
+		author := "test"
+		ctxWithAuthor := context.WithValue(context.Background(), middlewares.CtxUserKey, author)
+
+		// Set up mock expectations and return values
+		mockMovieRepo.On("FindMovieByID", ctxWithAuthor, mock.Anything).
+			Return(&entity.Movie{
+				ID:       uint(1),
+				Title:    "Movie1",
+				TypeCode: "TV",
+				Price: sql.NullFloat64{
+					Float64: 10.5,
+					Valid:   true,
+				},
+			}, nil)
+
+		mockUserRepo.On("FindUserByUsernameAndIsNew", ctxWithAuthor, author, false).
+			Return(&entity.User{
+				Role: &entity.Role{
+					RoleCode: "GENERAL",
+				},
+			}, nil)
+
+		mockPaymentRepo.On("FindPaymentByUserIDAndTypeCodeAndRefID", ctxWithAuthor, mock.Anything, mock.Anything, mock.Anything).
 			Return(&entity.Payment{}, nil)
 
-		result, err := movieService.GetMovieByID(context.Background(), uint(1))
+		result, err := movieSvc.GetMovieByID(ctxWithAuthor, uint(1))
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), result.ID)
 		assert.Equal(t, "Movie1", result.Title)
@@ -142,7 +157,7 @@ func TestMovieService_GetMovieByID(t *testing.T) {
 
 func TestMovieService_GetMoviesByGenre(t *testing.T) {
 	t.Run("Valid data", func(t *testing.T) {
-		_, _, mockMovieRepo, _, _, _, movieService := initMock()
+		_, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		genreId := uint(5)
@@ -160,7 +175,7 @@ func TestMovieService_GetMoviesByGenre(t *testing.T) {
 				},
 			}, nil)
 
-		pageMovie, err := movieService.GetMoviesByGenre(context.Background(), &pagination.PageRequest{}, uint(genreId))
+		pageMovie, err := movieSvc.GetMoviesByGenre(context.Background(), &pagination.PageRequest{}, uint(genreId))
 
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(pageMovie.Content))
@@ -175,9 +190,9 @@ func TestMovieService_GetMoviesByGenre(t *testing.T) {
 
 func TestMovieService_AddMovie(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
-		_, _, _, _, _, _, movieService := initMock()
+		_, _, _, _, _, _, movieSvc := initMock()
 
-		err := movieService.AddMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.AddMovie(context.Background(), &dto.MovieDto{
 			ID: 1,
 		})
 		assert.Error(t, err)
@@ -185,12 +200,12 @@ func TestMovieService_AddMovie(t *testing.T) {
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, _, _, _, movieService := initMock()
+		mockCtrl, _, _, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
-		err := movieService.AddMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.AddMovie(context.Background(), &dto.MovieDto{
 			Title:       "Movie1",
 			TypeCode:    "TV",
 			Runtime:     10,
@@ -206,12 +221,12 @@ func TestMovieService_AddMovie(t *testing.T) {
 	})
 
 	t.Run("Mismatch Type code", func(t *testing.T) {
-		mockCtrl, _, _, _, _, _, movieService := initMock()
+		mockCtrl, _, _, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
-		err := movieService.AddMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.AddMovie(context.Background(), &dto.MovieDto{
 			Title:       "Movie1",
 			TypeCode:    "TV",
 			Runtime:     10,
@@ -228,12 +243,12 @@ func TestMovieService_AddMovie(t *testing.T) {
 	})
 
 	t.Run("Genres empty with check", func(t *testing.T) {
-		mockCtrl, _, _, _, _, _, movieService := initMock()
+		mockCtrl, _, _, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
-		err := movieService.AddMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.AddMovie(context.Background(), &dto.MovieDto{
 			Title:       "Movie1",
 			TypeCode:    "TV",
 			Runtime:     10,
@@ -250,7 +265,7 @@ func TestMovieService_AddMovie(t *testing.T) {
 	})
 
 	t.Run("Valid data", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
@@ -258,7 +273,7 @@ func TestMovieService_AddMovie(t *testing.T) {
 		mockMovieRepo.On("InsertMovie", context.Background(), mock.Anything).
 			Return(nil).Once()
 
-		err := movieService.AddMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.AddMovie(context.Background(), &dto.MovieDto{
 			Title:       "Movie1",
 			TypeCode:    "TV",
 			Runtime:     10,
@@ -276,9 +291,9 @@ func TestMovieService_AddMovie(t *testing.T) {
 
 func TestMovieService_UpdateMovie(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
-		_, _, _, _, _, _, movieService := initMock()
+		_, _, _, _, _, _, movieSvc := initMock()
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID: uint(0),
 		})
 		assert.Error(t, err)
@@ -286,13 +301,13 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 	})
 
 	t.Run("Existed movie", func(t *testing.T) {
-		_, _, mockMovieRepo, _, _, _, movieService := initMock()
+		_, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
 			Return(&entity.Movie{}, errors.ErrResourceNotFound)
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
 			Title:       "Movie1",
 			TypeCode:    "TV",
@@ -309,7 +324,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
@@ -317,7 +332,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
 			Title:       "Movie1",
 			TypeCode:    "TV",
@@ -334,7 +349,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 	})
 
 	t.Run("Mismatch Type code", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
@@ -345,7 +360,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 		mockMovieRepo.On("UpdateMovie", context.Background(), mock.Anything).
 			Return(nil)
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
 			Title:       "Movie1",
 			TypeCode:    "TV",
@@ -363,7 +378,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 	})
 
 	t.Run("Genres empty with check", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
@@ -374,7 +389,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 		mockMovieRepo.On("UpdateMovie", context.Background(), mock.Anything).
 			Return(nil)
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
 			Title:       "Movie1",
 			TypeCode:    "TV",
@@ -392,7 +407,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 	})
 
 	t.Run("Valid data", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockMovieRepo.On("FindMovieByID", context.Background(), uint(1)).
@@ -406,7 +421,7 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 		mockMovieRepo.On("UpdateMovieGenres", context.Background(), mock.Anything, mock.Anything).
 			Return(nil)
 
-		err := movieService.UpdateMovie(context.Background(), &dto.MovieDto{
+		err := movieSvc.UpdateMovie(context.Background(), &dto.MovieDto{
 			ID:          uint(1),
 			Title:       "Movie1",
 			TypeCode:    "MOVIE",
@@ -425,15 +440,15 @@ func TestMovieService_UpdateMovie(t *testing.T) {
 
 func TestMovieService_RemoveMovieByID(t *testing.T) {
 	t.Run("Invalid ID", func(t *testing.T) {
-		_, _, _, _, _, _, movieService := initMock()
+		_, _, _, _, _, _, movieSvc := initMock()
 
-		err := movieService.RemoveMovieByID(context.Background(), 0)
+		err := movieSvc.RemoveMovieByID(context.Background(), 0)
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrInvalidInput.Error(), err.Error())
 	})
 
 	t.Run("Added to Payment ", func(t *testing.T) {
-		_, _, _, _, mockPaymentRepo, _, movieService := initMock()
+		_, _, _, _, mockPaymentRepo, _, movieSvc := initMock()
 
 		movieID := uint(1)
 
@@ -442,13 +457,13 @@ func TestMovieService_RemoveMovieByID(t *testing.T) {
 				{ID: uint(1)},
 			}, nil)
 
-		err := movieService.RemoveMovieByID(context.Background(), movieID)
+		err := movieSvc.RemoveMovieByID(context.Background(), movieID)
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrCannotExecuteAction.Error(), err.Error())
 	})
 
 	t.Run("Added to Collection ", func(t *testing.T) {
-		_, _, _, mockCollectionRepo, mockPaymentRepo, _, movieService := initMock()
+		_, _, _, mockCollectionRepo, mockPaymentRepo, _, movieSvc := initMock()
 
 		movieID := uint(1)
 
@@ -460,13 +475,13 @@ func TestMovieService_RemoveMovieByID(t *testing.T) {
 				{ID: uint(1)},
 			}, nil)
 
-		err := movieService.RemoveMovieByID(context.Background(), movieID)
+		err := movieSvc.RemoveMovieByID(context.Background(), movieID)
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrCannotExecuteAction.Error(), err.Error())
 	})
 
 	t.Run("Invalid Client", func(t *testing.T) {
-		mockCtrl, _, _, mockCollectionRepo, mockPaymentRepo, _, movieService := initMock()
+		mockCtrl, _, _, mockCollectionRepo, mockPaymentRepo, _, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "MOVIE", mock.Anything).
@@ -477,13 +492,13 @@ func TestMovieService_RemoveMovieByID(t *testing.T) {
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
-		err := movieService.RemoveMovieByID(context.Background(), uint(1))
+		err := movieSvc.RemoveMovieByID(context.Background(), uint(1))
 		assert.Error(t, err)
 		assert.Equal(t, errors.ErrInvalidClient.Error(), err.Error())
 	})
 
 	t.Run("Valid data", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, mockCollectionRepo, mockPaymentRepo, mockBlobSvc, movieSvc := initMock()
 
 		// Set up mock expectations and return values
 		mockPaymentRepo.On("FindPaymentsByTypeCodeAndRefID", mock.Anything, "MOVIE", mock.Anything).
@@ -509,14 +524,14 @@ func TestMovieService_RemoveMovieByID(t *testing.T) {
 		mockMovieRepo.On("DeleteMovieByID", context.Background(), uint(1)).
 			Return(nil).Once()
 
-		err := movieService.RemoveMovieByID(context.Background(), uint(1))
+		err := movieSvc.RemoveMovieByID(context.Background(), uint(1))
 		assert.NoError(t, err)
 	})
 }
 
 func TestMovieService_GetMovieByEpisodeID(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, mockMovieRepo, _, _, _, movieService := initMock()
+		mockCtrl, _, mockMovieRepo, _, _, _, movieSvc := initMock()
 
 		mockCtrl.On("CheckUser", mock.Anything).Return(true, true)
 
@@ -526,7 +541,7 @@ func TestMovieService_GetMovieByEpisodeID(t *testing.T) {
 				Title: "movie1",
 			}, nil)
 
-		result, err := movieService.GetMovieByEpisodeID(context.Background(), uint(10))
+		result, err := movieSvc.GetMovieByEpisodeID(context.Background(), uint(10))
 
 		assert.NoError(t, err)
 		assert.Equal(t, uint(1), result.ID)

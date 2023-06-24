@@ -45,3 +45,8 @@ func (m *MockAnalysisRepository) CountMoviesByGenreAndReleasedDate(ctx context.C
 	args := m.Called(ctx, request)
 	return args.Get(0).([]*entity.MovieCount), args.Error(1)
 }
+
+func (m *MockAnalysisRepository) SumTotalAmountAndTotalReceivedPayment(ctx context.Context, typeCode string) (*entity.TotalPayment, error) {
+	args := m.Called(ctx, typeCode)
+	return args.Get(0).(*entity.TotalPayment), args.Error(1)
+}

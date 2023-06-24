@@ -21,7 +21,7 @@ func NewMovieHandler(movieService movie.Service) movie.Handler {
 	}
 }
 
-func (mh *movieHandler) FetchMoviesByType() gin.HandlerFunc {
+func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		keyword := c.Query("q")
 		movieType := c.Query("type")
@@ -174,9 +174,9 @@ func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
 	}
 }
 
-func (mh *movieHandler) FetchMovies() gin.HandlerFunc {
+func (mh *movieHandler) FetchMovieByEpisode() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		episodeIdStr := c.Query("episodeId")
+		episodeIdStr := c.Param("id")
 		episodeID, _ := strconv.Atoi(episodeIdStr)
 
 		allMovies, err := mh.movieService.GetMovieByEpisodeID(c, uint(episodeID))

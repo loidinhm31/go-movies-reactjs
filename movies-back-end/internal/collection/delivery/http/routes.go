@@ -11,8 +11,8 @@ func MapCollectionRoutes(collectionGroup *gin.RouterGroup, h collection.Handler)
 }
 
 func MapAuthCollectionRoutes(collectionGroup *gin.RouterGroup, h collection.Handler) {
-	collectionGroup.PUT("/", h.PutCollection())
-	collectionGroup.GET("/", h.FetchCollectionsByUsername())
-	collectionGroup.POST("/", h.FetchCollectionsByUsername())
+	collectionGroup.POST("/", h.PostCollection())
+	collectionGroup.GET("/page", h.FetchCollectionsByUsername())
+	collectionGroup.POST("/page", h.FetchCollectionsByUsername())
 	collectionGroup.DELETE("/refs/:id", h.DeleteCollectionByTypeCodeAndRefID())
 }

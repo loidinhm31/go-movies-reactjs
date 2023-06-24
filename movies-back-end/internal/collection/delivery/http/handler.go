@@ -21,7 +21,7 @@ func NewCollectionHandler(collectionService collection.Service) collection.Handl
 	}
 }
 
-func (r collectionHandler) PutCollection() gin.HandlerFunc {
+func (r collectionHandler) PostCollection() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		theCollection := &dto.CollectionDto{}
 

@@ -10,6 +10,7 @@ import (
 	"movies-service/internal/common/entity"
 	"movies-service/internal/episode"
 	"movies-service/internal/errors"
+	"movies-service/internal/middlewares"
 	"movies-service/internal/test/helper"
 	"testing"
 	"time"
@@ -24,14 +25,35 @@ func initMock() (*helper.MockManagementCtrl, *helper.MockUserRepository, *helper
 	mockEpisodeRepo := new(helper.MockEpisodeRepository)
 	mockBlobSvc := new(helper.MockBlobService)
 
-	episodeService := NewEpisodeService(mockCtrl, mockUserRepo, mockSeasonRepo, mockCollectionRepo, mockPaymentRepo, mockEpisodeRepo, mockBlobSvc)
+	episodeSvc := NewEpisodeService(mockCtrl, mockUserRepo, mockSeasonRepo, mockCollectionRepo, mockPaymentRepo, mockEpisodeRepo, mockBlobSvc)
 
-	return mockCtrl, mockUserRepo, mockSeasonRepo, mockCollectionRepo, mockPaymentRepo, mockEpisodeRepo, mockBlobSvc, episodeService
+	return mockCtrl, mockUserRepo, mockSeasonRepo, mockCollectionRepo, mockPaymentRepo, mockEpisodeRepo, mockBlobSvc, episodeSvc
 }
 
 func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 	t.Run("Invalid Client", func(t *testing.T) {
-		_, mockUserRepo, _, _, _, _, _, episodeService := initMock()
+		_, mockUserRepo, _, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
+
+		episodeID := uint(1)
+		mockEpisode := &entity.Episode{
+			ID:   episodeID,
+			Name: "Episode 1",
+			Price: sql.NullFloat64{
+				Float64: 10.5,
+				Valid:   true,
+			},
+			AirDate:   time.Now(),
+			Runtime:   uint(60),
+			VideoPath: sql.NullString{String: "/path/to/episode1", Valid: true},
+			SeasonID:  uint(1),
+			CreatedAt: time.Now(),
+			CreatedBy: "John",
+			UpdatedAt: time.Now(),
+			UpdatedBy: "John",
+		}
+
+		mockEpisodeRepo.On("FindEpisodeByID", mock.Anything, mock.Anything).
+			Return(mockEpisode, nil)
 
 		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, mock.Anything).
 			Return(&entity.User{
@@ -39,17 +61,20 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 			}, nil)
 
 		// Call the service method
-		_, err := episodeService.GetEpisodeByID(context.Background(), uint(1))
+		result, err := episodeSvc.GetEpisodeByID(context.Background(), uint(1))
 
 		// Assertions
-		assert.Error(t, err)
-		assert.Equal(t, errors.ErrInvalidClient, err)
+		assert.NoError(t, err)
+		assert.Equal(t, result.Name, mockEpisode.Name)
 	})
 
 	t.Run("Episode Has Price, Not Paid", func(t *testing.T) {
-		_, mockUserRepo, _, _, mockPaymentRepo, mockEpisodeRepo, _, episodeService := initMock()
+		_, mockUserRepo, _, _, mockPaymentRepo, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up expectations
+		author := "test"
+		ctxWithAuthor := context.WithValue(context.Background(), middlewares.CtxUserKey, author)
+
 		movieType := "TV"
 		episodeID := uint(1)
 		mockEpisode := &entity.Episode{
@@ -69,20 +94,20 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 			UpdatedBy: "John",
 		}
 
-		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, mock.Anything).
+		mockEpisodeRepo.On("FindEpisodeByID", ctxWithAuthor, mock.Anything).
+			Return(mockEpisode, nil)
+
+		mockUserRepo.On("FindUserByUsernameAndIsNew", ctxWithAuthor, author, mock.Anything).
 			Return(&entity.User{
 				Role: &entity.Role{RoleCode: "GENERAL"},
 			}, nil)
 
-		mockEpisodeRepo.On("FindEpisodeByID", mock.Anything, mock.Anything).
-			Return(mockEpisode, nil)
-
 		mockPaymentRepo.On("FindPaymentByUserIDAndTypeCodeAndRefID",
-			mock.Anything, mock.Anything, movieType, mock.Anything).
+			ctxWithAuthor, mock.Anything, movieType, mock.Anything).
 			Return(&entity.Payment{}, nil)
 
 		// Call the service method
-		result, err := episodeService.GetEpisodeByID(context.Background(), episodeID)
+		result, err := episodeSvc.GetEpisodeByID(ctxWithAuthor, episodeID)
 
 		// Assertions
 		assert.NoError(t, err)
@@ -97,9 +122,12 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		_, mockUserRepo, _, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		_, mockUserRepo, _, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up expectations
+		author := "test"
+		ctxWithAuthor := context.WithValue(context.Background(), middlewares.CtxUserKey, author)
+
 		episodeID := uint(1)
 		mockEpisode := &entity.Episode{
 			ID:        episodeID,
@@ -114,15 +142,16 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 			UpdatedBy: "John",
 		}
 
-		mockUserRepo.On("FindUserByUsernameAndIsNew", mock.Anything, mock.Anything, mock.Anything).
+		mockEpisodeRepo.On("FindEpisodeByID", ctxWithAuthor, episodeID).
+			Return(mockEpisode, nil)
+
+		mockUserRepo.On("FindUserByUsernameAndIsNew", ctxWithAuthor, author, mock.Anything).
 			Return(&entity.User{
 				Role: &entity.Role{RoleCode: "GENERAL"},
 			}, nil)
-		mockEpisodeRepo.On("FindEpisodeByID", context.Background(), episodeID).
-			Return(mockEpisode, nil)
 
 		// Call the service method
-		result, err := episodeService.GetEpisodeByID(context.Background(), episodeID)
+		result, err := episodeSvc.GetEpisodeByID(ctxWithAuthor, episodeID)
 
 		// Assertions
 		assert.NoError(t, err)
@@ -139,7 +168,7 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 
 func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		mockCrtl, _, _, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCrtl, _, _, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up expectations
 		seasonID := uint(1)
@@ -166,7 +195,7 @@ func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 		mockEpisodeRepo.On("FindEpisodesBySeasonID", context.Background(), seasonID).Return(mockEpisodes, nil)
 
 		// Call the service method
-		result, err := episodeService.GetEpisodesBySeasonID(context.Background(), seasonID)
+		result, err := episodeSvc.GetEpisodesBySeasonID(context.Background(), seasonID)
 
 		// Assertions
 		assert.NoError(t, err)
@@ -178,7 +207,7 @@ func TestEpisodeService_GetEpisodesBySeasonID(t *testing.T) {
 
 func TestEpisodeService_AddEpisode(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
-		_, _, _, _, _, _, _, episodeService := initMock()
+		_, _, _, _, _, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -191,7 +220,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		}
 
 		// Call the service method
-		err := episodeService.AddEpisode(context.Background(), episodeDto)
+		err := episodeSvc.AddEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -199,7 +228,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, _, _, _, _, episodeService := initMock()
+		mockCtrl, _, _, _, _, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -214,7 +243,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the service method
-		err := episodeService.AddEpisode(context.Background(), episodeDto)
+		err := episodeSvc.AddEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -222,7 +251,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 	})
 
 	t.Run("Not Found Season", func(t *testing.T) {
-		mockCtrl, _, mockSeasonRepo, _, _, _, _, episodeService := initMock()
+		mockCtrl, _, mockSeasonRepo, _, _, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -238,7 +267,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 		mockSeasonRepo.On("FindSeasonByID", context.Background(), episodeDto.SeasonID).Return(nil, fmt.Errorf("failed to find season"))
 
 		// Call the service method
-		err := episodeService.AddEpisode(context.Background(), episodeDto)
+		err := episodeSvc.AddEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -246,7 +275,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -265,7 +294,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 			Return(nil)
 
 		// Call the service method
-		err := episodeService.AddEpisode(context.Background(), episodeDto)
+		err := episodeSvc.AddEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.NoError(t, err)
@@ -275,7 +304,7 @@ func TestEpisodeService_AddEpisode(t *testing.T) {
 
 func TestEpisodeService_UpdateEpisode(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
-		_, _, _, _, _, _, _, episodeService := initMock()
+		_, _, _, _, _, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -288,7 +317,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 		}
 
 		// Call the service method
-		err := episodeService.UpdateEpisode(context.Background(), episodeDto)
+		err := episodeSvc.UpdateEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -296,7 +325,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 	})
 
 	t.Run("Episode Not Found", func(t *testing.T) {
-		mockCtrl, _, _, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, _, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -314,7 +343,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 			Return(nil, errors.ErrResourceNotFound)
 
 		// Call the service method
-		err := episodeService.UpdateEpisode(context.Background(), episodeDto)
+		err := episodeSvc.UpdateEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -323,7 +352,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 	})
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, _, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, _, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -341,7 +370,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the service method
-		err := episodeService.UpdateEpisode(context.Background(), episodeDto)
+		err := episodeSvc.UpdateEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -350,7 +379,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 	})
 
 	t.Run("Error Getting Season", func(t *testing.T) {
-		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -369,7 +398,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 			Return(nil, fmt.Errorf("failed to find season"))
 
 		// Call the service method
-		err := episodeService.UpdateEpisode(context.Background(), episodeDto)
+		err := episodeSvc.UpdateEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.Error(t, err)
@@ -377,7 +406,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, mockSeasonRepo, _, _, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeDto := &dto.EpisodeDto{
@@ -398,7 +427,7 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 		mockEpisodeRepo.On("UpdateEpisode", context.Background(), mock.Anything).Return(nil)
 
 		// Call the service method
-		err := episodeService.UpdateEpisode(context.Background(), episodeDto)
+		err := episodeSvc.UpdateEpisode(context.Background(), episodeDto)
 
 		// Assertions
 		assert.NoError(t, err)
@@ -408,13 +437,13 @@ func TestEpisodeService_UpdateEpisode(t *testing.T) {
 
 func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	t.Run("Invalid Input", func(t *testing.T) {
-		_, _, _, _, _, _, _, episodeService := initMock()
+		_, _, _, _, _, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(0)
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.Error(t, err)
@@ -422,7 +451,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Added to Payment", func(t *testing.T) {
-		_, _, _, _, mockPaymentRepo, _, _, episodeService := initMock()
+		_, _, _, _, mockPaymentRepo, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
@@ -435,7 +464,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 			}, nil)
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.Error(t, err)
@@ -443,7 +472,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Added to Collection", func(t *testing.T) {
-		_, _, _, mockCollection, mockPaymentRepo, _, _, episodeService := initMock()
+		_, _, _, mockCollection, mockPaymentRepo, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
@@ -465,7 +494,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 			}, nil)
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.Error(t, err)
@@ -473,7 +502,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Invalid Client", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, mockPaymentRepo, _, _, episodeService := initMock()
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, _, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
@@ -491,7 +520,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.Error(t, err)
@@ -499,7 +528,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Error Deleting", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, _, episodeService := initMock()
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, _, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
@@ -520,7 +549,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 			Return(fmt.Errorf("failed to delete episode"))
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.Error(t, err)
@@ -528,7 +557,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, blobService, episodeService := initMock()
+		mockCtrl, _, _, mockCollection, mockPaymentRepo, mockEpisodeRepo, blobService, episodeSvc := initMock()
 
 		// Set up input parameters
 		episodeID := uint(1)
@@ -556,7 +585,7 @@ func TestEpisodeService_RemoveEpisodeByID(t *testing.T) {
 		mockEpisodeRepo.On("DeleteEpisodeByID", context.Background(), episodeID).Return(nil)
 
 		// Call the service method
-		err := episodeService.RemoveEpisodeByID(context.Background(), episodeID)
+		err := episodeSvc.RemoveEpisodeByID(context.Background(), episodeID)
 
 		// Assertions
 		assert.NoError(t, err)

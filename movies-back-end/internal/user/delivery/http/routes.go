@@ -7,7 +7,7 @@ import (
 
 // MapUserRoutes Map user routes
 func MapUserRoutes(userGroup *gin.RouterGroup, h user.Handler) {
-	userGroup.POST("/", h.FetchUsers())
+	userGroup.POST("/page", h.FetchUsers())
 	userGroup.PATCH("/role", h.PatchUserRole())
 	userGroup.PUT("/oidc", h.PutOidcUSer())
 }

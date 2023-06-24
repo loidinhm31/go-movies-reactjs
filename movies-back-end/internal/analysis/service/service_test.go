@@ -17,19 +17,19 @@ func initMock() (*helper.MockManagementCtrl, *helper.MockAnalysisRepository, ana
 	mockCtrl := new(helper.MockManagementCtrl)
 	mockRepo := new(helper.MockAnalysisRepository)
 
-	analysisService := NewAnalysisService(mockCtrl, mockRepo)
+	analysisSvc := NewAnalysisService(mockCtrl, mockRepo)
 
-	return mockCtrl, mockRepo, analysisService
+	return mockCtrl, mockRepo, analysisSvc
 }
 
 func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByGenre(context.Background(), "TV")
+		result, err := analysisSvc.GetNumberOfMoviesByGenre(context.Background(), "TV")
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -38,7 +38,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 	})
 
 	t.Run("Valid MovieType", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -49,7 +49,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 			}, nil)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByGenre(context.Background(), "MOVIE")
+		result, err := analysisSvc.GetNumberOfMoviesByGenre(context.Background(), "MOVIE")
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -62,7 +62,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -70,7 +70,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 			Return([]*entity.GenreCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByGenre(context.Background(), "TV")
+		result, err := analysisSvc.GetNumberOfMoviesByGenre(context.Background(), "TV")
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -80,12 +80,12 @@ func TestAnalysisService_GetNumberOfMoviesByGenre(t *testing.T) {
 
 func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -94,7 +94,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 	})
 
 	t.Run("Valid Year, Month", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -105,7 +105,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 			}, nil)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -120,7 +120,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -128,7 +128,7 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 			Return([]*entity.MovieCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByReleaseDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -138,13 +138,13 @@ func TestAnalysisService_GetNumberOfMoviesByReleaseDate(t *testing.T) {
 
 func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		// Set up the mock repository's behavior
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -153,7 +153,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 	})
 
 	t.Run("Valid Year, Month", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -164,7 +164,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 			}, nil)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -179,7 +179,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 	})
 
 	t.Run("Error Counting Movie", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -187,7 +187,7 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 			Return([]*entity.MovieCount{}, fmt.Errorf("unexpected error occurred"))
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
+		result, err := analysisSvc.GetNumberOfMoviesByCreatedDate(context.Background(), "2022", []string{"6", "7", "8"})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -197,12 +197,12 @@ func TestAnalysisService_GetNumberOfMoviesByCreatedDate(t *testing.T) {
 
 func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfViewsByGenreAndViewedDate(context.Background(), &dto.RequestData{})
+		result, err := analysisSvc.GetNumberOfViewsByGenreAndViewedDate(context.Background(), &dto.RequestData{})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -211,7 +211,7 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 	})
 
 	t.Run("Invalid Type Code", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -220,7 +220,7 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 			TypeCode: "",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetNumberOfViewsByGenreAndViewedDate(context.Background(), request)
+		result, err := analysisSvc.GetNumberOfViewsByGenreAndViewedDate(context.Background(), request)
 
 		// Assert the expected error
 		assert.Nil(t, err)
@@ -229,7 +229,7 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 	})
 
 	t.Run("Valid Request", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		// Set up the mock repository's behavior
 		expectedResult := []*entity.ViewCount{
@@ -247,7 +247,7 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 			TypeCode: "MOVIE",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetNumberOfViewsByGenreAndViewedDate(context.Background(), request)
+		result, err := analysisSvc.GetNumberOfViewsByGenreAndViewedDate(context.Background(), request)
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -264,12 +264,12 @@ func TestAnalysisService_GetNumberOfViewsByGenreAndViewedDate(t *testing.T) {
 
 func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetCumulativeViewsByGenreAndViewedDate(context.Background(), &dto.RequestData{})
+		result, err := analysisSvc.GetCumulativeViewsByGenreAndViewedDate(context.Background(), &dto.RequestData{})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -278,7 +278,7 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 	})
 
 	t.Run("Invalid Type Code", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -287,7 +287,7 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 			TypeCode: "",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetCumulativeViewsByGenreAndViewedDate(context.Background(), request)
+		result, err := analysisSvc.GetCumulativeViewsByGenreAndViewedDate(context.Background(), request)
 
 		// Assert the expected error
 		assert.Nil(t, err)
@@ -296,7 +296,7 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 	})
 
 	t.Run("Valid Request", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		// Set up the mock repository's behavior
 		expectedResult := []*entity.ViewCount{
@@ -314,7 +314,7 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 			TypeCode: "MOVIE",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetCumulativeViewsByGenreAndViewedDate(context.Background(), request)
+		result, err := analysisSvc.GetCumulativeViewsByGenreAndViewedDate(context.Background(), request)
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -333,12 +333,12 @@ func TestAnalysisService_GetCumulativeViewsByGenreAndViewedDate(t *testing.T) {
 
 func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfViewsByViewedDate(context.Background(), &dto.RequestData{})
+		result, err := analysisSvc.GetNumberOfViewsByViewedDate(context.Background(), &dto.RequestData{})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -347,7 +347,7 @@ func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 	})
 
 	t.Run("Valid Request", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		// Set up the mock repository's behavior
 		expectedResult := []*entity.ViewCount{
@@ -365,7 +365,7 @@ func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 			TypeCode: "MOVIE",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetNumberOfViewsByViewedDate(context.Background(), request)
+		result, err := analysisSvc.GetNumberOfViewsByViewedDate(context.Background(), request)
 
 		// Assert the expected result and error
 		assert.NoError(t, err)
@@ -382,12 +382,12 @@ func TestAnalysisService_GetNumberOfViewsByViewedDate(t *testing.T) {
 
 func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 	t.Run("Unauthorized", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(false)
 
 		// Call the method being tested
-		result, err := analysisService.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), &dto.RequestData{})
+		result, err := analysisSvc.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), &dto.RequestData{})
 
 		// Assert the expected error
 		assert.Error(t, err)
@@ -396,7 +396,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 	})
 
 	t.Run("Invalid Type Code", func(t *testing.T) {
-		mockCtrl, _, analysisService := initMock()
+		mockCtrl, _, analysisSvc := initMock()
 
 		mockCtrl.On("CheckPrivilege", mock.Anything).Return(true)
 
@@ -405,7 +405,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 			TypeCode: "",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), request)
+		result, err := analysisSvc.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), request)
 
 		// Assert the expected error
 		assert.Nil(t, err)
@@ -414,7 +414,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 	})
 
 	t.Run("Valid Request", func(t *testing.T) {
-		mockCtrl, mockRepo, analysisService := initMock()
+		mockCtrl, mockRepo, analysisSvc := initMock()
 
 		// Set up the mock repository's behavior
 		data := []*entity.MovieCount{
@@ -432,7 +432,7 @@ func TestAnalysisService_GetNumberOfMoviesByGenreAndReleasedDate(t *testing.T) {
 			TypeCode: "MOVIE",
 			Name:     "Action",
 		}
-		result, err := analysisService.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), request)
+		result, err := analysisSvc.GetNumberOfMoviesByGenreAndReleasedDate(context.Background(), request)
 
 		// Assert the expected result and error
 		assert.NoError(t, err)

@@ -59,3 +59,8 @@ func (m *MockMovieRepository) FindMovieByEpisodeID(ctx context.Context, episdoeI
 	args := m.Called(ctx, episdoeID)
 	return args.Get(0).(*entity.Movie), args.Error(1)
 }
+
+func (m *MockMovieRepository) UpdatePriceWithAverageEpisodePrice(ctx context.Context, movieID uint) error {
+	args := m.Called(ctx, movieID)
+	return args.Error(0)
+}

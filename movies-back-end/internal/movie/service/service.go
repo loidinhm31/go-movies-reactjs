@@ -75,14 +75,9 @@ func (ms *movieService) GetAllMoviesByType(ctx context.Context, keyword, movieTy
 }
 
 func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDto, error) {
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	theUser, err := ms.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
-	if err != nil {
-		return nil, err
-	}
-
-	if theUser.Role.RoleCode == "BANNED" {
-		return nil, errors.ErrInvalidClient
+	var author string
+	if val := ctx.Value(middlewares.CtxUserKey); val != nil {
+		author = fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	}
 
 	result, err := ms.movieRepository.FindMovieByID(ctx, id)
@@ -91,24 +86,42 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 		return nil, errors.ErrResourceNotFound
 	}
 
-	// Set valid video path
-	if result.Price.Valid {
-		thePayment, err := ms.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, result.TypeCode, result.ID)
+	var movieDto *dto.MovieDto
+	if author != "" {
+		theUser, err := ms.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
 		if err != nil {
 			return nil, err
 		}
 
-		// Not paid
-		if !(thePayment.TypeCode == result.TypeCode && thePayment.RefID == result.ID) {
-			result.VideoPath = sql.NullString{}
+		if theUser.Role.RoleCode == "BANNED" {
+			return nil, errors.ErrInvalidClient
 		}
+
+		// Set valid video path
+		if result.Price.Valid {
+			thePayment, err := ms.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, result.TypeCode, result.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			// Not paid
+			if !(thePayment.TypeCode == result.TypeCode && thePayment.RefID == result.ID) {
+				result.VideoPath = sql.NullString{}
+			}
+		}
+		movieDto = mapper2.MapToMovieDto(
+			result,
+			true,
+			theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
+		)
+	} else {
+		movieDto = mapper2.MapToMovieDto(
+			result,
+			true,
+			false,
+		)
 	}
 
-	movieDto := mapper2.MapToMovieDto(
-		result,
-		true,
-		theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
-	)
 	return movieDto, nil
 }
 

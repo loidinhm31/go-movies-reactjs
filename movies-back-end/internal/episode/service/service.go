@@ -49,38 +49,54 @@ func NewEpisodeService(mgmtCtrl control.Service, userRepository user.UserReposit
 }
 
 func (es episodeService) GetEpisodeByID(ctx context.Context, id uint) (*dto.EpisodeDto, error) {
-	author := fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
-	theUser, err := es.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
-	if err != nil {
-		return nil, err
+	var author string
+	if val := ctx.Value(middlewares.CtxUserKey); val != nil {
+		author = fmt.Sprintf("%s", ctx.Value(middlewares.CtxUserKey))
 	}
 
-	if theUser.Role.RoleCode == "BANNED" {
-		return nil, errors.ErrInvalidClient
-	}
 	result, err := es.episodeRepository.FindEpisodeByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	// Set valid video path
-	if result.Price.Valid {
-		thePayment, err := es.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, "TV", result.ID)
+	var episodeDto *dto.EpisodeDto
+	if author != "" {
+		theUser, err := es.userRepository.FindUserByUsernameAndIsNew(ctx, author, false)
 		if err != nil {
 			return nil, err
 		}
 
-		// Not paid
-		if !(thePayment.TypeCode == "TV" && thePayment.RefID == result.ID) {
-			result.VideoPath = sql.NullString{}
+		if theUser.Role.RoleCode == "BANNED" {
+			return nil, errors.ErrInvalidClient
 		}
+
+		// Set valid video path
+		if result.Price.Valid {
+			thePayment, err := es.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, "TV", result.ID)
+			if err != nil {
+				return nil, err
+			}
+
+			// Not paid
+			if !(thePayment.TypeCode == "TV" && thePayment.RefID == result.ID) {
+				result.VideoPath = sql.NullString{}
+			}
+		}
+
+		episodeDto = mapper.MapToEpisodeDto(
+			result,
+			true,
+			theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
+		)
+	} else {
+		episodeDto = mapper.MapToEpisodeDto(
+			result,
+			true,
+			false,
+		)
 	}
 
-	return mapper.MapToEpisodeDto(
-		result,
-		true,
-		theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
-	), nil
+	return episodeDto, nil
 }
 
 func (es episodeService) GetEpisodesBySeasonID(ctx context.Context, seasonID uint) ([]*dto.EpisodeDto, error) {
