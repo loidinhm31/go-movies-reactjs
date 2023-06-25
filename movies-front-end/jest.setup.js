@@ -5,7 +5,8 @@ import "@testing-library/jest-dom/extend-expect";
 import { TextDecoderStream } from "@stardazed/streams-text-encoding";
 import { TextDecoder, TextEncoder } from "util";
 import { ReadableStream } from "web-streams-polyfill/es6";
-
+import ResizeObserver from 'resize-observer-polyfill';
+import "jest-canvas-mock";
 import { server } from "@/__tests__/__mocks__/msw/server";
 
 global.TextEncoder = TextEncoder;
