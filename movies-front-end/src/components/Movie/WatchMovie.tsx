@@ -25,7 +25,7 @@ export default function WatchMovie({ author, movieId, episodeId }: WatchMoviePro
 
   const [videoJsOptions, setVideoJsOptions] = useState<VideoJsOption>({
     autoplay: true,
-    controls: true,
+    controls: true
   });
 
   const { data: movie, error } = useSWR<MovieType>(`/api/v1/movies/${movieId}`, get, {
@@ -36,12 +36,12 @@ export default function WatchMovie({ author, movieId, episodeId }: WatchMoviePro
           sources: [
             {
               src: `${process.env.NEXT_PUBLIC_CLOUDINARY_URL}/video/upload/${result.video_path}`,
-              type: "video/mp4",
-            },
-          ],
+              type: "video/mp4"
+            }
+          ]
         });
       }
-    },
+    }
   });
 
   const handleClickOpen = () => {
@@ -67,7 +67,7 @@ export default function WatchMovie({ author, movieId, episodeId }: WatchMoviePro
           <Box sx={{ p: 1, m: 1 }}>
             <Typography>
               <small>
-                <em>{format(new Date(movie.release_date!), "MMMM do, yyyy")} | </em>
+                <em>{`${movie.release_date ? format(new Date(movie.release_date!), "MMMM do, yyyy") : ""}`} | </em>
               </small>
               <small>
                 <em>{movie.runtime} minutes | </em>

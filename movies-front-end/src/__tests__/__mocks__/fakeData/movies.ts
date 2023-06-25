@@ -2,7 +2,7 @@ import { MovieType } from "@/types/movies";
 import { Direction, PageType } from "@/types/page";
 
 export const fakeMoviePage: PageType<MovieType> = {
-  size: 2,
+  size: 10,
   page: 0,
   sort: {
     orders: [
@@ -12,7 +12,7 @@ export const fakeMoviePage: PageType<MovieType> = {
       }
     ]
   },
-  total_elements: 2,
+  total_elements: 4,
   total_pages: 1,
   content: [
     {
@@ -34,12 +34,34 @@ export const fakeMoviePage: PageType<MovieType> = {
       mpaa_rating: "NC17",
       description: "Test desc movie 2",
       image_url: "https://image.tmdb.org/t/p/w200//62HCnUTziyWcpDaBO2i1DX17ljH.jpg"
+    },
+    {
+      id: 3,
+      title: "Test movie 3",
+      type_code: "MOVIE",
+      release_date: "2022-05-24T00:00:00Z",
+      runtime: 131,
+      price: 59,
+      mpaa_rating: "NC17",
+      description: "Test desc movie 3",
+      image_url: "https://image.tmdb.org/t/p/w200//62HCnUTziyWcpDaBO2i1DX17ljH.jpg"
+    },
+    {
+      id: 4,
+      title: "Test movie 4",
+      type_code: "MOVIE",
+      release_date: "2022-05-24T00:00:00Z",
+      runtime: 131,
+      price: 59,
+      mpaa_rating: "NC17",
+      description: "Test desc movie 4",
+      image_url: "https://image.tmdb.org/t/p/w200//62HCnUTziyWcpDaBO2i1DX17ljH.jpg"
     }
   ]
 };
 
 export const fakeTvPage: PageType<MovieType> = {
-  size: 3,
+  size: 10,
   page: 0,
   sort: {
     orders: [

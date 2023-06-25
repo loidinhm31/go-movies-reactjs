@@ -152,7 +152,7 @@ describe("Buy Collection Component", () => {
 
       // Expect "Buy to Watch" button to be rendered
       expect(screen.getByRole("button", { name: "Buy to Watch" })).toBeInTheDocument();
-    })
+    });
   });
 
   test("renders correct button when paid and collected", async () => {
@@ -180,7 +180,7 @@ describe("Buy Collection Component", () => {
       await waitFor(() => {
         // Expect the collection to be added
         expect(screen.getByRole("button", { name: "Collected" })).toBeInTheDocument();
-      })
+      });
     });
   });
 
@@ -197,7 +197,7 @@ describe("Buy Collection Component", () => {
       await waitFor(() => {
         // Expect the collection to be removed
         expect(screen.getByRole("button", { name: "Add to Collection" })).toBeInTheDocument();
-      })
+      });
     });
   });
-})
+});
