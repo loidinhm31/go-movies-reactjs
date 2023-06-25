@@ -7,10 +7,10 @@ import {
   MenuItem,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import { Fragment, useEffect, useState } from "react";
-import { post } from "@/libs/api";
+import { get } from "@/libs/api";
 import { GenreType } from "@/types/movies";
 import useSWRMutation from "swr/mutation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -22,27 +22,40 @@ interface SearchGenreProps {
 }
 
 export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) {
+  const [operator, setOperator] = useState("");
   const [open, setOpen] = useState(false);
-  const [options, setOptions] = useState<readonly GenreType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [options, setOptions] = useState<readonly GenreType[]>();
 
   const selectedType = useMovieType(movieType);
 
-  const { trigger } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, post);
+  const { trigger: getGenres } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, get);
+
+  useEffect(() => {
+    if (operator !== "") {
+      handleStringField("genres", operator, "operator", "string");
+    }
+  }, [operator]);
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    trigger()
+    setIsLoading(true);
+    getGenres()
       .then((data: GenreType[]) => {
         setOptions(data);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setIsLoading(false));
   }, [open, movieType]);
 
   return (
-    <Accordion>
+    <Accordion
+      expanded={open}
+      onChange={() => setOpen(!open)}
+    >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography>Genres</Typography>
       </AccordionSummary>
@@ -54,7 +67,8 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
             sx={{ minWidth: 100 }}
             id="genre-1"
             label="Operator"
-            onChange={(event) => handleStringField("genres", event.target.value, "operator", "string")}
+            value={operator}
+            onChange={(event) => setOperator(event.target.value)}
           >
             <MenuItem value={"and"}>AND</MenuItem>
             <MenuItem value={"or"}>OR</MenuItem>
@@ -67,48 +81,44 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
             label="Field"
             defaultValue="Genres"
             InputProps={{
-              readOnly: true,
+              readOnly: true
             }}
           />
-          <Autocomplete
-            fullWidth
-            open={open}
-            onOpen={() => {
-              setOpen(true);
-            }}
-            onClose={() => {
-              setOpen(false);
-            }}
-            isOptionEqualToValue={(option, value) => option.name === value.name}
-            options={options}
-            getOptionLabel={(option) => `${option.name} - ${option.type_code}`}
-            loading={open}
-            onChange={(_, value) =>
-              handleStringField(
-                "genres",
-                value.map((v) => `${v.name}-${v.type_code}`),
-                "def",
-                "string"
-              )
-            }
-            multiple
-            id="genre-3"
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Genres"
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <Fragment>
-                      {open ? <CircularProgress color="inherit" size={20} /> : null}
-                      {params.InputProps.endAdornment}
-                    </Fragment>
-                  ),
-                }}
-              />
-            )}
-          />
+          {options &&
+            <Autocomplete
+              fullWidth
+              isOptionEqualToValue={(option, value) => option.name === value.name}
+              options={options}
+              getOptionLabel={(option) => `${option.name} - ${option.type_code}`}
+              loading={isLoading}
+              onChange={(_, value) =>
+                handleStringField(
+                  "genres",
+                  value.map((v) => `${v.name}-${v.type_code}`),
+                  "def",
+                  "string"
+                )
+              }
+              multiple
+              id="genre-3"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Genres"
+                  label="Genres"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <Fragment>
+                        {isLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                        {params.InputProps.endAdornment}
+                      </Fragment>
+                    )
+                  }}
+                />
+              )}
+            />
+          }
         </Stack>
       </AccordionDetails>
     </Accordion>

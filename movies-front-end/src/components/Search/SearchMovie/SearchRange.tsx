@@ -7,7 +7,7 @@ import {
   Slider,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -31,7 +31,12 @@ function valueLabelFormat(value: number) {
 }
 
 export function SearchRange({ label, field, defType, min, max, step, handleRangeField }: SearchRangeProps) {
+  const [operator, setOperator] = useState("");
   const [values, setValues] = useState<number[]>([0, 0]);
+
+  useEffect(() => {
+    handleRangeField(field, operator, "operator", defType);
+  }, [operator]);
 
   useEffect(() => {
     handleRangeField(field, values, "def", defType);
@@ -54,7 +59,8 @@ export function SearchRange({ label, field, defType, min, max, step, handleRange
             sx={{ minWidth: 100 }}
             id={`${field}-1`}
             label="Operator"
-            onChange={(event) => handleRangeField(field, event.target.value, "operator", defType)}
+            value={operator}
+            onChange={(event) => setOperator(event.target.value)}
           >
             <MenuItem value={"and"}>AND</MenuItem>
             <MenuItem value={"or"}>OR</MenuItem>
@@ -67,11 +73,12 @@ export function SearchRange({ label, field, defType, min, max, step, handleRange
             label="Field"
             defaultValue={label}
             InputProps={{
-              readOnly: true,
+              readOnly: true
             }}
           />
 
           <Slider
+            data-testid="slider"
             value={values}
             onChange={handleChange}
             valueLabelDisplay="auto"

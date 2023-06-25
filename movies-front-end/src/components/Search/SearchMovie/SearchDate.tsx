@@ -10,8 +10,13 @@ interface SearchDateProps {
 }
 
 export function SearchDate({ label, field, defType, handleDateField }: SearchDateProps) {
+  const [operator, setOperator] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEnDate] = useState("");
+
+  useEffect(() => {
+    handleDateField(field, operator, "operator", defType, "")
+  }, [operator]);
 
   useEffect(() => {
     if (startDate === "") {
@@ -40,7 +45,8 @@ export function SearchDate({ label, field, defType, handleDateField }: SearchDat
             sx={{ minWidth: 100 }}
             id={`${field}-1`}
             label="Operator"
-            onChange={(event) => handleDateField(field, event.target.value, "operator", defType, "")}
+            value={operator}
+            onChange={(event) => setOperator(event.target.value)}
           >
             <MenuItem value={"and"}>AND</MenuItem>
             <MenuItem value={"or"}>OR</MenuItem>

@@ -8,8 +8,9 @@ import {
   MenuItem,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
 interface SearchStringProps {
   label: string;
@@ -19,6 +20,14 @@ interface SearchStringProps {
 }
 
 export function SearchString({ label, field, defType, handleStringField }: SearchStringProps) {
+  const [operator, setOperator] = useState("");
+
+  useEffect(() => {
+    if (operator !== "") {
+      handleStringField(field, operator, "operator", defType);
+    }
+  }, [operator]);
+
   return (
     <Accordion>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -32,7 +41,8 @@ export function SearchString({ label, field, defType, handleStringField }: Searc
             sx={{ minWidth: 100 }}
             id={`${field}-1`}
             label={"Operator"}
-            onChange={(event) => handleStringField(field, event.target.value, "operator", defType)}
+            value={operator}
+            onChange={(event) => setOperator(event.target.value)}
           >
             <MenuItem value={"and"}>AND</MenuItem>
             <MenuItem value={"or"}>OR</MenuItem>
@@ -44,7 +54,7 @@ export function SearchString({ label, field, defType, handleStringField }: Searc
             label="Field"
             defaultValue={label}
             InputProps={{
-              readOnly: true,
+              readOnly: true
             }}
           />
           <Autocomplete
@@ -62,7 +72,7 @@ export function SearchString({ label, field, defType, handleStringField }: Searc
                 {...params}
                 {...(defType === "number" ? { type: "number" } : {})}
                 label="Value"
-                placeholder="Value"
+                placeholder={label}
               />
             )}
           />
