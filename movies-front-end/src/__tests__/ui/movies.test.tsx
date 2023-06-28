@@ -123,7 +123,9 @@ describe("Movie Component", () => {
 
     });
   });
+});
 
+describe("Views Component", () => {
   test("renders view component", async () => {
 
     render(<Views movieId={1} wasMutateView={true} setWasMuateView={jest.fn} />);
@@ -135,7 +137,7 @@ describe("Movie Component", () => {
 
     });
   });
-});
+})
 
 describe("Buy Collection Component", () => {
 
