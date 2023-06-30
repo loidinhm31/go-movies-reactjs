@@ -42,8 +42,8 @@ export default function CheckoutAuthorize() {
         })
         .catch((error) => {
           setIsError(true);
-        });
-      setIsProcessing(false);
+        })
+        .finally(() => setIsProcessing(false));
     }
   }, [refId]);
 

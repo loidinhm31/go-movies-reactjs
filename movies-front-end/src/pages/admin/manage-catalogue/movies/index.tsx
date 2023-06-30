@@ -18,7 +18,7 @@ import {
   RadioGroup,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import { format } from "date-fns";
 import { signIn } from "next-auth/react";
@@ -26,17 +26,19 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { movieTypes } from "@/components/MovieTypeSelect";
 import AlertDialog from "@/components/shared/alert";
-import NotifySnackbar, { NotifyState, sleep } from "@/components/shared/snackbar";
+import NotifySnackbar, { NotifyState } from "@/components/shared/snackbar";
 import { useCheckTokenAndRole } from "@/hooks/auth/useCheckTokenAndRole";
-import { del, get, patch, post, postForm } from "@/libs/api";
+import { del, get, put, post, postForm } from "@/libs/api";
 import { FileType, GenreType, MovieType, RatingType } from "@/types/movies";
-import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 import PriceChangeIcon from "@mui/icons-material/PriceChange";
+import { useDispatch } from "react-redux";
+import { setData } from "@/redux/store";
 
 const EditMovie = () => {
   const router = useRouter();
   const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+  const dispatch = useDispatch();
 
   const [isOpenAlertDialog, setIsOpenAlertDialog] = useState<boolean>(false);
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
@@ -48,16 +50,18 @@ const EditMovie = () => {
     title: "",
     type_code: "",
     description: "",
-    release_date: null,
+    release_date: format(new Date(), "yyyy-MM-dd"),
     runtime: 0,
     price: 0,
     genres: [],
-    image_url: "",
+    image_url: ""
   });
 
   // Get id from the URL
   let { id } = router.query;
 
+  const [ratings, setRatings] = useState<RatingType[]>();
+  const [rating, setRating] = useState("");
   const videoFileRef = useRef<any>(null);
   const [videoFile, setVideoFile] = useState<HTMLInputElement | null>(null);
   const [videoPath, setVideoPath] = useState<string>("");
@@ -74,9 +78,9 @@ const EditMovie = () => {
   const { trigger: uploadFile } = useSWRMutation(`/api/v1/admin/movies/files/upload`, postForm);
   const { trigger: removeFile } = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
 
-  const { trigger: updateMoviePrice } = useSWRMutation(`/api/v1/admin/movies/price`, patch);
+  const { trigger: updateMoviePrice } = useSWRMutation(`/api/v1/admin/movies/price`, put);
 
-  const { data: mpaaOptions } = useSWR<RatingType[]>("/api/v1/ratings", get);
+  const { trigger: getRatings } = useSWRMutation<RatingType[]>("/api/v1/ratings", get);
 
   useEffect(() => {
     if (isInvalid) {
@@ -86,19 +90,12 @@ const EditMovie = () => {
   }, [isInvalid]);
 
   useEffect(() => {
-    if (id === undefined) {
-      setMovie({
-        title: "",
-        type_code: "",
-        description: "",
-        release_date: format(new Date(), "yyyy-MM-dd"),
-        runtime: 0,
-        price: 0,
-        mpaa_rating: "",
-        genres: [],
-      });
+    getRatings().then((result) => {
+      setRatings(result);
+    });
 
-      if (movie.type_code) {
+    if (id === undefined) {
+      if (movie.type_code !== "") {
         handleFetchGenres();
       }
     } else {
@@ -117,7 +114,7 @@ const EditMovie = () => {
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         });
     }
@@ -130,31 +127,44 @@ const EditMovie = () => {
   }, [id, movie.type_code]);
 
   useEffect(() => {
+    if (rating !== "") {
+      setMovie({
+        ...movie,
+        mpaa_rating: rating
+      });
+    }
+  }, [rating]);
+
+  useEffect(() => {
+    if (imageUrl !== "") {
+      setMovie({
+        ...movie,
+        image_url: imageUrl
+      });
+    }
+  }, [imageUrl]);
+
+  useEffect(() => {
     if (isConfirmDelete) {
       deleteMovie()
         .then((data) => {
           if (data) {
-            setNotifyState({
-              open: true,
-              message: data.message,
-              vertical: "top",
-              horizontal: "right",
+            dispatch(setData({
               severity: "info",
-            });
+              message: `${movie.title} was deleted`
+            }));
 
-            (async () => {
-              await sleep(1500);
-              await router.push("/admin/manage-catalogue");
-            })();
+            router.push("/admin/manage-catalogue");
           }
         })
         .catch((error) => {
+          setIsConfirmDelete(false);
           setNotifyState({
             open: true,
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         });
     }
@@ -172,7 +182,7 @@ const EditMovie = () => {
       });
       setMovie({
         ...movie,
-        genres: checks,
+        genres: checks
       } as MovieType);
     });
   };
@@ -187,10 +197,10 @@ const EditMovie = () => {
       { field: movie.release_date, name: "release_date", label: "Release Date" },
       { field: movie.runtime, name: "runtime", label: "Runtime" },
       { field: movie.description, name: "description", label: "Description" },
-      { field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating" },
+      { field: movie.mpaa_rating, name: "mpaa_rating", label: "MPAA Rating" }
     ];
 
-    required.forEach(function ({ field, label }: any) {
+    required.forEach(function({ field, label }: any) {
       if (field === "" || field === undefined) {
         errors.push(label);
       }
@@ -208,7 +218,7 @@ const EditMovie = () => {
         message: `Fill value for ${errors.join(", ")}`,
         vertical: "bottom",
         horizontal: "center",
-        severity: "warning",
+        severity: "warning"
       });
       return false;
     }
@@ -216,18 +226,11 @@ const EditMovie = () => {
     triggerMovie(movie)
       .then((data) => {
         if (data) {
-          setNotifyState({
-            open: true,
-            message: "Movie Saved",
-            vertical: "top",
-            horizontal: "right",
+          dispatch(setData({
             severity: "success",
-          });
-
-          (async () => {
-            await sleep(1500);
-            await router.push("/admin/manage-catalogue");
-          })();
+            message: "Movie Saved"
+          }));
+          router.push("/admin/manage-catalogue");
         }
       })
       .catch((error) => {
@@ -236,7 +239,7 @@ const EditMovie = () => {
           message: error.message.message,
           vertical: "top",
           horizontal: "right",
-          severity: "error",
+          severity: "error"
         });
       });
   };
@@ -251,7 +254,7 @@ const EditMovie = () => {
 
     setMovie({
       ...movie,
-      [name]: value,
+      [name]: value
     });
   };
 
@@ -262,7 +265,7 @@ const EditMovie = () => {
 
     setMovie({
       ...movie,
-      genres: tmpArr,
+      genres: tmpArr
     });
   };
 
@@ -301,7 +304,7 @@ const EditMovie = () => {
 
             setMovie({
               ...movie,
-              video_path: result.fileName.split(".")[0],
+              video_path: result.fileName.split(".")[0]
             });
 
             setNotifyState({
@@ -309,7 +312,7 @@ const EditMovie = () => {
               message: "Video Uploaded",
               vertical: "top",
               horizontal: "right",
-              severity: "info",
+              severity: "info"
             });
           }
         })
@@ -319,7 +322,7 @@ const EditMovie = () => {
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         });
     } else if (type === FileType.IMAGE) {
@@ -332,7 +335,7 @@ const EditMovie = () => {
 
             setMovie({
               ...movie,
-              image_url: result.fileName,
+              image_url: result.fileName
             });
 
             setNotifyState({
@@ -340,7 +343,7 @@ const EditMovie = () => {
               message: "Image Uploaded",
               vertical: "top",
               horizontal: "right",
-              severity: "info",
+              severity: "info"
             });
           }
         })
@@ -350,7 +353,7 @@ const EditMovie = () => {
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         });
     }
@@ -366,7 +369,7 @@ const EditMovie = () => {
       if (movie.image_url!.startsWith("https://image.tmdb.org")) {
         setMovie({
           ...movie,
-          image_url: "",
+          image_url: ""
         });
         return;
       }
@@ -379,7 +382,7 @@ const EditMovie = () => {
     const fileName = paths[paths.length - 1];
     removeFile({
       fileName: fileName,
-      fileType: fileType,
+      fileType: fileType
     })
       .then((result) => {
         if (result.result === "ok") {
@@ -389,7 +392,7 @@ const EditMovie = () => {
 
             setMovie({
               ...movie,
-              video_path: "",
+              video_path: ""
             });
           } else if (fileType === FileType.IMAGE) {
             setImageFile(null);
@@ -397,7 +400,7 @@ const EditMovie = () => {
 
             setMovie({
               ...movie,
-              image_url: "",
+              image_url: ""
             });
           }
 
@@ -406,7 +409,7 @@ const EditMovie = () => {
             message: `${fileType} removed`,
             vertical: "top",
             horizontal: "right",
-            severity: "info",
+            severity: "info"
           });
         } else {
           setNotifyState({
@@ -414,7 +417,7 @@ const EditMovie = () => {
             message: `Cannot remove video, ${result.result}`,
             vertical: "top",
             horizontal: "right",
-            severity: "info",
+            severity: "info"
           });
         }
       })
@@ -424,7 +427,7 @@ const EditMovie = () => {
           message: error.message.message,
           vertical: "top",
           horizontal: "right",
-          severity: "error",
+          severity: "error"
         });
       });
   };
@@ -438,14 +441,14 @@ const EditMovie = () => {
             message: "Average Price Was Updated",
             vertical: "top",
             horizontal: "right",
-            severity: "success",
+            severity: "success"
           });
 
           fetchMovie()
             .then((movie) => {
               setMovie((prevMovie) => ({
                 ...prevMovie,
-                price: movie?.price,
+                price: movie?.price
               }));
             })
             .catch((error) => {
@@ -454,7 +457,7 @@ const EditMovie = () => {
                 message: error.message.message,
                 vertical: "top",
                 horizontal: "right",
-                severity: "error",
+                severity: "error"
               });
             });
         }
@@ -465,7 +468,7 @@ const EditMovie = () => {
           message: error.message.message,
           vertical: "top",
           horizontal: "right",
-          severity: "error",
+          severity: "error"
         });
       });
   };
@@ -522,7 +525,7 @@ const EditMovie = () => {
                       type="number"
                       name="price"
                       InputProps={{
-                        endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                        endAdornment: <InputAdornment position="end">USD</InputAdornment>
                       }}
                       value={movie.price || 0}
                       onChange={(e) => handleChange(e, "price")}
@@ -531,7 +534,7 @@ const EditMovie = () => {
 
                   {movie.type_code === "TV" && (
                     <Stack direction="row" spacing={2}>
-                      <IconButton color="secondary" onClick={handleUpdateAveragePrice}>
+                      <IconButton data-testid="updateAvgPrice" color="secondary" onClick={handleUpdateAveragePrice}>
                         <PriceChangeIcon />
                       </IconButton>
 
@@ -543,7 +546,7 @@ const EditMovie = () => {
                         type="number"
                         name="price"
                         InputProps={{
-                          endAdornment: <InputAdornment position="end">USD</InputAdornment>,
+                          endAdornment: <InputAdornment position="end">USD</InputAdornment>
                         }}
                         value={movie.price || 0}
                       />
@@ -589,7 +592,7 @@ const EditMovie = () => {
                   type="number"
                   name="runtime"
                   InputProps={{
-                    endAdornment: <InputAdornment position="end">minutes</InputAdornment>,
+                    endAdornment: <InputAdornment position="end">minutes</InputAdornment>
                   }}
                   value={movie.runtime}
                   onChange={(e) => handleChange(e, "runtime")}
@@ -597,22 +600,26 @@ const EditMovie = () => {
               </Grid>
 
               <Grid item xs={4}>
-                <TextField
-                  fullWidth
-                  select
-                  label="MPAA Rating"
-                  variant="outlined"
-                  value={movie.mpaa_rating}
-                  onChange={(e) => handleChange(e, "mpaa_rating")}
-                >
-                  {mpaaOptions &&
-                    mpaaOptions.map((o, index) => (
-                      <MenuItem key={`${o.id}-${index}`} value={o.code}>
-                        {o.name}
-                      </MenuItem>
-                    ))}
-                </TextField>
+                {ratings &&
+                  <TextField
+                    fullWidth
+                    select
+                    label="MPAA Rating"
+                    variant="outlined"
+                    value={rating}
+                    onChange={(event) => setRating(event.target.value)}
+                  >
+                    {
+                      ratings.map((o, index) => (
+                        <MenuItem key={`${o.id}-${index}`} value={o.code}>
+                          {o.name}
+                        </MenuItem>
+                      ))
+                    }
+                  </TextField>
+                }
               </Grid>
+
 
               <Grid container item xs={12} spacing={3} sx={{ display: "flex", alignItems: "center" }}>
                 {movie && !movie.image_url && (
@@ -622,12 +629,13 @@ const EditMovie = () => {
                         fullWidth
                         label="Image Path"
                         variant="outlined"
-                        value={movie.image_url}
-                        onChange={(e) => handleChange(e, "image_url")}
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
                       />
                     </Grid>
                     <Grid container item xs={6} spacing={2} sx={{ display: "flex" }}>
                       <input
+                        data-testid="uploadImage"
                         ref={imageFileRef}
                         hidden={true}
                         type="file"
@@ -668,6 +676,7 @@ const EditMovie = () => {
               {movie && movie.type_code === "MOVIE" && (
                 <Grid item xs={12}>
                   <input
+                    data-testid="uploadVideo"
                     ref={videoFileRef}
                     hidden={true}
                     type="file"

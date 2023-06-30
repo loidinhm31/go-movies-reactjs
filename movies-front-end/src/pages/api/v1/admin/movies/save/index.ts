@@ -10,10 +10,10 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
 
   // Define date format
   data.release_date = new Date(data.release_date!).toISOString();
-  let method = "PUT";
+  let method = "POST";
 
   if (data.id !== undefined) {
-    method = "PATCH";
+    method = "PUT";
   }
   const requestOptions = {
     method: method,

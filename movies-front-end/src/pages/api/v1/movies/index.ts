@@ -32,12 +32,12 @@ const handler = async (req, res) => {
     let response;
     if (type) {
       response = await fetch(
-        `${process.env.API_BASE_URL}/movies?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`,
+        `${process.env.API_BASE_URL}/movies/page?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`,
         requestOptions
       );
     } else {
       response = await fetch(
-        `${process.env.API_BASE_URL}/movies?q=${q}&page=${pageIndex}&size=${pageSize}`,
+        `${process.env.API_BASE_URL}/movies/page?q=${q}&page=${pageIndex}&size=${pageSize}`,
         requestOptions
       );
     }

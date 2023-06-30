@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MovieType, PaymentType } from "@/types/movies";
 import useSWRMutation from "swr/mutation";
 import { get, post } from "@/libs/api";
-import { useHasUsername } from "@/hooks/auth/useHasUsername";
 import { Stripe } from "@stripe/stripe-js/types/stripe-js";
 import { CardMedia, Grid, Paper, Stack, Typography } from "@mui/material";
 import format from "date-fns/format";
@@ -11,12 +10,10 @@ import { loadStripe } from "@stripe/stripe-js";
 
 export interface MovieCheckoutProps {
   refId: number;
-  type: string;
+  type?: string;
 }
 
 export default function MovieCheckout({ refId, type }: MovieCheckoutProps) {
-  const username = useHasUsername();
-
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null>>();
   const [clientSecret, setClientSecret] = useState("");
 

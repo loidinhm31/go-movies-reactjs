@@ -3,7 +3,6 @@ import { MovieType, PaymentType } from "@/types/movies";
 import { EpisodeType } from "@/types/seasons";
 import useSWRMutation from "swr/mutation";
 import { get, post } from "@/libs/api";
-import { useHasUsername } from "@/hooks/auth/useHasUsername";
 import { Stripe } from "@stripe/stripe-js/types/stripe-js";
 import { Box, CardMedia, Grid, Paper, Stack, Typography } from "@mui/material";
 import CheckoutBox from "@/components/Payment/CheckoutBox";
@@ -11,21 +10,19 @@ import { loadStripe } from "@stripe/stripe-js";
 import { MovieCheckoutProps } from "@/components/Payment/MovieCheckout";
 import format from "date-fns/format";
 
-export default function EpisodeCheckout({ refId, type }: MovieCheckoutProps) {
-  const username = useHasUsername();
-
+export default function EpisodeCheckout({ refId }: MovieCheckoutProps) {
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null>>();
   const [clientSecret, setClientSecret] = useState("");
 
   const [wasPaid, setWasPaid] = useState(false);
   const [episode, setEpisode] = useState<EpisodeType>();
   const [movie, setMovie] = useState<MovieType>();
+  const [paymentId, setPaymentId] = useState();
 
   const { trigger: getRootMovie } = useSWRMutation(`/api/v1/movies/checkout?episodeId=${refId}`, get);
   const { trigger: getEpisode } = useSWRMutation(`/api/v1/episodes/${refId}`, get);
-  const { trigger: checkBuy } = useSWRMutation(`/api/v1/payments/check?type=${type}&refId=${refId}`, get);
+  const { trigger: checkBuy } = useSWRMutation(`/api/v1/payments/check?type=TV&refId=${refId}`, get);
   const { trigger: getPaymentIntent } = useSWRMutation("/api/v1/payments/intents", post);
-  const [paymentId, setPaymentId] = useState();
 
   useEffect(() => {
     setStripePromise(loadStripe(`${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}`));
@@ -41,7 +38,7 @@ export default function EpisodeCheckout({ refId, type }: MovieCheckoutProps) {
         setMovie(result);
       });
     }
-  }, [refId, type]);
+  }, [refId]);
 
   useEffect(() => {
     if (episode && episode.price) {
@@ -114,7 +111,7 @@ export default function EpisodeCheckout({ refId, type }: MovieCheckoutProps) {
       <Grid item xs={6}>
         <CheckoutBox
           paymentId={paymentId!}
-          type={type}
+          type={"TV"}
           movieId={movie?.id!}
           episodeId={Number(refId)}
           price={episode?.price}

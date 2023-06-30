@@ -32,7 +32,7 @@ const handler = withRole("admin", async (req, res, token) => {
 
     try {
       const response = await fetch(
-        `${process.env.API_BASE_URL}/auth/users?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
+        `${process.env.API_BASE_URL}/auth/users/page?page=${pageIndex}&size=${pageSize}&isNew=${isNew}&q=${query}`,
         requestOptions
       );
       res.status(response.status).json(await response.json());

@@ -66,7 +66,7 @@ export default function SeasonDialog({
     <>
       <Dialog fullWidth={true} maxWidth={"lg"} open={open} onClose={handleClose}>
         <DialogTitle>
-          <Typography variant="subtitle1">
+          <Typography >
             <b>{`TV Series - ${selectedMovie?.title}`}</b>
           </Typography>
         </DialogTitle>

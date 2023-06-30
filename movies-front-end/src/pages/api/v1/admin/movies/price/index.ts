@@ -9,7 +9,7 @@ const handler = withAnyRole(["admin", "moderator"], async (req, res, token) => {
   headers.append("Authorization", `Bearer ${token.accessToken}`);
 
   const requestOptions = {
-    method: "PATCH",
+    method: "PUT",
     headers: headers,
   };
 

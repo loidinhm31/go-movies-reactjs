@@ -33,18 +33,18 @@ const handler = withoutRole("banned", async (req, res, token) => {
 
     try {
       const response = await fetch(
-        `${process.env.API_BASE_URL}/auth/collections?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`,
+        `${process.env.API_BASE_URL}/auth/collections/page?type=${type}&q=${q}&page=${pageIndex}&size=${pageSize}`,
         requestOptions
       );
       res.status(response.status).json(await response.json());
     } catch (error) {
       res.status(500).json({ message: "server error" });
     }
-  } else if (req.method === "PUT") {
+  } else if (req.method === "POST") {
     const data: CollectionType = req.body;
 
     const requestOptions = {
-      method: "PUT",
+      method: "POST",
       headers: headers,
       body: JSON.stringify(data),
     };

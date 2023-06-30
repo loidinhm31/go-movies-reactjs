@@ -7,8 +7,12 @@ import SeasonDialog from "@/components/Dialog/SeasonDialog";
 import { MovieType } from "@/types/movies";
 import AddIcon from "@mui/icons-material/Add";
 import { useCheckTokenAndRole } from "@/hooks/auth/useCheckTokenAndRole";
+import { setData } from "@/redux/store";
+import { useSelector } from "react-redux";
 
 const ManageCatalogue = () => {
+  const data = useSelector((state: any) => state.data);
+
   const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
   const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
@@ -22,6 +26,20 @@ const ManageCatalogue = () => {
       return;
     }
   }, [isInvalid]);
+
+  useEffect(() => {
+    if (data.severity !== undefined && data.message !== undefined) {
+      setNotifyState({
+        open: true,
+        message: data.message,
+        vertical: "top",
+        horizontal: "right",
+        severity:  data.severity,
+      });
+
+      setData(null);
+    }
+  }, [data]);
 
   return (
     <>

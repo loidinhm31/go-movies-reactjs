@@ -38,7 +38,7 @@ const EditSeason = () => {
   const [season, setSeason] = useState<SeasonType>({
     name: "",
     description: "",
-    air_date: null,
+    air_date: format(new Date(), "yyyy-MM-dd"),
     movie_id: parseInt(movieId as string),
   });
 
@@ -54,14 +54,7 @@ const EditSeason = () => {
   }, [isInvalid]);
 
   useEffect(() => {
-    if (id === undefined) {
-      setSeason({
-        name: "",
-        description: "",
-        air_date: format(new Date(), "yyyy-MM-dd"),
-        movie_id: parseInt(movieId as string),
-      });
-    } else {
+    if (id !== undefined) {
       fetchSeason()
         .then((result) => {
           setSeason(result!);

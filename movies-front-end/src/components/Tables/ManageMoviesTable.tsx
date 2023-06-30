@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import SearchKey from "@/components/Search/SearchKey";
 import AlertDialog from "@/components/shared/alert";
 import { NotifyState } from "@/components/shared/snackbar";
-import { del, patch, post } from "@/libs/api";
+import { del, put, post } from "@/libs/api";
 import { MovieType } from "@/types/movies";
 import { Direction, PageType } from "@/types/page";
 import useSWRMutation from "swr/mutation";
@@ -151,7 +151,7 @@ export default function ManageMoviesTable({
     post
   );
   const { trigger: deleteMovie } = useSWRMutation(`/api/v1/admin/movies/delete/${deleteId}`, del);
-  const { trigger: updateMoviePrice } = useSWRMutation(`/api/v1/admin/movies/price`, patch);
+  const { trigger: updateMoviePrice } = useSWRMutation(`/api/v1/admin/movies/price`, put);
 
   useEffect(() => {
     handeRequestPage();
@@ -334,15 +334,15 @@ export default function ManageMoviesTable({
                                 <IconButton color="inherit" href={`/admin/manage-catalogue/movies?id=${row.id}`}>
                                   <EditIcon />
                                 </IconButton>
-                                <IconButton color="error" onClick={() => handleDeleteRow(row)}>
+                                <IconButton data-testid={`del-button-${row.id}`} color="error" onClick={() => handleDeleteRow(row)}>
                                   <DeleteIcon />
                                 </IconButton>
                                 {row.type_code === "TV" && (
                                   <>
-                                    <IconButton color="inherit" onClick={() => handleViewTv(row)}>
+                                    <IconButton data-testid={`view-button-${row.id}`} color="inherit" onClick={() => handleViewTv(row)}>
                                       <VisibilityIcon />
                                     </IconButton>
-                                    <IconButton color="secondary" onClick={() => handleUpdateAveragePrice(row)}>
+                                    <IconButton data-testid={`update-button-${row.id}`} color="secondary" onClick={() => handleUpdateAveragePrice(row)}>
                                       <PriceChangeIcon />
                                     </IconButton>
                                   </>

@@ -59,9 +59,7 @@ export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdate
   const { trigger: removeVideo } = useSWRMutation(`/api/v1/admin/movies/files/remove`, post);
 
   useEffect(() => {
-    if (id === undefined) {
-      setEpisode(clearObj);
-    } else {
+    if (id !== undefined) {
       if (openEdit) {
         fetchEpisode()
           .then((result) => {

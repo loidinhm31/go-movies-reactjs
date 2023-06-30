@@ -13,7 +13,7 @@ const handler = withoutRole("banned", async (req, res, token) => {
   };
 
   try {
-    const response = await fetch(`${process.env.API_BASE_URL}/auth/movies?episodeId=${episodeId}`, requestOptions);
+    const response = await fetch(`${process.env.API_BASE_URL}/auth/movies/episodes/${episodeId}`, requestOptions);
 
     res.status(response.status).json(await response.json());
   } catch (error) {

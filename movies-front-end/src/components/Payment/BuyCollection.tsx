@@ -1,5 +1,5 @@
 import useSWRMutation from "swr/mutation";
-import { del, get, put } from "@/libs/api";
+import { del, get, post } from "@/libs/api";
 import LibraryAddIcon from "@mui/icons-material/LibraryAdd";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { CollectionType, MovieType, PaymentType } from "@/types/movies";
@@ -24,7 +24,7 @@ export function BuyCollection({ movie, episode }: CollectionProps) {
   const [wasCollected, setWasCollected] = useState(false);
   const [wasPaid, setWasPaid] = useState(false);
 
-  const { trigger: addCollection } = useSWRMutation("/api/v1/collections", put);
+  const { trigger: addCollection } = useSWRMutation("/api/v1/collections", post);
   const { trigger: deleteCollection } = useSWRMutation(
     `/api/v1/collections?type=${movie.type_code}&refId=${refId}`,
     del

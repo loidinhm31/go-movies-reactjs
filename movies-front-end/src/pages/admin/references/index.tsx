@@ -61,6 +61,7 @@ export default function References() {
       }
     }
   }, [progress, isClickSearch]);
+
   const handleSearchClick = () => {
     if (searchKey !== "") {
       setProgress(0);

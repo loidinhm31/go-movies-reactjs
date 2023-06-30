@@ -10,7 +10,7 @@ import {
   Select,
   SelectChangeEvent,
   Stack,
-  Typography,
+  Typography
 } from "@mui/material";
 import Link from "next/link";
 import format from "date-fns/format";
@@ -60,7 +60,7 @@ export function CollectionMovieTab() {
                   sx={{
                     m: 2,
                     p: 2,
-                    flexGrow: 1,
+                    flexGrow: 1
                   }}
                 >
                   <Stack spacing={3}>
@@ -95,9 +95,11 @@ export function CollectionMovieTab() {
       </Grid>
       <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>
         <Stack spacing={2} direction="row">
-          <FormControl>
-            <InputLabel>Size</InputLabel>
+          <FormControl
+          >
+            <InputLabel >Size</InputLabel>
             <Select
+              data-testid="select-size"
               sx={{ display: "flex", alignItems: "center" }}
               value={pageSize.toString()}
               label="Size"
@@ -105,7 +107,7 @@ export function CollectionMovieTab() {
             >
               {process.env.NODE_ENV === "development" && <MenuItem value={1}>1</MenuItem>}
               <MenuItem value={9}>9</MenuItem>
-              <MenuItem value={18}>18</MenuItem>
+              <MenuItem data-testid="select-18" value={18}>18</MenuItem>
               <MenuItem value={27}>27</MenuItem>
             </Select>
           </FormControl>
