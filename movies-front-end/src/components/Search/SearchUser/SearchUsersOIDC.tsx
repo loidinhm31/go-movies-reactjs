@@ -170,7 +170,7 @@ export default function SearchUsersOIDC({ setNotifyState, wasUpdated, setWasUpda
                   </RadioGroup>
                 </FormControl>
               </Grid>
-              <IconButton color="primary" size="large" onClick={handleAddOidcUserClick}>
+              <IconButton data-testid="add-oidc" color="primary" size="large" onClick={handleAddOidcUserClick}>
                 <PersonAddIcon fontSize="inherit" />
               </IconButton>
             </Grid>

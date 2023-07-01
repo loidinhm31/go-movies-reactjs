@@ -95,7 +95,7 @@ export default function SearchUsers({ setNotifyState, wasUpdated, setWasUpdated 
       <Grid item xs={2}>
         <Stack sx={{ display: "flex", alignItems: "center" }}>
           <Typography>Is New?</Typography>
-          <Checkbox checked={isNew} onChange={(event) => setIsNew(event.target.checked)} />
+          <Checkbox data-testid="is-new" checked={isNew} onChange={(event) => setIsNew(event.target.checked)} />
         </Stack>
       </Grid>
       <Grid item xs={12}>

@@ -22,10 +22,13 @@ import { useCheckTokenAndRole } from "@/hooks/auth/useCheckTokenAndRole";
 import { SeasonType } from "@/types/seasons";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ManageEpisodesTable } from "@/components/Tables/ManageEpisodesTable";
+import { useDispatch } from "react-redux";
+import { setData } from "@/redux/store";
 
 const EditSeason = () => {
   const router = useRouter();
   const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+  const dispatch = useDispatch();
 
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
   const [isConfirmDelete, setIsConfirmDelete] = useState<boolean>(false);
@@ -76,18 +79,12 @@ const EditSeason = () => {
       deleteSeason()
         .then((data) => {
           if (data) {
-            setNotifyState({
-              open: true,
-              message: data.message,
-              vertical: "top",
-              horizontal: "right",
+            dispatch(setData({
               severity: "info",
-            });
+              message: data.message
+            }));
 
-            (async () => {
-              await sleep(1500);
-              await router.push("/admin/manage-catalogue");
-            })();
+            router.push("/admin/manage-catalogue");
           }
         })
         .catch((error) => {
@@ -133,19 +130,21 @@ const EditSeason = () => {
     triggerSeason(season)
       .then((data) => {
         if (data) {
-          setNotifyState({
-            open: true,
-            message: "Season Saved",
-            vertical: "top",
-            horizontal: "right",
-            severity: "success",
-          });
-
           if (!id) {
-            (async () => {
-              await sleep(1500);
-              await router.push("/admin/manage-catalogue");
-            })();
+            dispatch(setData({
+              severity: "success",
+              message: "Season Saved"
+            }));
+
+            router.push("/admin/manage-catalogue");
+          } else {
+            setNotifyState({
+              open: true,
+              message: "Season Saved",
+              vertical: "top",
+              horizontal: "right",
+              severity: "success",
+            });
           }
         }
       })
