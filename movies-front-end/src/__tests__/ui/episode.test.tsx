@@ -30,6 +30,6 @@ describe("Watch Episode", () => {
 
       // Expect the episode name to be rendered
       expect(screen.getByText("Season 1 - E1: Test episode 1")).toBeInTheDocument();
-    })
+    });
   });
-})
+});
