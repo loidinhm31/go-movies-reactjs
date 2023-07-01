@@ -1,14 +1,15 @@
 import React from "react";
-import ManageMoviesTable from "@/components/Tables/ManageMoviesTable";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { fakeSearchData } from "@/__tests__/__mocks__/fakeData/search";
 import userEvent from "@testing-library/user-event";
-import EditSeason from "@/pages/admin/manage-catalogue/movies/seasons";
+import EditEpisode from "@/components/Episode/EditEpisode";
+import { ManageEpisodesTable } from "@/components/Tables/ManageEpisodesTable";
+import ManageMoviesTable from "@/components/Tables/ManageMoviesTable";
+import { fakeSearchData } from "@/__tests__/__mocks__/fakeData/search";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import EditMovie from "@/pages/admin/manage-catalogue/movies";
-import { sleep } from "@/components/shared/snackbar";
 import { useDispatch } from "react-redux";
+import EditMovie from "@/pages/admin/manage-catalogue/movies";
+import EditSeason from "@/pages/admin/manage-catalogue/movies/seasons";
 
 
 jest.mock("next/router", () => ({
@@ -126,6 +127,7 @@ describe("Edit Movie", () => {
       status: "authenticated"
     }));
 
+    // @ts-ignore
     render(<EditMovie />);
 
     await waitFor(() => {
@@ -441,15 +443,7 @@ describe("Edit Season", () => {
 
     // Assert that the success message is displayed
     await waitFor(async () => {
-      expect(await screen.getByText("Season Saved")).toBeInTheDocument();
-
-    });
-
-    await sleep(1500);
-
-    await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith("/admin/manage-catalogue");
-
     });
   });
 
@@ -481,12 +475,13 @@ describe("Edit Season", () => {
   });
 
   test("should delete season when 'Delete Season' button is clicked", async () => {
+    const mockPush = jest.fn();
     (useRouter as jest.Mock).mockImplementation(() => ({
       query: {
         id: "1",
         movieId: "3"
       },
-      push: jest.fn()
+      push: mockPush
     }));
 
     (useSession as jest.Mock).mockImplementation(() => ({
@@ -513,8 +508,136 @@ describe("Edit Season", () => {
     fireEvent.click(screen.getByText("Yes"));
 
     await waitFor(() => {
-      // Assert that the success message is displayed
-      expect(screen.getByText("Season deleted")).toBeInTheDocument();
+      expect(mockPush).toBeCalledWith("/admin/manage-catalogue");
+    });
+
+  });
+});
+
+describe("Edit Episode", () => {
+  test("renders ManageEpisodesTable component", async () => {
+    render(
+      <ManageEpisodesTable
+        season={{
+          id: 5,
+          name: "Season 5",
+          air_date: "2022-06-01T00:00:00Z",
+          description: "Fifth Season at OT",
+          movie_id: 5
+        }}
+        setNotifyState={jest.fn} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("E1: Test episode 1")).toBeInTheDocument();
+      expect(screen.getByText("E2: Test episode 2")).toBeInTheDocument();
+    });
+  });
+
+  test("should handle form submission", async () => {
+    const mockSetNotifyState = jest.fn();
+    const mockSetWasUpdated = jest.fn();
+
+    render(<EditEpisode id={1} seasonId={1} setNotifyState={mockSetNotifyState} setWasUpdated={mockSetWasUpdated} />);
+
+    // Open edit
+    userEvent.click(screen.getByTestId("edit-episode"));
+
+    // Fill in the form fields
+    const nameField = screen.getByLabelText("Name");
+    userEvent.click(nameField);
+    userEvent.type(nameField, "Change Name");
+
+    const runtimeField = screen.getByLabelText("Runtime");
+    userEvent.click(runtimeField);
+    userEvent.type(runtimeField, "10");
+
+    fireEvent.change(screen.getByLabelText("Air Date"), { target: { value: "2023-06-30" } });
+
+    // Submit the form
+    userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    // Wait for the form submission to complete
+    await waitFor(() => {
+      expect(mockSetNotifyState).toBeCalledWith({
+        open: true,
+        message: "Episode Saved",
+        vertical: "top",
+        horizontal: "right",
+        severity: "success"
+      });
+
+      expect(mockSetWasUpdated).toBeCalledWith(true);
+    });
+  });
+
+  test("Delete episode", async () => {
+    const mockSetNotifyState = jest.fn();
+    const mockSetWasUpdated = jest.fn();
+
+    render(<EditEpisode id={1} seasonId={1} setNotifyState={mockSetNotifyState} setWasUpdated={mockSetWasUpdated} />);
+
+    userEvent.click(screen.getByTestId("delete-episode"));
+
+    userEvent.click(screen.getByText("Yes"));
+
+    await waitFor(() => {
+      expect(mockSetNotifyState).toBeCalledWith({
+        open: true,
+        message: "ok",
+        vertical: "top",
+        horizontal: "right",
+        severity: "info"
+      });
+
+      expect(mockSetWasUpdated).toBeCalledWith(true);
+    });
+  });
+
+  test("Missing field when adding episode", async () => {
+    const mockSetNotifyState = jest.fn();
+
+    render(<EditEpisode seasonId={1} setNotifyState={mockSetNotifyState} setWasUpdated={jest.fn} />);
+
+    userEvent.click(screen.getByTestId("add-episode"));
+
+    const nameInput = screen.getByLabelText("Name");
+    userEvent.click(nameInput);
+    userEvent.type(nameInput, "test");
+
+    userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockSetNotifyState).toBeCalledWith({
+      open: true,
+      message: `Fill value for Runtime`,
+      vertical: "bottom",
+      horizontal: "center",
+      severity: "warning"
+    });
+  });
+
+  test("handles file video upload", async () => {
+    const mockSetNotifyState = jest.fn();
+
+    render(<EditEpisode seasonId={1} setNotifyState={mockSetNotifyState} setWasUpdated={jest.fn} />);
+
+    userEvent.click(screen.getByTestId("add-episode"));
+
+    // Mock the file input change event
+    const videoFile = new File(["dummy video content"], "example-file.mp4", { type: "video/mp4" });
+    const fileInput = screen.getByTestId("upload-video");
+    fireEvent.change(fileInput, { target: { files: [videoFile] } });
+
+    await waitFor(() => {
+      // Check that the file was uploaded and the state was updated
+      expect(screen.getByText("example-file")).toBeInTheDocument();
+      expect(mockSetNotifyState).toBeCalledWith({
+        open: true,
+        message: "Video Uploaded",
+        vertical: "top",
+        horizontal: "right",
+        severity: "info",
+      })
     });
 
   });

@@ -7,6 +7,8 @@ import { fakeSearchData } from "@/__tests__/__mocks__/fakeData/search";
 import { fakeSeasons } from "@/__tests__/__mocks__/fakeData/seasons";
 import useSWRMutation from "swr/mutation";
 import { patch } from "@/libs/api";
+import { fakeUsers } from "@/__tests__/__mocks__/fakeData/users";
+import { boolean } from "boolean";
 
 export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
   const type = req.url.searchParams.get("type");
@@ -80,6 +82,26 @@ export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
     return res(ctx.status(200), ctx.body(JSON.stringify(episode)));
   }),
 
+  rest.get("/api/v1/episodes", (req, res, ctx) => {
+    const seasonId = req.url.searchParams.get("seasonId");
+    const episodes = fakeEpisodes.filter((e) => e.season_id === Number(seasonId));
+    return res(ctx.status(200), ctx.json(episodes));
+  }),
+
+  rest.post("/api/v1/admin/movies/seasons/episodes/save", (req, res, ctx) => {
+    // Return success message
+    return res(ctx.status(200), ctx.json({
+      message: "ok"
+    }));
+  }),
+
+  rest.delete("/api/v1/admin/movies/seasons/episodes/delete/:id", (req, res, ctx) => {
+    // Return success message
+    return res(ctx.status(200), ctx.json({
+      message: "ok"
+    }));
+  }),
+
   rest.get("/api/v1/views/:id", (req, res, ctx) => {
     const { id } = req.params;
 
@@ -149,9 +171,7 @@ export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
   rest.get("/api/v1/admin/dashboard/movies/genres", (req, res, ctx) => {
 
     const data = [{ name: "G1", type_code: "MOVIE", count: 10 }, {
-      name: "G2",
-      type_code: "MOVIE",
-      count: 15
+      name: "G2", type_code: "MOVIE", count: 15
     }, { name: "G3", type_code: "MOVIE", count: 5 }];
     return res(ctx.status(200), ctx.json({ data }));
   }),
@@ -253,6 +273,90 @@ export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
 
   rest.delete("/api/v1/admin/movies/seasons/delete/:id", (req, res, ctx) => {
     return res(ctx.status(200), ctx.json({ message: "Season deleted" }));
+  }),
+
+  rest.post("http://localhost/api/v1/admin/movies/references", async (req, res, ctx) => {
+    const body = await req.json();
+    let page;
+    if (body.type_code === "MOVIE") {
+      page = fakeMoviePage.content;
+    } else if (body.type_code === "TV") {
+      page = fakeTvPage.content;
+    }
+    return res(ctx.status(200), ctx.body(JSON.stringify(page)));
+  }),
+
+  rest.get("/api/v1/collections", (req, res, ctx) => {
+    const type = req.url.searchParams.get("type");
+
+    let content;
+    if (type === "MOVIE") {
+      content = [{
+        id: 1,
+        title: "Movie 1",
+        price: 9.99,
+        image_url: "image1.jpg",
+        release_date: "2023-01-01",
+        description: "Movie 1 description "
+      }, {
+        id: 2, title: "Movie 2", image_url: "image2.jpg", release_date: "2023-02-01", description: "Movie 2 description"
+      }];
+    } else if (type === "TV") {
+      content = [{
+        id: 1,
+        title: "Episode 1",
+        price: 9.99,
+        image_url: "image1.jpg",
+        release_date: "2023-01-01",
+        description: "Description 1",
+        season_name: "Season 1",
+        episode_name: "Episode 1"
+      }, {
+        id: 2,
+        title: "Episode 2",
+        price: 19.99,
+        image_url: "image2.jpg",
+        release_date: "2023-02-01",
+        description: "Description 2",
+        season_name: "Season 2",
+        episode_name: "Episode 2"
+      }];
+    }
+
+    return res(ctx.status(200), ctx.json({
+      content: content, total_pages: 2
+    }));
+  }),
+
+  rest.get("/api/v1/admin/users/oidc", (req, res, ctx) => {
+    const username = req.url.searchParams.get("username");
+    if (username === "existingUser") {
+      return res(ctx.json({
+        username: "existingUser",
+        email: "existingUser@example.com",
+        first_name: "John",
+        last_name: "Doe",
+        role: { role_code: "" }
+      }));
+    } else {
+      return res(ctx.status(404), ctx.json({ message: "User not found" }));
+    }
+  }),
+
+  rest.put("/api/v1/admin/users/oidc", (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json({ message: "ok" }));
+  }),
+
+  rest.get("/api/v1/admin/roles", (req, res, ctx) => {
+    return res(ctx.status(200), ctx.json([{ id: 1, role_code: "admin" }, { id: 2, role_code: "general" }]));
+  }),
+
+  rest.post("/api/v1/admin/users", (req, res, ctx) => {
+    const isNew = req.url.searchParams.get("isNew");
+    const users = fakeUsers;
+    users.content = fakeUsers.content.filter((u) => u.is_new === boolean(isNew));
+    users.total_elements = users.content.length;
+    return res(ctx.status(200), ctx.body(JSON.stringify(users)));
   })
 
 ];

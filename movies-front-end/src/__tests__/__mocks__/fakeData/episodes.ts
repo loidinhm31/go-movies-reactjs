@@ -28,6 +28,7 @@ export const fakeEpisodes: EpisodeType[] = [
     runtime: 60,
     video_path: "",
     season_id: 5,
+    season: {name: "Season 1", description: "test desc s1"},
     price: 57
   },
   {

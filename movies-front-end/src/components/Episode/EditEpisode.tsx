@@ -115,11 +115,15 @@ export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdate
     let required = [
       { field: episode.name, name: "name", label: "Name" },
       { field: episode.air_date, name: "air_date", label: "Air Date" },
-      { field: episode.runtime, name: "description", label: "Description" },
+      { field: episode.runtime, name: "runtime", label: "Runtime" },
     ];
 
-    required.forEach(function ({ field, label }: any) {
+    required.forEach(function ({ field, name, label }: any) {
       if (field === "" || field === undefined) {
+        errors.push(label);
+      }
+
+      if (name === "runtime" && field === 0) {
         errors.push(label);
       }
     });
@@ -303,17 +307,17 @@ export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdate
                 <CloseIcon />
               </Button>
             ) : id ? (
-              <Button variant="contained" onClick={handleOpenEdit}>
+              <Button data-testid="edit-episode" variant="contained" onClick={handleOpenEdit}>
                 <EditIcon />
               </Button>
             ) : (
-              <Button variant="contained" onClick={handleOpenEdit}>
+              <Button data-testid="add-episode" variant="contained" onClick={handleOpenEdit}>
                 <AddIcon />
               </Button>
             )}
 
             {id! > 0 && (
-              <Button variant="contained" color="error" onClick={considerDelete}>
+              <Button data-testid="delete-episode" variant="contained" color="error" onClick={considerDelete}>
                 <DeleteIcon />
               </Button>
             )}
@@ -378,7 +382,7 @@ export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdate
                 </Grid>
 
                 <Grid item xs={12}>
-                  <input ref={videoFileRef} hidden={true} type="file" name="video" onChange={handleVideoFileChange} />
+                  <input data-testid="upload-video" ref={videoFileRef} hidden={true} type="file" name="video" onChange={handleVideoFileChange} />
                   <Stack spacing={2} direction="row">
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       <Typography variant="subtitle1">Upload Video</Typography>
