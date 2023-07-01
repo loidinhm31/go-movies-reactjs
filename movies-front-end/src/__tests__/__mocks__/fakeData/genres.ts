@@ -21,4 +21,19 @@ export const fakeGenres: GenreType[] = [
     name: "G4",
     type_code: "MOVIE"
   },
+  {
+    id: 5,
+    name: "G5",
+    type_code: "TV"
+  },
+  {
+    id: 6,
+    name: "G6",
+    type_code: "TV"
+  },
+  {
+    id: 7,
+    name: "G7",
+    type_code: "TV"
+  },
 ];

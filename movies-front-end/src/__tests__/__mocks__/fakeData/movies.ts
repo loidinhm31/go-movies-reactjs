@@ -23,7 +23,19 @@ export const fakeMoviePage: PageType<MovieType> = {
       runtime: 102,
       mpaa_rating: "G",
       description: "Test desc movie 1",
-      image_url: "https://image.tmdb.org/t/p/w200//d13Uj86LdbDLrfDoHR5aDOFYyJC.jpg"
+      image_url: "https://image.tmdb.org/t/p/w200//d13Uj86LdbDLrfDoHR5aDOFYyJC.jpg",
+      genres: [
+        {
+          id: 1,
+          name: "G1",
+          type_code: "MOVIE"
+        },
+        {
+          id: 2,
+          name: "G2",
+          type_code: "MOVIE"
+        },
+      ]
     },
     {
       id: 2,
