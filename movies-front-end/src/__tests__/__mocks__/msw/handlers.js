@@ -9,6 +9,7 @@ import useSWRMutation from "swr/mutation";
 import { patch } from "@/libs/api";
 import { fakeUsers } from "@/__tests__/__mocks__/fakeData/users";
 import { boolean } from "boolean";
+import { fakePayments } from "@/__tests__/__mocks__/fakeData/payments";
 
 export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
   const type = req.url.searchParams.get("type");
@@ -357,6 +358,12 @@ export const handlers = [rest.get("/api/v1/movies", (req, res, ctx) => {
     users.content = fakeUsers.content.filter((u) => u.is_new === boolean(isNew));
     users.total_elements = users.content.length;
     return res(ctx.status(200), ctx.body(JSON.stringify(users)));
+  }),
+
+  rest.post("/api/v1/payments", (req, res, ctx) => {
+    // Mock the response data here
+    const data = fakePayments;
+    return res(ctx.status(200), ctx.json(data));
   })
 
 ];

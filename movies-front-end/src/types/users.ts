@@ -7,7 +7,7 @@ export type UserType = {
   is_new: boolean;
   role: RoleType;
   created_at: string | null;
-  updated_at: string | null;
+  updated_at?: string | null;
 };
 
 export type RoleType = {
