@@ -11,7 +11,7 @@ func MapEpisodeRoutes(episodeGroup *gin.RouterGroup, h episode.Handler) {
 }
 
 func MapAuthEpisodeRoutes(episodeGroup *gin.RouterGroup, h episode.Handler) {
+	episodeGroup.POST("/", h.PostEpisode())
 	episodeGroup.PUT("/", h.PutEpisode())
-	episodeGroup.PATCH("/", h.PatchEpisode())
 	episodeGroup.DELETE("/:id", h.DeleteEpisode())
 }

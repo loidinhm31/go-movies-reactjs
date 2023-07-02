@@ -119,7 +119,7 @@ func (cr *collectionRepository) FindCollectionsByMovieID(ctx context.Context, mo
 	if cr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Where("movie_id = ? AND type_code", movieID, "MOVIE").
+	err := tx.Where("movie_id = ? AND type_code = ?", movieID, "MOVIE").
 		Find(&results).Error
 	if err != nil {
 		return nil, err

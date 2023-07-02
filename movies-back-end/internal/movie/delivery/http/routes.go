@@ -15,9 +15,9 @@ func MapMovieRoutes(movieGroup *gin.RouterGroup, h movie.Handler) {
 }
 
 func MapAuthMovieRoutes(movieGroup *gin.RouterGroup, h movie.Handler) {
-	movieGroup.PUT("/", h.PutMovie())
+	movieGroup.POST("/", h.PostMovie())
 	movieGroup.DELETE("/:id", h.DeleteMovie())
-	movieGroup.PATCH("/", h.PatchMovie())
+	movieGroup.PUT("/", h.PutMovie())
 	movieGroup.GET("/episodes/:id", h.FetchMovieByEpisode())
 	movieGroup.PUT("/:id/price", h.PatchMoviePrice())
 }

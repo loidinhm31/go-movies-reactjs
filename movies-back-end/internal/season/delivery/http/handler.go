@@ -54,7 +54,7 @@ func (s seasonHandler) FetchSeasonsByMovieID() gin.HandlerFunc {
 	}
 }
 
-func (s seasonHandler) PutSeason() gin.HandlerFunc {
+func (s seasonHandler) PostSeason() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		season := &dto.SeasonDto{}
 		if err := util.ReadRequest(c, season); err != nil {
@@ -78,7 +78,7 @@ func (s seasonHandler) PutSeason() gin.HandlerFunc {
 	}
 }
 
-func (s seasonHandler) PatchSeason() gin.HandlerFunc {
+func (s seasonHandler) PutSeason() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		theSeason := &dto.SeasonDto{}
 		if err := util.ReadRequest(c, theSeason); err != nil {

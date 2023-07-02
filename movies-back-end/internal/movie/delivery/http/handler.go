@@ -102,7 +102,7 @@ func (mh *movieHandler) FetchMovieByGenre() gin.HandlerFunc {
 	}
 }
 
-func (mh *movieHandler) PutMovie() gin.HandlerFunc {
+func (mh *movieHandler) PostMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		theMovie := &dto.MovieDto{}
 
@@ -149,7 +149,7 @@ func (mh *movieHandler) DeleteMovie() gin.HandlerFunc {
 	}
 }
 
-func (mh *movieHandler) PatchMovie() gin.HandlerFunc {
+func (mh *movieHandler) PutMovie() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		theMovie := &dto.MovieDto{}
 

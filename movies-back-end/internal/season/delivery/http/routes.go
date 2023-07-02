@@ -12,7 +12,7 @@ func MapSeasonRoutes(seasonGroup *gin.RouterGroup, h season.Handler) {
 
 func MapAuthSeasonRoutes(seasonGroup *gin.RouterGroup, h season.Handler) {
 	seasonGroup.GET("/", h.FetchSeasonsByMovieID())
+	seasonGroup.POST("/", h.PostSeason())
 	seasonGroup.PUT("/", h.PutSeason())
-	seasonGroup.PATCH("/", h.PatchSeason())
 	seasonGroup.DELETE("/:id", h.DeleteSeason())
 }

@@ -54,7 +54,7 @@ func (e episodeHandler) FetchEpisodesBySeasonID() gin.HandlerFunc {
 	}
 }
 
-func (e episodeHandler) PutEpisode() gin.HandlerFunc {
+func (e episodeHandler) PostEpisode() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		thEpisode := &dto.EpisodeDto{}
 		if err := util.ReadRequest(c, thEpisode); err != nil {
@@ -78,7 +78,7 @@ func (e episodeHandler) PutEpisode() gin.HandlerFunc {
 	}
 }
 
-func (e episodeHandler) PatchEpisode() gin.HandlerFunc {
+func (e episodeHandler) PutEpisode() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		thEpisode := &dto.EpisodeDto{}
 		if err := util.ReadRequest(c, thEpisode); err != nil {
