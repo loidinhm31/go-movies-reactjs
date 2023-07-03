@@ -5,7 +5,7 @@ up:
 	@echo "Docker images started!"
 
 ## up_build: stops docker compose (if running), builds all projects and starts docker compose
-up_build: build_api_service build_nextjs_fe
+up_build: build_nextjs_fe build_api_service
 	@echo "Stopping docker images (if running...)"
 	docker compose down
 	@echo "Building (when required) and starting docker images..."
@@ -30,5 +30,5 @@ build_api_service:
 ## build_nextjs_fe: builds the nextjs website frontend jar as a linux executable
 build_nextjs_fe:
 	@echo "Building website frontend..."
-	cd ../movies-front-end && npm i --force && npm run build
+	cd ../movies-front-end && npm ci && npm run build
 	@echo "Done!"
