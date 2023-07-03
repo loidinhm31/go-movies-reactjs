@@ -29,12 +29,21 @@ services:
     volumes:
       - ./keycloak:/opt/keycloak/data/import
     command: start-dev --import-realm
+    depends_on:
+      - postgres
+
+  mailhog:
+    image: mailhog/mailhog
+    logging:
+      driver: "none"
+    ports:
+      - "8003:1025"
+      - "8100:8025"
 
   go-api-service:
     build:
       context: ./../movies-back-end
       dockerfile: ./../project/docker/Dockerfile.go-api-service
-    restart: always
     ports:
       - "9090:9090"
     environment:
@@ -42,12 +51,14 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+    depends_on:
+      - postgres
+      - keycloak
 
   nextjs-website:
     build:
       context: ./../movies-front-end
       dockerfile: ./../project/docker/Dockerfile.nextjs-website
-    restart: always
     ports:
       - "3000:3000"
     environment:
