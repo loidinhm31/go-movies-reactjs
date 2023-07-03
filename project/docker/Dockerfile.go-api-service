@@ -4,5 +4,6 @@ RUN mkdir /app
 
 COPY apiBinary /app
 COPY /config /etc/config
+COPY /resources /etc/resources
 
 CMD ["/app/apiBinary"]
