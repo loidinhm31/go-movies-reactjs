@@ -49,7 +49,7 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
       })
       .catch((error) => console.log(error))
       .finally(() => setIsLoading(false));
-  }, [open, movieType]);
+  }, [open, selectedType]);
 
   return (
     <Accordion

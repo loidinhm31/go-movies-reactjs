@@ -43,7 +43,6 @@ export function SearchField({
 
 
   const handleStringField = (label: string, values: string | string[], forField: string, defType: string) => {
-    console.log("call1");
     let data = fieldDataMap.get(label) as FieldData;
     if (!data) {
       data = { field: label };
