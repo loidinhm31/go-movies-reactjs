@@ -28,6 +28,7 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
   const [options, setOptions] = useState<readonly GenreType[]>();
 
   const selectedType = useMovieType(movieType);
+  const [selectedGenres, setSelectedGenres] = useState<GenreType[]>([]);
 
   const { trigger: getGenres } = useSWRMutation<GenreType[]>(`/api/v1/genres?type=${selectedType}`, get);
 
@@ -36,6 +37,17 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
       handleStringField("genres", operator, "operator", "string");
     }
   }, [operator]);
+
+  useEffect(() => {
+    handleStringField(
+      "genres",
+      [],
+      "def",
+      "string"
+    );
+
+    setSelectedGenres([]);
+  }, [selectedType]);
 
   useEffect(() => {
     if (!open) {
@@ -50,6 +62,17 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
       .catch((error) => console.log(error))
       .finally(() => setIsLoading(false));
   }, [open, selectedType]);
+
+  const handleChangeGenre = (value) => {
+    setSelectedGenres(value);
+
+    handleStringField(
+      "genres",
+      value.map((v) => `${v.name}-${v.type_code}`),
+      "def",
+      "string"
+    );
+  };
 
   return (
     <Accordion
@@ -87,18 +110,12 @@ export function SearchGenre({ movieType, handleStringField }: SearchGenreProps) 
           {options &&
             <Autocomplete
               fullWidth
-              isOptionEqualToValue={(option, value) => option.name === value.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
               options={options}
               getOptionLabel={(option) => `${option.name} - ${option.type_code}`}
               loading={isLoading}
-              onChange={(_, value) =>
-                handleStringField(
-                  "genres",
-                  value.map((v) => `${v.name}-${v.type_code}`),
-                  "def",
-                  "string"
-                )
-              }
+              value={selectedGenres}
+              onChange={(_, value) => handleChangeGenre(value)}
               multiple
               id="genre-3"
               renderInput={(params) => (
