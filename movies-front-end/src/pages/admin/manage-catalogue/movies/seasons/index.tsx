@@ -13,7 +13,7 @@ import {
   Grid,
   Stack,
   TextField,
-  Typography,
+  Typography
 } from "@mui/material";
 import AlertDialog from "@/components/shared/alert";
 import NotifySnackbar, { NotifyState, sleep } from "@/components/shared/snackbar";
@@ -42,7 +42,7 @@ const EditSeason = () => {
     name: "",
     description: "",
     air_date: format(new Date(), "yyyy-MM-dd"),
-    movie_id: parseInt(movieId as string),
+    movie_id: Number(movieId)
   });
 
   const { trigger: fetchSeason } = useSWRMutation<SeasonType>(`/api/v1/seasons/${id}`, get);
@@ -68,7 +68,7 @@ const EditSeason = () => {
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         });
     }
@@ -93,7 +93,7 @@ const EditSeason = () => {
             message: error.message.message,
             vertical: "top",
             horizontal: "right",
-            severity: "error",
+            severity: "error"
           });
         })
         .finally(() => {
@@ -107,10 +107,10 @@ const EditSeason = () => {
     let required = [
       { field: season.name, name: "name", label: "Name" },
       { field: season.air_date, name: "air_date", label: "Air Date" },
-      { field: season.description, name: "description", label: "Description" },
+      { field: season.description, name: "description", label: "Description" }
     ];
 
-    required.forEach(function ({ field, label }: any) {
+    required.forEach(function({ field, label }: any) {
       if (field === "" || field === undefined) {
         errors.push(label);
       }
@@ -122,10 +122,13 @@ const EditSeason = () => {
         message: `Fill value for ${errors.join(", ")}`,
         vertical: "bottom",
         horizontal: "center",
-        severity: "warning",
+        severity: "warning"
       });
       return false;
     }
+
+    // Make sure movieId was set
+    season.movie_id = Number(movieId);
 
     triggerSeason(season)
       .then((data) => {
@@ -143,7 +146,7 @@ const EditSeason = () => {
               message: "Season Saved",
               vertical: "top",
               horizontal: "right",
-              severity: "success",
+              severity: "success"
             });
           }
         }
@@ -154,7 +157,7 @@ const EditSeason = () => {
           message: error.message.message,
           vertical: "top",
           horizontal: "right",
-          severity: "error",
+          severity: "error"
         });
       });
   };
@@ -167,7 +170,7 @@ const EditSeason = () => {
 
     setSeason({
       ...season,
-      [name]: value,
+      [name]: value
     });
   };
 
