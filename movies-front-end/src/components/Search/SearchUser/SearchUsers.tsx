@@ -32,11 +32,16 @@ export default function SearchUsers({ setNotifyState, wasUpdated, setWasUpdated 
 
   useEffect(() => {
     handeRequestPage();
-  }, [pageIndex, pageSize, order, orderBy, isNew]);
+  }, [pageIndex, pageSize, order, orderBy]);
+
+  useEffect(() => {
+    setPageIndex(0);
+    handeRequestPage();
+  }, [isNew])
 
   useEffect(() => {
     if (wasUpdated) {
-      handeRequestPage();
+      setPageIndex(0);
       setWasUpdated(false);
     }
   }, [wasUpdated]);
