@@ -184,7 +184,7 @@ func (es episodeService) UpdateEpisode(ctx context.Context, episode *dto.Episode
 		AirDate:   episode.AirDate,
 		Runtime:   episode.Runtime,
 		VideoPath: util.StringToSQLNullString(episode.VideoPath),
-		Season:    seasonObj,
+		SeasonID:  seasonObj.ID,
 		Price:     util.FloatToSQLNullFloat(episode.Price),
 		CreatedAt: episodeObj.CreatedAt,
 		CreatedBy: author,
