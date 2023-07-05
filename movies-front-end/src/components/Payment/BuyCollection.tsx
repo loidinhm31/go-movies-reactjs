@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck";
 import { useRouter } from "next/router";
 import { EpisodeType } from "@/types/seasons";
+import { signIn } from "next-auth/react";
 
 interface CollectionProps {
   movie: MovieType;
@@ -82,6 +83,10 @@ export function BuyCollection({ movie, episode }: CollectionProps) {
   }, [username, refId]);
 
   const handleClickAddToCollection = () => {
+    if (username === "anonymous") {
+      return signIn();
+    }
+
     addCollection({
       movie_id: movie.id!,
       episode_id: episode?.id!,
