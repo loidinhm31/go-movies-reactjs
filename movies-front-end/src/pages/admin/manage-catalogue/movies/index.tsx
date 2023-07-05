@@ -107,6 +107,11 @@ const EditMovie = () => {
           if (movie?.video_path) {
             setVideoPath(movie?.video_path!);
           }
+
+          // Set file image
+          if (movie?.image_url) {
+            setImageUrl(movie?.image_url);
+          }
         })
         .catch((error) => {
           setNotifyState({
@@ -414,7 +419,7 @@ const EditMovie = () => {
         } else {
           setNotifyState({
             open: true,
-            message: `Cannot remove video, ${result.result}`,
+            message: `Cannot remove file, ${result.result}`,
             vertical: "top",
             horizontal: "right",
             severity: "info"
