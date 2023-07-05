@@ -242,6 +242,7 @@ export default function EditEpisode({ id, seasonId, setNotifyState, setWasUpdate
       const fileName = paths[paths.length - 1];
       removeVideo({
         fileName: fileName,
+        fileType: FileType.VIDEO,
       })
         .then((result) => {
           if (result.result === "ok") {
