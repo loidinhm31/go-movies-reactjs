@@ -36,7 +36,8 @@ func MapToMovieUpdate(movieDto *dto.MovieDto, author string) *entity.Movie {
 		Description: movieDto.Description,
 		ImageUrl:    util.StringToSQLNullString(movieDto.ImageUrl),
 		VideoPath:   util.StringToSQLNullString(movieDto.VideoPath),
-		Price:       util.FloatToSQLNullFloat(float64(movieDto.Price)),
+		Price:       util.FloatToSQLNullFloat(movieDto.Price),
+		CreatedAt:   movieDto.CreatedAt,
 		UpdatedAt:   time.Now(),
 		UpdatedBy:   author,
 	}

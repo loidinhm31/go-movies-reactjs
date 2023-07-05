@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"movies-service/internal/blob"
@@ -98,6 +97,7 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 		}
 
 		// Set valid video path
+		isRestrict := false
 		if result.Price.Valid {
 			thePayment, err := ms.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, result.TypeCode, result.ID)
 			if err != nil {
@@ -106,12 +106,14 @@ func (ms *movieService) GetMovieByID(ctx context.Context, id uint) (*dto.MovieDt
 
 			// Not paid
 			if !(thePayment.TypeCode == result.TypeCode && thePayment.RefID == result.ID) {
-				result.VideoPath = sql.NullString{}
+				if !(theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD") {
+					isRestrict = true
+				}
 			}
 		}
 		movieDto = mapper2.MapToMovieDto(
 			result,
-			true,
+			isRestrict,
 			theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
 		)
 	} else {
@@ -214,6 +216,7 @@ func (ms *movieService) UpdateMovie(ctx context.Context, movie *dto.MovieDto) er
 	}
 
 	// After check object exists, write updating value
+	movie.CreatedAt = movieObj.CreatedAt
 	movieObj = mapper2.MapToMovieUpdate(movie, author)
 
 	err = ms.movieRepository.UpdateMovie(ctx, movieObj)

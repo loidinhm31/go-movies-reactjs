@@ -66,7 +66,7 @@ func (s seasonRepository) UpdateSeason(ctx context.Context, season *entity.Seaso
 		tx = tx.Debug()
 	}
 	err := tx.Model(&entity.Season{}).Where("id = ?", season.ID).
-		Updates(season).Error
+		Save(season).Error
 	if err != nil {
 		return err
 	}

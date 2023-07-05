@@ -129,7 +129,7 @@ func (mr *movieRepository) UpdateMovie(ctx context.Context, movie *entity.Movie)
 	if mr.cfg.Server.Debug {
 		tx = tx.Debug()
 	}
-	err := tx.Model(&entity.Movie{}).Where("id = ?", movie.ID).Updates(movie).Error
+	err := tx.Model(&entity.Movie{}).Where("id = ?", movie.ID).Save(movie).Error
 	if err != nil {
 		return err
 	}

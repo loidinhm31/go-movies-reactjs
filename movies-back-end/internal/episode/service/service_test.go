@@ -160,7 +160,7 @@ func TestEpisodeService_GetEpisodesByID(t *testing.T) {
 		assert.Equal(t, mockEpisode.Name, result.Name)
 		assert.Equal(t, mockEpisode.AirDate, result.AirDate)
 		assert.Equal(t, mockEpisode.Runtime, result.Runtime)
-		assert.Equal(t, "", result.VideoPath)
+		assert.Equal(t, "/path/to/episode1", result.VideoPath)
 		assert.Equal(t, mockEpisode.SeasonID, result.SeasonID)
 
 	})

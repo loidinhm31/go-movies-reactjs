@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"movies-service/internal/blob"
@@ -71,6 +70,7 @@ func (es episodeService) GetEpisodeByID(ctx context.Context, id uint) (*dto.Epis
 		}
 
 		// Set valid video path
+		isRestrict := false
 		if result.Price.Valid {
 			thePayment, err := es.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, "TV", result.ID)
 			if err != nil {
@@ -79,13 +79,15 @@ func (es episodeService) GetEpisodeByID(ctx context.Context, id uint) (*dto.Epis
 
 			// Not paid
 			if !(thePayment.TypeCode == "TV" && thePayment.RefID == result.ID) {
-				result.VideoPath = sql.NullString{}
+				if !(theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD") {
+					isRestrict = true
+				}
 			}
 		}
 
 		episodeDto = mapper.MapToEpisodeDto(
 			result,
-			true,
+			isRestrict,
 			theUser.Role.RoleCode == "ADMIN" || theUser.Role.RoleCode == "MOD",
 		)
 	} else {
@@ -184,7 +186,7 @@ func (es episodeService) UpdateEpisode(ctx context.Context, episode *dto.Episode
 		VideoPath: util.StringToSQLNullString(episode.VideoPath),
 		Season:    seasonObj,
 		Price:     util.FloatToSQLNullFloat(episode.Price),
-		CreatedAt: time.Now(),
+		CreatedAt: episodeObj.CreatedAt,
 		CreatedBy: author,
 		UpdatedAt: time.Now(),
 		UpdatedBy: author,

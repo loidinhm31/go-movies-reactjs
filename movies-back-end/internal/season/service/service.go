@@ -118,7 +118,7 @@ func (s seasonService) UpdateSeason(ctx context.Context, season *dto.SeasonDto) 
 		AirDate:     season.AirDate,
 		Description: season.Description,
 		Movie:       movieObj,
-		CreatedAt:   time.Now(),
+		CreatedAt:   seasonObj.CreatedAt,
 		CreatedBy:   author,
 		UpdatedAt:   time.Now(),
 		UpdatedBy:   author,

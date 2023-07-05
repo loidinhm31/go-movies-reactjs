@@ -67,7 +67,7 @@ func (e episodeRepository) UpdateEpisode(ctx context.Context, episode *entity.Ep
 		tx = tx.Debug()
 	}
 	err := tx.Model(&entity.Episode{}).Where("id = ?", episode.ID).
-		Updates(episode).Error
+		Save(episode).Error
 	if err != nil {
 		return err
 	}
