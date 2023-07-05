@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import PaymentsTable from "@/components/Tables/PaymentsTable";
 
 export default function Payments() {
-  const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+  const isInvalid = useCheckTokenAndRole(["admin", "moderator", "general"]);
 
   useEffect(() => {
     if (isInvalid) {

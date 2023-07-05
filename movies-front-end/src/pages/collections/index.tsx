@@ -1,6 +1,6 @@
 import NotifySnackbar, { NotifyState } from "@/components/shared/snackbar";
 import { Box, Divider, Paper, Stack, Tab, Tabs, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CollectionMovieTab } from "@/components/Tab/CollectionMovieTab";
 import { TabPanel } from "@/components/Tab/TabPanel";
 import TheatersIcon from "@mui/icons-material/Theaters";
@@ -10,7 +10,7 @@ import { useCheckTokenAndRole } from "@/hooks/auth/useCheckTokenAndRole";
 import { signIn } from "next-auth/react";
 
 export default function Collection() {
-  const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
+  const isInvalid = useCheckTokenAndRole(["admin", "moderator", "general"]);
 
   const [notifyState, setNotifyState] = useState<NotifyState>({ open: false, vertical: "top", horizontal: "right" });
 
