@@ -8,10 +8,11 @@ import { MovieType } from "@/types/movies";
 import AddIcon from "@mui/icons-material/Add";
 import { useCheckTokenAndRole } from "@/hooks/auth/useCheckTokenAndRole";
 import { setData } from "@/redux/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const ManageCatalogue = () => {
   const data = useSelector((state: any) => state.data);
+  const dispatch = useDispatch();
 
   const isInvalid = useCheckTokenAndRole(["admin", "moderator"]);
 
@@ -37,7 +38,7 @@ const ManageCatalogue = () => {
         severity:  data.severity,
       });
 
-      setData(null);
+      dispatch(setData({}));
     }
   }, [data]);
 
