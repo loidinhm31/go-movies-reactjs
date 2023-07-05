@@ -103,6 +103,9 @@ const EditMovie = () => {
         .then((movie) => {
           setMovie(movie!);
 
+          // Set Rating
+          setRating(movie?.mpaa_rating);
+
           // Set file video
           if (movie?.video_path) {
             setVideoPath(movie?.video_path!);

@@ -46,6 +46,9 @@ const ReferenceMovie = () => {
   // Get id from the URL
   let { id, type } = router.query;
 
+  const [ratings, setRatings] = useState<RatingType[]>();
+  const [rating, setRating] = useState("");
+
   const [movie, setMovie] = useState<MovieType>({
     title: "",
     type_code: "",
@@ -133,6 +136,15 @@ const ReferenceMovie = () => {
         });
     }
   }, [id, router]);
+
+  useEffect(() => {
+    if (rating !== "") {
+      setMovie({
+        ...movie,
+        mpaa_rating: rating
+      });
+    }
+  }, [rating]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -472,8 +484,8 @@ const ReferenceMovie = () => {
                   select
                   label="MPAA Rating"
                   variant="outlined"
-                  value={movie.mpaa_rating}
-                  onChange={(e) => handleChange(e, "mpaa_rating")}
+                  value={rating}
+                  onChange={(e) => setRating(e.target.value)}
                 >
                   {mpaaOptions &&
                     mpaaOptions.map((o) => (
