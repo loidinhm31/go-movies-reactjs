@@ -95,7 +95,7 @@ export default function SeasonDialog({
                     <Grid item xs={2}>
                       <IconButton
                         color="inherit"
-                        href={`/admin/manage-catalogue/movies/seasons?id=${s.id}?movieId=${s.movie_id}`}
+                        href={`/admin/manage-catalogue/movies/seasons?id=${s.id}&movieId=${s.movie_id}`}
                       >
                         <EditIcon />
                       </IconButton>
