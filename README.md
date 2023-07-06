@@ -13,16 +13,26 @@
 11. Send email with [MailHog](https://github.com/mailhog/MailHog) as host to catch outgoing SMTP delivery
 
 ## Futuristic features
+
 1. Media Management
 2. Different OAuth providers
 3. Cronjob
 
 # STRUCTURE
+
 1. `Postgresql` port `5432`
 2. `Keycloak Admin Console`: port `8086`
 3. `MailHog`: SMTP port `8003`, UI port `8100`
 4. `API`: port `9090`
 5. `Website`: port `3000`
+
+# HIGH LEVEL DESIGN
+
+![Alt text](./draw/architecture.png)
+
+## DATABASE DESIGN
+
+![Alt text](./draw/db.png)
 
 ## ShiftFlix API
 
@@ -33,7 +43,8 @@ This API build using
 1. [Gin](https://gin-gonic.com/): A web framework written in Golang.
 2. [GORM](https://gorm.io/): The fantastic ORM library for Golang.
 3. [Gocloak](https://github.com/Nerzal/gocloak/): Golang keycloak client.
-4. [Go Simple Mail][https://github.com/xhit/go-simple-mail]: The best way to send emails in Go with SMTP Keep Alive and Timeout for Connect and Send.
+4. [Go Simple Mail](https://github.com/xhit/go-simple-mail): The best way to send emails in Go with SMTP Keep Alive and
+   Timeout for Connect and Send.
 
 ### Database
 
@@ -64,6 +75,8 @@ This website build using
 5. [MUI](https://mui.com/): A wide collection of pre-built UI components that generally look pretty go
 6. [Chart.js](https://www.chartjs.org/): Simple yet flexible JavaScript charting library for the modern web
 7. [Video.js](https://videojs.com/): Video.js is a web video player built from the ground up for an HTML5 world.
+8. [Redux](https://redux.js.org/): Redux is a predictable state container for JavaScript apps
+9. [Jest](https://jestjs.io/): Jest is a delightful JavaScript Testing Framework with a focus on simplicity.
 
 #### Set up your environment
 
