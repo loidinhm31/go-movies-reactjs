@@ -134,6 +134,7 @@ CREATE TABLE public.payments
 CREATE TABLE public.collections
 (
     id         SERIAL PRIMARY KEY,
+    payment_id INTEGER REFERENCES payments (id),
     user_id    INTEGER REFERENCES users (id),
     movie_id   INTEGER DEFAULT NULL,
     episode_id INTEGER DEFAULT NULL,

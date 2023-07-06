@@ -14,6 +14,7 @@ const (
 
 type Collection struct {
 	ID        uint `gorm:"primaryKey"`
+	PaymentID uint
 	UserID    uint
 	MovieID   sql.NullInt64 `gorm:"type:integer, default:null"`
 	EpisodeID sql.NullInt64 `gorm:"type:integer, default:null"`
