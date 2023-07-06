@@ -106,6 +106,9 @@ func TestCollectionService_AddCollection(t *testing.T) {
 				UserID: userID,
 			}, nil)
 
+		mockPaymentRepo.On("InsertPayment", mock.Anything, mock.Anything).
+			Return(&entity.Payment{}, nil)
+
 		mockCollectionRepo.On("InsertCollection", mock.Anything, mock.Anything).
 			Return(nil)
 
@@ -177,9 +180,11 @@ func TestCollectionService_AddCollection(t *testing.T) {
 				UserID: userID,
 			}, nil)
 
+		mockPaymentRepo.On("InsertPayment", mock.Anything, mock.Anything).
+			Return(&entity.Payment{}, nil)
+
 		mockCollectionRepo.On("InsertCollection", mock.Anything, mock.Anything).
 			Return(nil)
-
 		err := collectionService.AddCollection(context.Background(), &dto.CollectionDto{
 			TypeCode: "TV",
 			MovieID:  refID,

@@ -44,14 +44,14 @@ func (cr *collectionRepository) FindCollectionsByUserIDAndType(ctx context.Conte
 	tx = tx.WithContext(ctx).Table("collections c")
 	if movieType == "MOVIE" {
 		tx = tx.Joins("JOIN movies m ON m.id = c.movie_id AND c.type_code = ?", movieType).
-			Joins("LEFT JOIN payments p ON m.id = p.ref_id AND p.type_code = ?", movieType).
+			Joins("INNER JOIN payments p ON m.id = p.ref_id AND p.type_code = ? AND p.user_id = ?", movieType, userID).
 			Select("c.id, m.id as movie_id, m.title, m.description, m.release_date, m.image_url, p.amount, c.created_at").
 			Where("c.user_id = ?", userID)
 	} else if movieType == "TV" {
 		tx = tx.Joins("JOIN episodes e ON e.id = c.episode_id AND c.type_code = ?", movieType).
 			Joins("JOIN seasons s ON s.id = e.season_id").
 			Joins("JOIN movies m ON m.id = s.movie_id").
-			Joins("LEFT JOIN payments p ON e.id = p.ref_id AND p.type_code = ?", movieType).
+			Joins("INNER JOIN payments p ON e.id = p.ref_id AND p.type_code = ? AND p.user_id = ?", movieType, userID).
 			Select("c.id, m.id as movie_id, e.id as episode_id, m.title, m.description, s.name as season_name, e.name as episode_name, e.air_date as release_date, m.image_url, p.amount, c.created_at").
 			Where("c.user_id = ?", userID)
 	}

@@ -87,7 +87,7 @@ func (ps *paymentService) VerifyPayment(ctx context.Context, provider entity.Pay
 			return err
 		}
 
-		if theMovie.ID == 0 || !theMovie.Price.Valid {
+		if theEpisode.ID == 0 || !theEpisode.Price.Valid {
 			return errors.ErrInvalidInput
 		}
 	}
@@ -144,6 +144,7 @@ func (ps *paymentService) VerifyPayment(ctx context.Context, provider entity.Pay
 	// Add collection
 	theCollection := &entity.Collection{
 		UserID:    theUser.ID,
+		PaymentID: addedPayment.ID,
 		TypeCode:  typeCode,
 		CreatedAt: time.Now(),
 		CreatedBy: username,

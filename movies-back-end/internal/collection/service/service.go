@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"movies-service/internal/collection"
 	"movies-service/internal/common/dto"
@@ -49,6 +50,8 @@ func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.
 	}
 
 	// Check free movie
+	var refId uint
+	var paymentID uint
 	if collection.TypeCode == "MOVIE" {
 		theMovie, err := fs.movieRepository.FindMovieByID(ctx, collection.MovieID)
 		if err != nil {
@@ -64,18 +67,10 @@ func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.
 			if !(thePayment.RefID == theMovie.ID && thePayment.UserID == theUser.ID) {
 				return errors.ErrPaymentNotFound
 			}
+			paymentID = thePayment.ID
 		}
 
-		err = fs.collectionRepository.InsertCollection(ctx, &model2.Collection{
-			UserID:    theUser.ID,
-			MovieID:   util.IntToSQLNullInt(int64(theMovie.ID)),
-			TypeCode:  collection.TypeCode,
-			CreatedAt: time.Now(),
-			CreatedBy: author,
-		})
-		if err != nil {
-			return err
-		}
+		refId = theMovie.ID
 	} else if collection.TypeCode == "TV" {
 		theEpisode, err := fs.episodeRepository.FindEpisodeByID(ctx, collection.EpisodeID)
 		if err != nil {
@@ -91,19 +86,62 @@ func (fs *collectionService) AddCollection(ctx context.Context, collection *dto.
 			if !(thePayment.RefID == theEpisode.ID && thePayment.UserID == theUser.ID) {
 				return errors.ErrPaymentNotFound
 			}
+			paymentID = thePayment.ID
 		}
 
+		refId = theEpisode.ID
+	}
+
+	if paymentID == 0 {
+		thePayment, err := fs.paymentRepository.FindPaymentByUserIDAndTypeCodeAndRefID(ctx, theUser.ID, collection.TypeCode, refId)
+
+		if thePayment.ID == 0 {
+			// Add free payment
+			thePayment, err = fs.paymentRepository.InsertPayment(ctx, &model2.Payment{
+				UserID:            theUser.ID,
+				RefID:             refId,
+				TypeCode:          collection.TypeCode,
+				Provider:          "FREE",
+				ProviderPaymentID: sql.NullString{},
+				Amount:            0,
+				Received:          0,
+				Currency:          "usd",
+				PaymentMethod:     "free",
+				Status:            "succeeded",
+				CreatedAt:         time.Now(),
+				CreatedBy:         "system",
+			})
+			if err != nil {
+				return err
+			}
+		}
+		paymentID = thePayment.ID
+	}
+
+	var err error
+	if collection.TypeCode == "MOVIE" {
 		err = fs.collectionRepository.InsertCollection(ctx, &model2.Collection{
 			UserID:    theUser.ID,
-			EpisodeID: util.IntToSQLNullInt(int64(theEpisode.ID)),
+			PaymentID: paymentID,
+			MovieID:   util.IntToSQLNullInt(int64(refId)),
 			TypeCode:  collection.TypeCode,
 			CreatedAt: time.Now(),
 			CreatedBy: author,
 		})
-		if err != nil {
-			return err
-		}
+	} else if collection.TypeCode == "TV" {
+		err = fs.collectionRepository.InsertCollection(ctx, &model2.Collection{
+			UserID:    theUser.ID,
+			PaymentID: paymentID,
+			EpisodeID: util.IntToSQLNullInt(int64(refId)),
+			TypeCode:  collection.TypeCode,
+			CreatedAt: time.Now(),
+			CreatedBy: author,
+		})
 	}
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
